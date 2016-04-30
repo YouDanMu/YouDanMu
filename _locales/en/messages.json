@@ -1,0 +1,18 @@
+{
+    "extName": {
+        "message": "YouDanMu",
+        "description": "Extension name display as the title in extensions manager list."
+    },
+    "extDescription": {
+        "message": "YouTube barrage plugin.",
+        "description": "Short extension description display below the title in extensions manager list."
+    },
+    "popup_title": {
+        "message": "YouDanMu Settings",
+        "description": "Browser action button popup menu dialog title."
+    },
+    "YDM_welcome_log": {
+        "message": "Thank you for using YouDanMu!",
+        "description": "Console log welcome message immediately after the main script is injected on the page."
+    }
+}

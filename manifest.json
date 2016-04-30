@@ -1,0 +1,51 @@
+{
+    "manifest_version": 2,
+    "name": "__MSG_ext_name__",
+    "description": "__MSG_ext_description__",
+    "version": "0.0.0",
+    "default_locale": "zh_TW",
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "19": "images/icon19.png",
+            "38": "images/icon38.png"
+        },
+        "default_title": "__MSG_ext_name__",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*.youtube.com/*",
+                "https://*.youtube.com/*",
+                "http://apis.google.com/*/widget/render/comments?*",
+                "https://apis.google.com/*/widget/render/comments?*",
+                "http://plus.googleapis.com/*/widget/render/comments?*",
+                "https://plus.googleapis.com/*/widget/render/comments?*"
+            ],
+            "exclude_matches": [
+                "http://apiblog.youtube.com/*",
+                "https://apiblog.youtube.com/*"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "js": [
+                "YouDanMu.js"
+            ]
+        }
+    ],
+    "permissions": [
+        "cookies",
+        "storage",
+        "unlimitedStorage",
+        "http://*.youtube.com/*",
+        "https://*.youtube.com/*",
+        "http://s.ytimg.com/yts/jsbin/*",
+        "https://s.ytimg.com/yts/jsbin/*"
+    ]
+}
