@@ -19,7 +19,7 @@ with the page JS, we need to inject our code directly into the page through a <s
   function inject(func) {
     var p = document.body || document.head || document.documentElement;
     if (!p) {
-      setTimeout(bind(this, inject, func), 0);
+      setTimeout(inject.bind(this, func), 0);
       return;
     }
     var script = document.createElement('script');
