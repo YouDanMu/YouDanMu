@@ -38,6 +38,31 @@ with the page JS, we need to inject our code directly into the page through a <s
   function main() {
     /* If the injection succeeded, this line should print to the console. */
     console.log('__MSG_YDM_welcome_log__');
+    
+    /* Here we are going to hijack the private class `e9` by hacking Function's prototype.
+    Since `e9` is a Function instance, and there's a property defined by `e9.create = ...`
+    and this property is eventually exposed to the global context. We can exploit it as an
+    entry point to hijack the private `e9` class. We do this by making every functions
+    inherits an infected prototype, that having an evil `create` proxy property already
+    defined. Therefore, when the statement `e9.create = ...` is executed, it will actually
+    pass the right side operand to our evil setter, invoking with `e9` as `this` context.
+    In this case, we can just bind the `this` value onto the operand value. Then when the
+    `e9.create` is exposed to the global context, we will be able to get the private `e9`
+    by `GLOBAL_EXPOSED_CREATE._this`. */
+    Object.defineProperty(Function.prototype, 'create', {
+        __proto__: null,
+        enumerable: true,
+        configurable: false,
+        get: function _getter() {
+            return this._create;
+        },
+        set: function _setter(value) {
+            if (typeof value === 'function') {
+                value._this = this;
+            }
+            this._create = value;
+        }
+    });
 
     /* A helper function to resolve deep object path without throwing "undefined" exceptions.
     If at a certain level a property on the path is undefined, just returns undefined. */
@@ -77,6 +102,9 @@ with the page JS, we need to inject our code directly into the page through a <s
       window,
       ['yt', 'player', 'Application', 'create'],
       function onHijack(origin) {
+        window._player = origin;
+        /* Now we can steal the private `e9` Player class like this. */
+        window._Player = origin._this;
         console.log('[YouDanMu]: yt.player.Application.create is hijacked.');
       },
       function onInvoke() {
@@ -84,6 +112,11 @@ with the page JS, we need to inject our code directly into the page through a <s
         console.log(arguments);
       },
       function onReturn(instance) {
+        instance.hijacked = true;
+        instance.Y.subscribe("onStateChange", function(state) {
+          console.log("[YDM] onStateChange:", state)
+        });
+        window.ydm = instance;
         console.log('[YouDanMu]: yt.player.Application.create returns with:');
         console.log(instance);
       }
