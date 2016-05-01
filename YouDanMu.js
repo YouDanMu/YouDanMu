@@ -96,29 +96,43 @@ with the page JS, we need to inject our code directly into the page through a <s
       parent[originName].name = originName;
       onHijack(origin);
     }
+    
+    /* Given a player instance, we hijack the interface and hook up the listeners to
+    do the main-in-the-middle attack. */
+    function hooker(player) {
+      player.hijacked = true;
+      player.Y.subscribe("onStateChange", function(state) {
+        console.log("[YDM] onStateChange:", state)
+      });
+    }
 
     /* Let's hijack the victim now. */
     hijack(
       window,
       ['yt', 'player', 'Application', 'create'],
       function onHijack(origin) {
-        window._player = origin;
-        /* Now we can steal the private `e9` Player class like this. */
-        window._Player = origin._this;
+        /* Now we can steal the private `e9` PlayerApp class like this. */
+        window._App = origin._this;
+        /* In case the target apperas publicly after it's invoked privately,
+        we may not be able to intercept in the middle. However, the `e9` class saves all
+        the created instances on `e9.o`. Thus we can get all of the already initialized
+        instances and hijack them. We also need to hiject the `create` method to hook up
+        the future instances. */
+        var playerKeys = Object.keys(window._App.o);
+        for (var i = 0; i < playerKeys.length; i++) {
+          hooker(window._App.o[playerKeys[i]]);
+        }
         console.log('[YouDanMu]: yt.player.Application.create is hijacked.');
       },
       function onInvoke() {
         console.log('[YouDanMu]: yt.player.Application.create is called with:');
         console.log(arguments);
       },
-      function onReturn(instance) {
-        instance.hijacked = true;
-        instance.Y.subscribe("onStateChange", function(state) {
-          console.log("[YDM] onStateChange:", state)
-        });
-        window.ydm = instance;
+      function onReturn(player) {
+        /* We hijack and hook up every future created instances. */
+        hooker(player);
         console.log('[YouDanMu]: yt.player.Application.create returns with:');
-        console.log(instance);
+        console.log(player);
       }
     );
   }
