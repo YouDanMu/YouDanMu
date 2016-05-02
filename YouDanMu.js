@@ -102,6 +102,7 @@ with the page JS, we need to inject our code directly into the page through a <s
     function hooker(player) {
       player.hijacked = true;
       player.Y.subscribe("onStateChange", function(state) {
+        window.postMessage({ type: 'FROM_PAGE', state: state }, '*');
         console.log("[YDM] onStateChange:", state)
       });
     }
@@ -136,6 +137,13 @@ with the page JS, we need to inject our code directly into the page through a <s
       }
     );
   }
+  
+  window.addEventListener('message', function(event) {
+    if (event.source != window) return;
+    if (event.data.type && (event.data.type == 'FROM_PAGE')) {
+      console.log('[Master]:', event.data);
+    }
+  });
 
   inject(main);
 })();
