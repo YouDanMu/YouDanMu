@@ -39,6 +39,11 @@
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
         <mkdir dir="${build.dir}"/>
+
+        <!-- init project strture -->
+        <mkdir dir="${src}"/>
+        <mkdir dir="${src.chrome}"/>
+        <mkdir dir="${src.styles}"/>
     </target>
 
     <!-- copy and apply styles into js files -->
