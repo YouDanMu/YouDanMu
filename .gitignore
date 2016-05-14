@@ -3,6 +3,7 @@ library/
 temp/
 local/
 build/
+dist/
 
 #npm file
 node_modules/

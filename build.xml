@@ -1,0 +1,147 @@
+<project name="YouDanMu" default="all" basedir=".">
+    <description>
+        Compiling YouDanMu to different browsers.
+    </description>
+
+    <!-- toolkit for ant build file -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="${basedir}/lib/ant-libs/ant-contrib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+
+    <property name="encoding" value="UTF-8" />
+    <property name="name.styles" value=".styles" />
+
+    <property name="build" value="${basedir}/build" />
+    <property name="build.prop" value="${basedir}/build.properties"/>
+    <property name="build.styles" value="${basedir}/${name.styles}"/>
+    <property name="build.dir" value="${build}/${ant.project.name}" />
+
+
+
+    <property name="src" value="${basedir}/src" />
+    <!-- TODO: more src directories -->
+    <property name="src.chrome" value="${src}/.chrome" />
+    <property name="src.styles" value="${src}/${name.styles}" />
+
+
+    <property name="dist" value="${basedir}/dist" />
+    <property name="sdk.yuicompressor" value="${basedir}/lib/sdk/yuicompressor-2.4.7.jar" />
+
+
+
+    <target name="all" depends="init ,chrome-build,clean-build" />
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <!-- copy and apply styles into js files -->
+    <target name="styles">
+        <copy todir="${build}/${name.styles}">
+            <fileset dir="${src.styles}/" />
+        </copy>
+        <echo>Compressing:</echo>
+        <for param="file">
+            <path>
+                <fileset dir="${src.styles}/" includes="*.css" />
+            </path>
+            <sequential>
+                <propertyregex property="styles.filename" input="@{file}" regexp=".*(/|\\)([^\.]*)\.css" replace="\2" override="true" />
+                <echo>  ${styles.filename}.css</echo>
+                <java jar="${sdk.yuicompressor}" fork="true">
+                    <arg value="@{file}" />
+                    <arg value="-o" />
+                    <arg value="${build}/${name.styles}/${styles.filename}.css" />
+                </java>
+            </sequential>
+        </for>
+    </target>
+
+    <target name="apply-styles">
+        <!-- this task is for embedding the css styles into js file-->
+        <copy todir="${build}/${name.styles}">
+            <fileset dir="${src.styles}/" />
+        </copy>
+        <for param="file">
+            <path>
+                <fileset dir="${src.styles}/" includes="*.css" />
+            </path>
+            <sequential>
+                <local name="styles.filename" />
+                <local name="styles.data" />
+
+                <propertyregex property="styles.filename" input="@{file}" regexp=".*(/|\\)([^\.]*)\.css" replace="\2" />
+                <loadfile property="styles.data" srcFile="${build}/${name.styles}/${styles.filename}.css" />
+                <replace dir="${build.dir}" value="${styles.data}" token="@styles-${styles.filename}@" encoding="${encoding}" />
+            </sequential>
+        </for>
+    </target>
+
+    <!-- apply token and strings -->
+    <target name="apply-token">
+        <loadproperties srcFile="${build.prop}"/>
+        <replace dir="${build.dir}" value="${@version@}" token="@version@" encoding="${encoding}" />
+        <replace dir="${build.dir}" value="${@name@}" token="@name@" encoding="${encoding}" />
+        <replace dir="${build.dir}" value="${@downloadURL@}" token="@downloadURL@" encoding="${encoding}" />
+        <replace dir="${build.dir}" value="${@updateURL@}" token="@updateURL@" encoding="${encoding}" />
+    </target>
+
+    <!-- generic build tasks -->
+
+    <!-- TODO: more task might be needed -->
+    <target name="build" depends="build-copyscripts"/>
+
+    <target name="build-copyscripts">
+        <copy todir="${build.dir}">
+            <fileset dir="${src}">
+                <include name="*.*" />
+                <exclude name=".*" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="build-applyAll" depends="apply-token, apply-styles"/>
+
+    <!-- chrome build -->
+
+    <target name="chrome-build-all" depends="chrome-build,chrome-zip,chrome-crx">
+        <antcall target="clean-build"/>
+    </target>
+
+    <target name="chrome-build" depends="init,build">
+        <copy todir="${build.dir}">
+            <fileset dir="${src.chrome}/" />
+        </copy>
+        <antcall target="build-applyAll"/>
+    </target>
+
+    <target name="chrome-zip" depends="chrome-build">
+        <zip destfile="${dist}/${ant.project.name}-chrome.zip" basedir="${build.dir}" />
+    </target>
+
+    <target name="chrome-crx" depends="chrome-build">
+    <!-- TODO -->
+    </target>
+
+    <!-- clean -->
+
+    <target name="clean-styles">
+        <delete dir="${build.styles}" />
+    </target>
+
+    <target name="clean-build">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="clean" depends="clean-build, clean-styles"/>
+    <target name="clean-all" depends="clean">
+        <delete dir="${dist}"/>
+    </target>
+
+</project>
