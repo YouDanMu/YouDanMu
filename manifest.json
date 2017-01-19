@@ -19,17 +19,12 @@
         "default_popup": "popup.html"
     },
     "web_accessible_resources": [
-        "page.js"
+        "content-script.js"
     ],
     "content_scripts": [
         {
             "matches": [
-                "http://*.youtube.com/*",
-                "https://*.youtube.com/*",
-                "http://apis.google.com/*/widget/render/comments?*",
-                "https://apis.google.com/*/widget/render/comments?*",
-                "http://plus.googleapis.com/*/widget/render/comments?*",
-                "https://plus.googleapis.com/*/widget/render/comments?*"
+                "*://*.youtube.com/*"
             ],
             "exclude_matches": [
                 "http://apiblog.youtube.com/*",
@@ -39,6 +34,9 @@
             "all_frames": true,
             "js": [
                 "YouDanMu.js"
+            ],
+            "css": [
+                "content-script.css"
             ]
         }
     ],
@@ -46,9 +44,6 @@
         "cookies",
         "storage",
         "unlimitedStorage",
-        "http://*.youtube.com/*",
-        "https://*.youtube.com/*",
-        "http://s.ytimg.com/yts/jsbin/*",
-        "https://s.ytimg.com/yts/jsbin/*"
+        "*://more.handlino.com/*"
     ]
 }

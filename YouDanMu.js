@@ -23,22 +23,23 @@ with the page JS, we need to inject our code directly into the page through a <s
       return;
     }
     var script = document.createElement('script');
+    script.id = 'ydm-content-script';
     script.setAttribute('type', 'text/javascript');
-    if (typeof func === 'function') {
-      script.appendChild(document.createTextNode(i18n('(' + func + ')();')));
-    } else if (typeof func === 'string') {
-      script.setAttribute('src', func);
-    }
+    script.appendChild(document.createTextNode(i18n('(function(){' + func + '})();')));
     p.appendChild(script);
-    p.removeChild(script);
   }
-  
-  window.addEventListener('message', function(event) {
+
+  window.addEventListener('message', function (event) {
     if (event.source != window) return;
     if (event.data.type && (event.data.type == 'FROM_PAGE')) {
       console.log('[Master]:', event.data);
     }
   });
 
-  inject(chrome.extension.getURL('page.js'));
+  var req = new XMLHttpRequest();
+  req.open('get', chrome.extension.getURL('content-script.js'), true);
+  req.onload = function () {
+    inject(this.responseText);
+  };
+  req.send();
 })();
