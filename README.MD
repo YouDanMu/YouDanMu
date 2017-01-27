@@ -21,6 +21,7 @@ Floating comment (_Danmu_ in Chinese, or _Danmaku_ in Japanese) is a comment sys
 
 
 ## Documentations
-* [Project Charter](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Team%203%20Project%20Charter.docx)
+* [Project Charter](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Project%20Charter.docx)
 * [Product Backlog](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Product%20Backlog.pdf)
+* [Test Plan](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Test%20Plan.pdf)
 
