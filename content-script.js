@@ -22,13 +22,13 @@ function YDM() {
 }
 
 YDM.prototype.init = (function () {
-    var inited = false;
     return function () {
-        log('YDM.init', inited);
-        if (inited) return;
-        inited = true;
-        var movie_player = this.dom['movie_player'] = document.getElementById('movie_player');
-        var overlay = this.dom['overlay'] = document.createElement('div');
+        log('YDM.init');
+        var overlay = document.getElementById('ydm-overlay');
+        var movie_player = document.getElementById('movie_player');
+        if (overlay != null || movie_player == null) return;
+        this.dom['movie_player'] = movie_player;
+        overlay = this.dom['overlay'] = document.createElement('div');
         overlay.id = 'ydm-overlay';
         movie_player.appendChild(overlay);
     };
@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             log('onStateChange:', state);
             switch (state) {
                 case 1: // playing
+                    ydm.init();
                     ydm.randomResume();
                     break;
                 case 2: // paused
@@ -121,7 +122,9 @@ function hijectLoadFunction() {
         // loadCaption(window.ytplayer.config.args);
         return oldLoad();
     };
+    if (window.ytplayer.config.args.video_id != null) {
+        ydm.init();
+        ydm.randomResume();
+    }
     // window.ytplayer.load();
-    ydm.init();
-    ydm.randomResume();
 }
