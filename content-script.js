@@ -42,9 +42,11 @@ YDM.prototype.addDanmu = (function () {
         var danmu = document.createElement('div');
         danmu.classList.add('ydm-danmu');
         danmu.style.top = top;
+        
         var hiddenText = document.createElement('span');
         hiddenText.classList.add('ydm-danmu-hidden-text');
         hiddenText.innerText = text;
+
         var displayText = document.createElement('span');
         displayText.classList.add('ydm-danmu-text');
         displayText.innerText = text;
