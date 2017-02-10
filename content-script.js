@@ -130,3 +130,14 @@ function hijectLoadFunction() {
     }
     // window.ytplayer.load();
 }
+
+//assertion function for testing
+function assert(condition, message) {
+    if (!condition) {
+        message = message || "Assertion failed";
+        if (typeof Error !== "undefined") {
+            throw new Error(message);
+        }
+        throw message; // Fallback
+    }
+}
