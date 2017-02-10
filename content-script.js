@@ -21,6 +21,15 @@ function YDM() {
     this.dom = {};
 }
 
+YDM.PlayerState = {
+    UNSTARTED: -1,
+    ENDED: 0,
+    PLAYING: 1,
+    PAUSED: 2,
+    BUFFERING: 3,
+    CUED: 5
+};
+
 YDM.prototype.init = (function () {
     return function () {
         log('YDM.init');
@@ -63,6 +72,13 @@ YDM.prototype.resume = function () {
     this.dom['overlay'].classList.remove('paused');
 };
 
+YDM.prototype.cue = function () {
+    // Clear all the childs in the Danmaku div
+    while (this.dom['overlay'].firstChild) {
+        this.dom['overlay'].removeChild(this.dom['overlay'].firstChild);
+    }
+};
+
 (function () {
     var randomInterval = null;
     function randomInt(min, max) {
@@ -96,12 +112,15 @@ document.addEventListener('DOMContentLoaded', function () {
         player.addEventListener('onStateChange', function (state) {
             log('onStateChange:', state);
             switch (state) {
-                case 1: // playing
+                case YDM.PlayerState.PLAYING:
                     ydm.init();
                     ydm.randomResume();
                     break;
-                case 2: // paused
+                case YDM.PlayerState.PAUSED:
                     ydm.randomPause();
+                    break;
+                case YDM.PlayerState.CUED:
+                    ydm.cue();
                     break;
             }
         });
