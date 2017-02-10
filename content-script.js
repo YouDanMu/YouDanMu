@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
     hijectLoadFunction();
     window.onYouTubePlayerReady = function (player) {
         log('onYouTubePlayerReady:', player);
+        window.player = player;
         // hijectMethods(player);
         player.addEventListener('onStateChange', function (state) {
             log('onStateChange:', state);
@@ -123,6 +124,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     ydm.cue();
                     break;
             }
+        });
+        player.addEventListener('onPlaybackRateChange', function (rate) {
+            log('onPlaybackRateChange:', rate);
         });
         if (typeof oldReady == 'function') {
             return oldReady.call(this, arguments);
