@@ -1,0 +1,56 @@
+#ydm-overlay {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes danmu {
+  from {
+    left: 100%;
+  }
+  to {
+    left: 0%;
+  }
+}
+
+@keyframes danmu-text {
+  from {
+    left: 0%;
+  }
+  to {
+    left: -100%;
+  }
+}
+
+.ydm-danmu {
+  color: white;
+  text-shadow: black 1px 0px 1px, black 0px 1px 1px, black 0px -1px 1px, black -1px 0px 1px;
+  font-size: 25px;
+  font-family: SimHei, "Microsoft JhengHei", Arial, Helvetica, sans-serif;
+  font-weight: normal;
+  line-height: 1.125;
+  white-space: nowrap;
+  position: absolute;
+  animation: danmu 5s linear 0s 1 normal forwards;
+
+  .ydm-danmu-hidden-text {
+    visibility: hidden;
+  }
+
+  .ydm-danmu-text {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    animation: danmu-text 5s linear 0s 1 normal forwards;
+  }
+}
+
+#ydm-overlay.paused .ydm-danmu {
+  animation-play-state: paused;
+  .ydm-danmu-text {
+    animation-play-state: paused;
+  }
+}

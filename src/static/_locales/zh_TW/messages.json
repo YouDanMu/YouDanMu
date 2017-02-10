@@ -1,0 +1,18 @@
+{
+    "ext_name": {
+        "message": "有弾幕",
+        "description": "Extension name display as the title in extensions manager list."
+    },
+    "ext_description": {
+        "message": "YouTube 彈幕模組",
+        "description": "Short extension description display below the title in extensions manager list."
+    },
+    "popup_title": {
+        "message": "有弾幕設置",
+        "description": "Browser action button popup menu dialog title."
+    },
+    "YDM_welcome_log": {
+        "message": "歡迎使用有弾幕！",
+        "description": "Console log welcome message immediately after the main script is injected on the page."
+    }
+}

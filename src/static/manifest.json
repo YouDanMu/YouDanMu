@@ -1,0 +1,49 @@
+{
+    "manifest_version": 2,
+    "name": "__MSG_ext_name__",
+    "description": "__MSG_ext_description__",
+    "version": "0.0.0",
+    "default_locale": "zh_TW",
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "19": "images/icon19.png",
+            "38": "images/icon38.png"
+        },
+        "default_title": "__MSG_ext_name__",
+        "default_popup": "popup.html"
+    },
+    "web_accessible_resources": [
+        "content-script.js"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.youtube.com/*"
+            ],
+            "exclude_matches": [
+                "http://apiblog.youtube.com/*",
+                "https://apiblog.youtube.com/*"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "js": [
+                "YouDanMu.js"
+            ],
+            "css": [
+                "content-script.css"
+            ]
+        }
+    ],
+    "permissions": [
+        "cookies",
+        "storage",
+        "unlimitedStorage",
+        "*://more.handlino.com/*"
+    ]
+}
