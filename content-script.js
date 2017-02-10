@@ -22,8 +22,23 @@ function YDM() {
 }
 
 YDM.prototype.init = (function () {
+
+    //TODO: more elegent way or to add more
+    var toLoad = ['\\source\\bilibili.js'];
+    var loadScripts = function() {
+        console.log('load script');
+
+        for(s in toLoad) {
+            var imported = document.createElement('script');
+            imported.src = s;
+            document.head.appendChild(imported);
+        }
+    }
+
     return function () {
         log('YDM.init');
+        loadScripts();
+        console.log(bilibili);
         var overlay = document.getElementById('ydm-overlay');
         var movie_player = document.getElementById('movie_player');
         if (overlay != null || movie_player == null) return;

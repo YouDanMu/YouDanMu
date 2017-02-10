@@ -1,27 +1,27 @@
 var Bilibili = {
 
-	bilibiliAppKey = '03fc8eb101b091fb';
+	bilibiliAppKey : '03fc8eb101b091fb',
 
-	var CommentList = {'comments': [], 'commentNumber': 0, 'pid': 0};
-	var support = {
-		function getSign(params,appkey,AppSecret) {
+	CommentList : {'comments': [], 'commentNumber': 0, 'pid': 0},
+	support : {
+		getSign : function(params,appkey,AppSecret) {
 
 			params['appkey']=appkey;
 		        data += para + "=" + params[para];
 		    data = "";
 		    paras = Object.keys(params);
 		    paras.sort();
-		    for (para in paras) {
+		    for (var para in paras) {
 		        if (data !== "") {
 		            data += "&";
 		        }
 		    }
 		    //if (AppSecret === undefined) {
-		    return data
+		    return data;
 		    //TODO: we assume AppSecret is always empty
-		};
+		},
 
-		var getVideoInfo = (function() {
+		getVideoInfo : (function() {
 
 			var video = {};
 
@@ -33,21 +33,21 @@ var Bilibili = {
 			    paras = {'id': GetString(aid),'page': GetString(page)};
 			    if (fav !== undefined) {
 			        paras['fav'] = fav;
-				}	
+				}
 			    var url =  'http://api.bilibili.cn/view?'+ this.GetSign(paras,appkey,AppSecret);
 			    //jsoninfo = JsonInfo(url);
 
 			    return fetch(url).then(function(response) {
 			    			return response.json();
-			   			 }).then(function(json)) {
+			   			 }).then(function(json) {
 					 		video['aid'] = json['title'];
-						    video['guankan'] = json['play']
-						    video['commentNumber'] = json['review']
-						    video['danmu'] = json['video_review']
+						    video['guankan'] = json['play'];
+						    video['commentNumber'] = json['review'];
+						    video['danmu'] = json['video_review'];
 						    video['shoucang'] = json['favorites'];
-						    video['description'] = json['description']
+						    video['description'] = json['description'];
 						    video['cover'] = json['pic'];
-						    video['mid'] = json['mid']
+						    video['mid'] = json['mid'];
 						    video['author'] = json['author'];
 						    video['page'] = json['pages'];
 						    video['date'] = json['created_at'];
@@ -58,21 +58,21 @@ var Bilibili = {
 						    video['offsite'] = json['offsite'];
 						    video['partname'] = json['partname'];
 						    video['src'] = json['src'];
-						    video['tid'] = json['tid']
-						    video['typename'] = json['typename']
+						    video['tid'] = json['tid'];
+						    video['typename'] = json['typename'];
 						    video['instant_server'] = json['instant_server'];
 			 					//taglist = json['tag'];
 			 				return video;
 
-			   			 }.then(function(ex) {
+			   			 }).then(function(ex) {
 
 			   			 	console.log('error fetching video json');
 
 			   			 });
-			};
-		}) ();
+            };
+		}) (),
 		
-		var getDanmuku = function(cid) {
+		getDanmuku : function(cid) {
 			var url = 'http://comment.bilibili.cn/'+cid+'.xml';
 			var content;
 			return fetch(url).then(function(response) {
@@ -81,12 +81,12 @@ var Bilibili = {
 							var parser = new window.DOMParser();
 							var content = parser.parseFromString(str, "application/xml");
 							return content;
-						}).then(function(ex)) {
+						}).then(function(ex) {
 							console.log(ex);
-						}
-		}
+            });
+		},
 
-		var parseDanmuku = function (dom) {
+		parseDanmuku : function (dom) {
 
 
 				var comments = [];
@@ -114,11 +114,12 @@ var Bilibili = {
            			} catch(e) {
            				continue;
            			}
-				}	
-				return {comments,Object.keys(comment_element).length};
+				}
+				return [comments,Object.keys(comment_element).length];
 		}
+    },
 
-	var GetDanmakuByAvID(avid, pid) {
+	 getDanmakuByAvID : function(avid, pid) {
 		var videoInfo = support.getVideoInfo(avid,bilibiliAppKey,pid,undefined,undefined);
 		var danmuXml = support.getDanmuku(videoInfo['cid']);
 		var danmukuObject = support.parseDanmuku(danmuXml);
@@ -130,5 +131,9 @@ var Bilibili = {
 
 
 	}
-
 }
+
+
+(function() {
+	console.log('YDM: bilibili parser loaded!');
+})();
