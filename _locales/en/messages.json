@@ -14,5 +14,13 @@
     "YDM_welcome_log": {
         "message": "Thank you for using YouDanMu!",
         "description": "Console log welcome message immediately after the main script is injected on the page."
+    },
+    "popup_font":{
+        "message": "Font Settings",
+        "description":"Change font for all Danmaku"
+    },
+    "popup_size":{
+        "message": "Size Settings",
+        "description":"Change size for all Danmaku"
     }
 }

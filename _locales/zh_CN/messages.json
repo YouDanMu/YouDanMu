@@ -14,5 +14,13 @@
     "YDM_welcome_log": {
         "message": "欢迎使用有弾幕！",
         "description": "Console log welcome message immediately after the main script is injected on the page."
+    },
+    "popup_font":{
+        "message": "全局字体设置",
+        "description":"Change font for all Danmaku"
+    },
+    "popup_size":{
+        "message": "全局字体大小",
+        "description":"Change size for all Danmaku"
     }
 }
