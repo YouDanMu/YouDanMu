@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/YouDanMu/YouDanMu",
   "devDependencies": {
+    "@types/chrome": "0.0.40",
     "browserify": "^14.0.0",
     "del": "^2.2.2",
     "gulp": "github:gulpjs/gulp#4.0",
