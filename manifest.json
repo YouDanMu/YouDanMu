@@ -35,6 +35,9 @@
             "js": [
                 "YouDanMu.js"
             ],
+            "backgound" : [
+               "scripts": ["Background.js"]
+            ],
             "css": [
                 "content-script.css"
             ]

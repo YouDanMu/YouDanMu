@@ -38,7 +38,7 @@ YDM.prototype.init = (function () {
     return function () {
         log('YDM.init');
         loadScripts();
-        console.log(bilibili);
+        console.log(Bilibili);
         var overlay = document.getElementById('ydm-overlay');
         var movie_player = document.getElementById('movie_player');
         if (overlay != null || movie_player == null) return;

@@ -36,6 +36,8 @@ with the page JS, we need to inject our code directly into the page through a <s
     }
   });
 
+
+  
   var req = new XMLHttpRequest();
   req.open('get', chrome.extension.getURL('content-script.js'), true);
   req.onload = function () {
