@@ -112,16 +112,22 @@ export class YDM {
         let duration = this.settings['duration'] / this.settings['speed'];
         let pWidth = this.moviePlayer.offsetWidth;
         Object.keys(this.danmaku).forEach((mode) => {
+            let segments = this.segments[mode];
+            if (mode === Danmaku.MODE.MARQUEE) segments.reset();
             this.danmaku[mode] = this.danmaku[mode].filter((d) => {
                 let elapsed = time - d.time;
                 if (elapsed >= duration) {
+                    if (mode === Danmaku.MODE.BOTTOM ||
+                        mode === Danmaku.MODE.TOP) {
+                        segments.add(d.ySegment);
+                    }
                     d.e.remove();
                     return false;
                 }
                 if (mode === Danmaku.MODE.MARQUEE) {
                     d.x = pWidth - ((pWidth+d.width)*elapsed/duration);
-                    if (d.x + d.width < pWidth)
-                        this.segments[mode].add(d.ySegment);
+                    if (d.x + d.width > pWidth)
+                        segments.subtract(d.ySegment);
                 }
                 return true;
             });
