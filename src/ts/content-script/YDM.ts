@@ -101,7 +101,7 @@ export class YDM {
     animationFrame(timestamp: number) {
         if (this.state !== YDM.PlayerState.PLAYING) {
             this.resumeTimeFrame = null;
-            this.resumeTimeVideo = null
+            this.resumeTimeVideo = null;
             return;
         }
         if (this.resumeTimeFrame == null)
