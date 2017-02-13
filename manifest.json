@@ -21,6 +21,9 @@
     "web_accessible_resources": [
         "content-script.js"
     ],
+    "backgound" : {
+               "scripts": ["Background.js"]
+        },
     "content_scripts": [
         {
             "matches": [
@@ -34,9 +37,6 @@
             "all_frames": true,
             "js": [
                 "YouDanMu.js"
-            ],
-            "backgound" : [
-               "scripts": ["Background.js"]
             ],
             "css": [
                 "content-script.css"
