@@ -45,15 +45,15 @@ export class Segment {
 
     subtract(s: Segment): Segment[] {
         let r: Segment[] = [];
-        if (this.start <= s.start) {
+        if (this.start < s.start) {
             r.push(this.copy());
-            if (this.end >= s.start) {
+            if (this.end > s.start) {
                 r[r.length-1].end = s.start;
             }
         }
-        if (this.end >= s.end) {
+        if (this.end > s.end) {
             r.push(this.copy());
-            if (this.start <= s.end) {
+            if (this.start < s.end) {
                 r[r.length-1].start = s.end;
             }
         }
