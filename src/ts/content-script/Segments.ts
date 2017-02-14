@@ -130,7 +130,7 @@ export class Segments {
     }
 
     findLast(length: number): Segment {
-        for (let i = this.segments.length; i -- > 0;) {
+        for (let i = this.segments.length - 1; i >= 0;) {
             if (this.segments[i].length() >= length)
                 return new Segment(
                     this.segments[i].end - length,

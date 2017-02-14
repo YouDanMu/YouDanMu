@@ -41,7 +41,6 @@ export class YDM {
         this.overlay.id = 'ydm-overlay';
         document.addEventListener('DOMContentLoaded', (...args: any[]) => {
             this.log('DOMContentLoaded');
-            document.body.appendChild(this.prepare);
             this.hijectLoadFunction();
             this.hijectYouTubePlayerReady();
         });
@@ -57,6 +56,7 @@ export class YDM {
         if (document.getElementById('ydm-overlay') != null
             || document.getElementById('movie_player') == null) return;
         this.moviePlayer.appendChild(this.overlay);
+        this.moviePlayer.appendChild(this.prepare);
         let s = new Segment(0, this.moviePlayer.offsetHeight);
         this.segments[Danmaku.MODE.TOP] = new Segments(s);
         this.segments[Danmaku.MODE.BOTTOM] = new Segments(s);
@@ -66,12 +66,11 @@ export class YDM {
     addDanmaku(d: Danmaku) {
         let segments = this.segments[d.mode];
         let pWidth = this.moviePlayer.offsetWidth;
-        let pHeight = this.moviePlayer.offsetHeight;
         this.prepare.appendChild(d.e);
         switch (d.mode) {
             case Danmaku.MODE.TOP:
             case Danmaku.MODE.BOTTOM: {
-                d.x = (pWidth+d.width)/2;
+                d.x = (pWidth-d.width)/2;
                 break;
             }
             case Danmaku.MODE.MARQUEE: {
@@ -82,18 +81,29 @@ export class YDM {
         switch (d.mode) {
             case Danmaku.MODE.TOP:
             case Danmaku.MODE.MARQUEE: {
-                let s = segments.findFirst(d.height); // bug here
+                let s = segments.findFirst(d.height);
+                if (!s) {
+                    this.danmaku[d.mode].forEach((x)=>x.occupying = false);
+                    segments.reset();
+                    s = segments.findFirst(d.height);
+                }
                 segments.subtract(s);
                 d.y = s.end;
                 break;
             }
             case Danmaku.MODE.BOTTOM: {
-                let s = segments.findLast(d.height); // bug here
+                let s = segments.findLast(d.height);
+                if (!s) {
+                    this.danmaku[d.mode].forEach((x)=>x.occupying = false);
+                    segments.reset();
+                    s = segments.findLast(d.height);
+                }
                 segments.subtract(s);
-                d.y = s.start;
+                d.y = s.end;
                 break;
             }
         }
+        d.occupying = true;
         this.overlay.appendChild(d.e);
         this.danmaku[d.mode].push(d);
     }
@@ -113,12 +123,13 @@ export class YDM {
         let pWidth = this.moviePlayer.offsetWidth;
         Object.keys(this.danmaku).forEach((mode) => {
             let segments = this.segments[mode];
-            if (mode === Danmaku.MODE.MARQUEE) segments.reset();
             this.danmaku[mode] = this.danmaku[mode].filter((d) => {
                 let elapsed = time - d.time;
                 if (elapsed >= duration) {
-                    if (mode === Danmaku.MODE.BOTTOM ||
-                        mode === Danmaku.MODE.TOP) {
+                    if (d.occupying &&
+                       (mode === Danmaku.MODE.BOTTOM ||
+                        mode === Danmaku.MODE.TOP)) {
+                        d.occupying = false;
                         segments.add(d.ySegment);
                     }
                     d.e.remove();
@@ -126,8 +137,10 @@ export class YDM {
                 }
                 if (mode === Danmaku.MODE.MARQUEE) {
                     d.x = pWidth - ((pWidth+d.width)*elapsed/duration);
-                    if (d.x + d.width > pWidth)
-                        segments.subtract(d.ySegment);
+                    if (d.occupying && d.x + d.width < pWidth) {
+                        d.occupying = false;
+                        segments.add(d.ySegment);
+                    }
                 }
                 return true;
             });
@@ -193,6 +206,20 @@ export class YDM {
                     d.mode = Danmaku.MODE.MARQUEE;
                     d.size = 25;
                     d.color = '#FFFFFF';
+                    this.addDanmaku(d);
+                    d = new Danmaku();
+                    d.text = '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊';
+                    d.time = this.currentTime;
+                    d.mode = Danmaku.MODE.TOP;
+                    d.size = 25;
+                    d.color = '#FF3333';
+                    this.addDanmaku(d);
+                    d = new Danmaku();
+                    d.text = '呵呵呵呵呵呵呵呵呵呵呵呵呵呵呵';
+                    d.time = this.currentTime;
+                    d.mode = Danmaku.MODE.BOTTOM;
+                    d.size = 25;
+                    d.color = '#3333FF';
                     this.addDanmaku(d);
                     // this.init();
                     this.resume();

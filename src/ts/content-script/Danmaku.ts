@@ -17,6 +17,7 @@ export class Danmaku {
         size: 25,
         color: '#FFFFFF',
         opacity: 1,
+        padding: 2,
         sizeRatio: 1,
         fontFamily: 'SimHei, "Microsoft JhengHei", Arial, Helvetica, sans-serif',
         textShadow: 'black 1px 0px 1px, black 0px 1px 1px, black 0px -1px 1px, black -1px 0px 1px'
@@ -30,6 +31,7 @@ export class Danmaku {
     id: string;
     e: SVGTextElement;
     sizeRatio: number;
+    occupying: boolean;
 
     constructor(text?: string, time?: number, mode?: string) {
         this.e = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -41,6 +43,7 @@ export class Danmaku {
         this.textShadow = Danmaku.defaults.textShadow;
         this.size = Danmaku.defaults.size;
         this.color = Danmaku.defaults.color;
+        this.padding = Danmaku.defaults.padding;
         this.opacity = Danmaku.defaults.opacity;
     }
 
@@ -68,6 +71,11 @@ export class Danmaku {
 
     set textShadow(ts: string) {
         this.e.style.textShadow = ts;
+    }
+
+    set padding(p: number | string) {
+        if (typeof p === 'number') p = p.toString() + 'px';
+        this.e.style.padding = p;
     }
 
     set x(x: number | string) {
