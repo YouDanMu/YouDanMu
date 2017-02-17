@@ -1,15 +1,144 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>__MSG_popup_title__</title>
-    <link rel="stylesheet" href="css/popup.css">
-</head>
-<body>
-    <header>
-        <!-- 有弾幕設置 -->
-        <h3>__MSG_popup_title__</h3>
-    </header>
-    <script src="js/popup.js"></script>
-</body>
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="css/popup.css" rel="stylesheet" type="text/css"/>
+        
+    </head>
+    <body>
+        <div class="setting-tabs">
+            <button class="close-btn btn">X</button>
+            <header>
+                <h1><img src="images/icon32.png"></img> YouDanMu: <span>Settings</span></h1>
+            </header>
+
+            <!-- Tabs -->
+            <input type="radio" id="Source" name="settingTab" class="tab" checked></input><!----><label class="tabbutton" for="Source">Source</label><!-- 
+             --><input type="radio" id="Styling" name="settingTab" class="tab"></input><!-- 
+             --><label class="tabbutton" for="Styling">Styling</label><!-- 
+             --><input type="radio" id="Options" name="settingTab" class="tab"></input><!-- 
+             --><label class="tabbutton" for="Options">Options</label>
+
+
+            <!-- /*different tabs*/ -->
+            <!-- Source -->
+            <div class="flow" format="Source">
+                <div class="container">
+                    <h4>Bilibili</h4>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons" checked></input>
+                    <label>第一个视频</label>
+                    <a>我是视频信息</a>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第二个视频</label>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第三个视频</label>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第四个视频</label>
+                   </div>
+                </div>
+
+                <div class="container">
+                   <h4>NicoNico</h4>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons" checked></input>
+                    <label>第一个视频</label>
+                    <a>我是视频信息</a>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第二个视频</label>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第三个视频</label>
+                   </div>
+                   <div class="detail">
+                    <input type="radio" name="buttons"class="source_buttons"></input>
+                    <label>第四个视频</label>
+                   </div>
+                </div>
+            </div>
+
+
+            <div class="flow" format="Styling">
+                 <div class="container">
+                    <h4>Font Family</h4>
+                    <div class="dropdown">
+                    <input class="dropdown-toggle" type="text">
+                    <div class="dropdown-text"><span style="font-family: STHeitiSC-Light">Default</span></div>
+                    <ul class="dropdown-content">
+                        <li><span style="font-family:STHeitiSC-Light" href="#">黑体</span></li>
+                        <li><span href="#" style="font-family:STSongti-SC-Regular">宋体</span></li>
+                        <li><span href="#" style="font-family:STYuanti-SC-Regular">圆体</span></li>
+                    </ul>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <h4>Font Size</h4>
+                    <div class="dropdown">
+                    <input class="dropdown-toggle" type="text">
+                    <div class="dropdown-text">Default(14)</div>
+                    <ul class="dropdown-content">
+                        <li><span style="font-size:14px">我是14号</span></li>
+                        <li><span style="font-size:16px">我是16号</span></li>
+                        <li><span style="font-size:18px">我是18号</span></li>
+                    </ul>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <h4>Alpha Channel</h4>
+                    <div class="slider"><input type="range" max="100" min="0" step="1" id="alpha-slider"/><span style="font-size: 14px; position:absolute; ">&nbsp;Value</span>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <h4>Text Boarder</h4>
+                    <div class="dropdown">
+                    <input class="dropdown-toggle" type="text">
+                    <div class="dropdown-text">Default</div>
+                    <ul class="dropdown-content">
+                        <li><span >重影</span></li>
+                        <li><span style="-webkit-text-stroke: 1px rgb(95, 95, 95);">描边</span></li>
+                        <li><span style="text-shadow: 2px -2px rgb(208, 208, 208);">投影</span></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+
+
+            
+
+            <div class="flow" format="Options">
+                <div class="container">
+                    <h4>Speed</h4>
+                    <div class="slider">
+                        <input type="range" max="10" min="2" step="1" id="speed-slider"/><span style="font-size: 14px; position:absolute; ">&nbsp;Value</span><br>
+                        <input type="checkbox" checked></input><label style="font-size:14px">Connect to Video Speed</label>
+                   </div>
+                </div>
+
+                <div class="container">
+                    <h4>Density</h4>
+                    <div class="slider">
+                        <input type="range" max="50" min="0" step="1" id="density-slider"/><span style="font-size: 14px; position:absolute;">&nbsp;Value</span><br>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <footer>
+                <p><a href="https://github.com/YouDanMu" target="_blank" >YouDanMu</a></p>
+            </footer>
+        </div>    
+    </body>
 </html>
