@@ -5,6 +5,7 @@ var tsify = require('tsify');
 var sass = require('gulp-sass');
 var gutil = require('gulp-util');
 var rename = require('gulp-rename');
+var jasmine = require('gulp-jasmine');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var autoprefixer = require('gulp-autoprefixer');
@@ -22,7 +23,10 @@ var paths = {
         },
         static: 'src/static/**'
     },
-    dist: 'dist'
+    dist: 'dist',
+    spec: {
+        'spec/ydm.js': 'spec/ydm.ts'
+    }
 };
 
 var watches = [];
@@ -77,6 +81,16 @@ function watch_task() {
     gulp.watch(paths.src.static, gulp.parallel('copy-static'));
 }
 
+Object.keys(paths.spec).map(function(target) {
+    var from = paths.spec[target];
+    gulp.task(target, generate_ts(from, target));
+});
+
+function jasmine_task() {
+    return gulp.src(paths.dist + '/spec/*.js')
+        .pipe(jasmine()); 
+}
+
 gulp.task('clean', clean_task);
 gulp.task('copy-static', copy_static);
 gulp.task('default', gulp.series(
@@ -86,3 +100,7 @@ gulp.task('default', gulp.series(
         Object.keys(paths.src.ts),
         Object.keys(paths.src.scss))));
 gulp.task('watch', gulp.series('default', watch_task));
+gulp.task('jasmine', jasmine_task)
+gulp.task('test', gulp.series(
+    gulp.parallel(Object.keys(paths.spec)),
+    'jasmine'));
