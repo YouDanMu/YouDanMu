@@ -25,4 +25,5 @@ Floating comment (_Danmu_ in Chinese, or _Danmaku_ in Japanese) is a comment sys
 * [Product Backlog](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Product%20Backlog.pdf)
 * [Test Plan](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Test%20Plan.pdf)
 * [Defect Logs](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Defect%20Logs.pdf)
+* [Sprint 1 Incremental Testing and Regression Testing](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Sprint%201%20Incremental%20Regression%20Testing.pdf)
 
