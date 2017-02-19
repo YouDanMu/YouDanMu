@@ -1,9 +1,48 @@
 {
-  "files": [
-    "src/**/*.ts"
-  ],
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "target": "es5"
-  }
+    "compilerOptions": {
+        "lib": [
+            "es5",
+            "es2015",
+            "dom",
+            "dom.iterable",
+            "es2015.core",
+            "es2015.collection",
+            "es2015.generator",
+            "es2015.iterable",
+            "es2015.promise",
+            "es2015.proxy",
+            "es2015.reflect",
+            "es2015.symbol",
+            "es2015.symbol.wellknown"
+        ],
+        "types": [
+            "node",
+            "chrome",
+            "mocha",
+            "chai"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "rootDirs": [
+            ".",
+            "src/ts"
+        ],
+        "pretty": true,
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": true,
+        "noImplicitAny": true,
+        "stripInternal": true,
+        "noImplicitReturns": true,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    "exclude": [
+        "build",
+        "src",
+        "node_modules"
+    ]
 }
