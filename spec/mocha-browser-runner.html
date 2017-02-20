@@ -6,10 +6,64 @@
     <base target="_blank">
     <title>YouDanMu Tests</title>
     <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .content {
+            width: 1280px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        #ydm-test {
+            background-color: #f4f6ff;
+        }
+        
+        h1.title {
+            margin: 0;
+            padding: 30px 0;
+        }
+
+        #movie-outter {
+            background-color: #333;
+        }
+        
+        #movie-player {
+            width: 1280px;
+            height: 720px;
+            margin: 0 auto;
+            background-color: #111;
+        }
+
+        #mocha {
+            margin: 0 0 60px 0 !important;
+        }
+
+        #mocha-stats {
+            padding: 5px !important;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, .8);
+        }
+    </style>
 </head>
 
 <body>
-    <div id="mocha"></div>
+    <div id="ydm-test">
+        <div class="content">
+            <h1 class="title">YouDanMu Automated Testing Framework</h1>
+        </div>
+        <div id="movie-outter">
+            <!--<div id="movie-player"></div>-->
+        </div>
+    </div>
+    <div class="content">
+        <h1 class="title">Macha Test Reports</h1>
+        <div id="mocha"></div>
+    </div>
     <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
     <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
     <script>

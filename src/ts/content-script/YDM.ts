@@ -1,3 +1,5 @@
+/// <reference path="../typings/YouTube.d.ts" />
+
 import { Danmaku } from './Danmaku';
 import { Segment, Segments } from './Segments';
 
@@ -184,15 +186,15 @@ export class YDM {
     }
 
     hijectYouTubePlayerReady() {
-        let oldReady = (<any>window).onYouTubePlayerReady;
-        (<any>window).onYouTubePlayerReady = (player: any, ...args: any[]) => {
+        let oldReady = window.onYouTubePlayerReady;
+        window.onYouTubePlayerReady = (player) => {
             this.onYouTubePlayerReady(player);
             if (typeof oldReady == 'function')
-                return oldReady(player, ...args);
+                return oldReady(player);
         };
     }
 
-    onYouTubePlayerReady(player: any) {
+    onYouTubePlayerReady(player: YouTube.Player) {
         this.log('onYouTubePlayerReady:', player);
         this.player = player;
         player.addEventListener('onStateChange', (state: number) => {
