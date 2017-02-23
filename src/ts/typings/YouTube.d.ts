@@ -1,5 +1,22 @@
 // Reference: https://developers.google.com/youtube/js_api_reference
 
+/**
+ * All listenable events (reverse engineered).
+ * We might only interest in a few of these.
+ * 
+ *  onDetailedError, onTabOrderChange, onTabAnnounce,
+ *  WATCH_LATER_VIDEO_ADDED, WATCH_LATER_VIDEO_REMOVED,
+ *  onMouseWheelCapture, onMouseWheelRelease, onAdAnnounce, onStateChange,
+ *  onPlaybackRateChange, onVideoProgress, SHARE_CLICKED, SIZE_CLICKED,
+ *  onError, onFullscreenChange, onAdStart, onAdComplete, onAdSkip,
+ *  onAdEnd, onAutonavChangeRequest, onAutonavPauseRequest,
+ *  onFeedbackStartRequest, onFeedbackArticleRequest, onScreenChanged,
+ *  onLogClientVeCreated, onLogServerVeCreated, onLogToGel,
+ *  onLogVeClicked, onLogVesShown, onYpcContentRequest, SUBSCRIBE,
+ *  UNSUBSCRIBE, onApiChange, captionschanged, CONNECTION_ISSUE,
+ *  onVolumeChange
+ */
+
 interface Window {
     onYouTubePlayerReady: (player: YouTube.Player) => any;
 }
@@ -48,7 +65,46 @@ declare namespace YouTube {
         suggestedQuality: string;
     }
 
-    class Player {
+    interface VideoData {
+        author: string;
+        title: string;
+        video_id: string;
+        video_quality: string;
+    }
+
+    interface FullscreenState {
+        fullscreen: boolean;
+        time: number;
+        videoId: string;
+    }
+
+    interface VideoConfig {
+        args?: any,
+        assets?: any,
+        attrs?: {
+            id?: string;
+            width?: string;
+            height?: string;
+        }
+        disable?: any;
+        fallback?: any;
+        fallbackMessage?: any;
+        html5?: boolean;
+        loaded?: boolean;
+        messages?: any;
+        minVersion?: string;
+        params?: any;
+        url?: string;
+    }
+
+    interface VideoContentRect {
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+    }
+
+    class Player implements EventTarget {
         e: HTMLDivElement;
         
         // Queueing functions
@@ -125,22 +181,58 @@ declare namespace YouTube {
 
         getDuration(): number;
         getVideoUrl(): string;
+        getVideoData(): VideoData;
         getVideoEmbedCode(): string;
+        getCurrentVideoConfig(): VideoConfig;
 
         // Retrieving playlist information
 
         getPlaylist(): string[];
         getPlaylistIndex(): number;
 
+        // Retrieving screen information
+
+        getVideoContentRect(): VideoContentRect;
+
+        // Debugging interfaces
+
+        // Show/hide video meta info panel on top of the video
+        showVideoInfo(): void;
+        hideVideoInfo(): void;
+
         // Adding or removing an event listener
 
-        addEventListener(event: 'onStateChange', listener: string | ((state: number) => any)): void;
-        addEventListener(event: 'onPlaybackQualityChange', listener: string | ((quality: string) => any)): void;
-        addEventListener(event: 'onPlaybackRateChange', listener: string | ((rate: number) => any)): void;
-        addEventListener(event: 'onError', listener: string | ((error: number) => any)): void;
-        addEventListener(event: 'onApiChange', listener: string | ((error: number) => any)): void;
+        addEventListener(event: 'onStateChange', listener: string | ((state: number) => void)): void;
+        addEventListener(event: 'onVideoProgress', listener: string | ((currentTime: number) => void)): void;
+        addEventListener(event: 'onPlaybackQualityChange', listener: string | ((quality: string) => void)): void;
+        addEventListener(event: 'onPlaybackRateChange', listener: string | ((rate: number) => void)): void;
+        addEventListener(event: 'onError', listener: string | ((error: number) => void)): void;
+        addEventListener(event: 'onApiChange', listener: string | ((error: number) => void)): void;
+        addEventListener(event: 'SIZE_CLICKED', listener: string | ((theaterMode: boolean) => void)): void;
+        addEventListener(event: 'onFullscreenChange', listener: string | ((fullscreen: FullscreenState) => void)): void;
+        addEventListener(event: 'onAdAnnounce', listener: string | ((val: any) => void)): void;
+        addEventListener(event: 'onAdStart', listener: string | ((val: any) => void)): void;
+        addEventListener(event: 'onAdComplete', listener: string | ((val: any) => void)): void;
+        addEventListener(event: 'onAdSkip', listener: string | ((val: any) => void)): void;
+        addEventListener(event: 'onAdEnd', listener: string | ((val: any) => void)): void;
+        addEventListener(event: string, listener?: EventListenerOrEventListenerObject, useCapture?: boolean): void;
 
-        removeEventListener(event: string, listener: string | Function): void;
+        dispatchEvent(evt: Event): boolean;
+
+        removeEventListener(event: 'onStateChange', listener: string | ((state: number) => void)): void;
+        removeEventListener(event: 'onVideoProgress', listener: string | ((currentTime: number) => void)): void;
+        removeEventListener(event: 'onPlaybackQualityChange', listener: string | ((quality: string) => void)): void;
+        removeEventListener(event: 'onPlaybackRateChange', listener: string | ((rate: number) => void)): void;
+        removeEventListener(event: 'onError', listener: string | ((error: number) => void)): void;
+        removeEventListener(event: 'onApiChange', listener: string | ((error: number) => void)): void;
+        removeEventListener(event: 'SIZE_CLICKED', listener: string | ((theaterMode: boolean) => void)): void;
+        removeEventListener(event: 'onFullscreenChange', listener: string | ((fullscreen: FullscreenState) => void)): void;
+        removeEventListener(event: 'onAdAnnounce', listener: string | ((val: any) => void)): void;
+        removeEventListener(event: 'onAdStart', listener: string | ((val: any) => void)): void;
+        removeEventListener(event: 'onAdComplete', listener: string | ((val: any) => void)): void;
+        removeEventListener(event: 'onAdSkip', listener: string | ((val: any) => void)): void;
+        removeEventListener(event: 'onAdEnd', listener: string | ((val: any) => void)): void;
+        removeEventListener(event: string, listener?: EventListenerOrEventListenerObject, useCapture?: boolean): void;
     }
 
     class API {
