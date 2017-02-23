@@ -28,6 +28,8 @@ export interface VideoService {
     onScreenInit: Observable<Screen>;
     onScreenResize: Observable<Screen>;
     onScreenDestroy: Observable<void>;
+    onAdStart: Observable<void>;
+    onAdEnd: Observable<void>;
 }
 
 export * from './YouTubeService';
