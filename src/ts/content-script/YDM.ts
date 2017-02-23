@@ -240,6 +240,12 @@ export class YDM {
         player.addEventListener('onPlaybackRateChange', (rate: number) => {
             this.log('onPlaybackRateChange:', rate);
         });
+        player.addEventListener('onAdAnnounce', function() {console.log('onAdAnnounce', arguments);});
+        player.addEventListener('onAdStart', function() {console.log('onAdStart', arguments);});
+        player.addEventListener('onAdComplete', function() {console.log('onAdComplete', arguments);});
+        player.addEventListener('onAdSkip', function() {console.log('onAdSkip', arguments);});
+        player.addEventListener('onAdEnd', function() {console.log('onAdEnd', arguments);});
+        player.showVideoInfo();
     }
 
 }
