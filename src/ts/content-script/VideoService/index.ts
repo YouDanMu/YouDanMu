@@ -11,9 +11,10 @@ export interface Video {
 }
 
 export interface Screen {
+    e?: HTMLElement;
     width: number;
     height: number;
-    fullscreen: boolean;
+    fullscreen?: boolean;
 }
 
 export interface VideoService {
