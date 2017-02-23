@@ -198,6 +198,8 @@ export class YDM {
         this.log('onYouTubePlayerReady:', player);
         this.player = player;
         player.addEventListener('onStateChange', (state: number) => {
+            let videoConfig = player.getCurrentVideoConfig();
+            if (videoConfig.attrs.id !== 'movie_player') return;
             this.log('onStateChange:', state);
             this.state = state;
             switch (state) {
