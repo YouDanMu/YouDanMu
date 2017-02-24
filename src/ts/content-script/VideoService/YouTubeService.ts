@@ -163,7 +163,7 @@ export class YouTubeService implements VideoService {
         this.screen.fullscreen = state.fullscreen;
     }
 
-    getScreenSize(): ScreenSize {
+    private getScreenSize(): ScreenSize {
         return {
             width: this.screen.e.offsetWidth,
             height: this.screen.e.offsetHeight
