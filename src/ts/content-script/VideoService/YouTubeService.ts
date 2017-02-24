@@ -8,7 +8,10 @@ import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/sampleTime';
 import 'rxjs/add/operator/multicast';
 
+import { Logger } from '../util';
 import { Seconds, Video, Screen, VideoService } from './';
+
+const console = new Logger('YouTubeService');
 
 enum State {
     UNSTARTED = -1,
@@ -58,6 +61,16 @@ export class YouTubeService implements VideoService {
             .refCount();
         Observable.fromEvent(document, 'DOMContentLoaded')
             .subscribe(() => this.hijectYouTubePlayerReady());
+        // Development level logging
+        this.onCue.subscribe((video) => console.log(3, 'Video Cued:', video));
+        this.onPause.subscribe((time) => console.log(3, 'Video Paused:', time));
+        this.onPlay.subscribe((time) => console.log(3, 'Video Played:', time));
+        this.onSpeedChange.subscribe((rate) => console.log(3, 'Video Speed Changed:', rate));
+        this.onScreenDestroy.subscribe(() => console.log(3, 'Screen Destroyed'));
+        this.onScreenInit.subscribe((screen) => console.log(3, 'Screen Inited:', screen));
+        this.onScreenResize.subscribe((screen) => console.log(3, 'Screen Resized:', screen));
+        this.onAdStart.subscribe(() => console.log(3, 'Ad Started'));
+        this.onAdEnd.subscribe(() => console.log(3, 'Ad Ended'));
     }
 
     cue() {
