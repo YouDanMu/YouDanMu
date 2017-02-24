@@ -19,7 +19,7 @@
         "default_popup": "popup.html"
     },
     "web_accessible_resources": [
-        "js/content-script.js"
+        "js/YouDanMu.js"
     ],
     "content_scripts": [
         {
@@ -33,7 +33,7 @@
             "run_at": "document_start",
             "all_frames": true,
             "js": [
-                "js/YouDanMu.js"
+                "js/content-script.js"
             ],
             "css": [
                 "css/content-script.css"

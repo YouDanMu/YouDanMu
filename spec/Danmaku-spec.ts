@@ -1,4 +1,4 @@
-import { Danmaku } from '../content-script/Danmaku';
+import { Danmaku } from '../YouDanMu/Danmaku';
 
 const { expect } = chai;
 
