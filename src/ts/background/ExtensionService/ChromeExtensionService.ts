@@ -42,23 +42,21 @@ export class ChromeExtensionService implements ExtensionService {
         else console.error(0, 'Undefined command type:', m.type, m);
     }
 
-    private fetch(url: string, callback: Callback): void {
-        let req = new XMLHttpRequest();
-        req.addEventListener('load', () => {
-            callback({
-                type: 'fetch',
-                data: req.responseText,
-                error: null
+    private fetch(args: { input: RequestInfo, init?: RequestInit }, callback: Callback): void {
+        fetch(args.input, args.init).then((response) => {
+            response.text().then((data) => {
+                callback({
+                    type: 'fetch',
+                    data: data,
+                    error: null
+                });
             });
-        });
-        req.addEventListener('error', () => {
+        }).catch((error) => {
             callback({
                 type: 'fetch',
                 data: null,
-                error: `Failed to fetch ${url}`
+                error: error
             });
         });
-        req.open('get', url, true);
-        req.send();
     }
 }
