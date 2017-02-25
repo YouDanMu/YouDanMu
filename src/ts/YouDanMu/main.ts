@@ -1,4 +1,5 @@
 import { Logger } from './util';
+import { ChromeExtensionService } from './ExtensionService';
 import { YouTubeService } from './VideoService';
 
 // Enable development level logging
@@ -11,3 +12,6 @@ console.log(0, '__MSG_YDM_welcome_log__');
 
 const ydmyt = new YouTubeService();
 (<any>window).ydmyt = ydmyt;
+
+const ydmext = new ChromeExtensionService();
+(<any>window).ydmext = ydmext;

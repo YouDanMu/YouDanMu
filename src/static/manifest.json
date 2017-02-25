@@ -21,6 +21,11 @@
     "web_accessible_resources": [
         "js/YouDanMu.js"
     ],
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
     "content_scripts": [
         {
             "matches": [
@@ -44,6 +49,6 @@
         "cookies",
         "storage",
         "unlimitedStorage",
-        "*://more.handlino.com/*"
+        "*://example.com/*"
     ]
 }

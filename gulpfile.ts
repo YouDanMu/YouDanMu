@@ -29,6 +29,22 @@ class Gulpfile {
             .pipe(gulp.dest('build/es5'));
     }
 
+    @Task('background.js')
+    background() {
+        let b = browserify({
+            entries: './build/es5/background/main.js',
+            debug: true
+        });
+
+        return b.bundle()
+            .pipe(source('background.js'))
+            .pipe(buffer())
+            .pipe(sourcemaps.init({ loadMaps: true }))
+            // .pipe(uglify()).on('error', gutil.log)
+            .pipe(sourcemaps.write('./'))
+            .pipe(gulp.dest('./build/dist/js'))
+    }
+
     @Task('content-script.js')
     content_script() {
         let b = browserify({
@@ -40,8 +56,8 @@ class Gulpfile {
             .pipe(source('content-script.js'))
             .pipe(buffer())
             .pipe(sourcemaps.init({ loadMaps: true }))
-            .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write())
+            // .pipe(uglify()).on('error', gutil.log)
+            .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest('./build/dist/js'))
     }
 
@@ -56,7 +72,7 @@ class Gulpfile {
             .pipe(source('popup.js'))
             .pipe(buffer())
             .pipe(sourcemaps.init({ loadMaps: true }))
-            .pipe(uglify()).on('error', gutil.log)
+            // .pipe(uglify()).on('error', gutil.log)
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest('./build/dist/js'))
     }
@@ -72,8 +88,8 @@ class Gulpfile {
             .pipe(source('YouDanMu.js'))
             .pipe(buffer())
             .pipe(sourcemaps.init({ loadMaps: true }))
-            .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write('./'))
+            // .pipe(uglify()).on('error', gutil.log)
+            .pipe(sourcemaps.write())
             .pipe(gulp.dest('./build/dist/js'))
     }
 
@@ -119,6 +135,7 @@ class Gulpfile {
             gulp.watch('src/ts/content-script/**/*.ts', gulp.series('compile_es5', 'content-script.js'));
             gulp.watch('src/ts/popup/**/*.ts', gulp.series('compile_es5', 'popup.js'));
             gulp.watch('src/ts/YouDanMu/**/*.ts', gulp.series('compile_es5', 'YouDanMu.js'));
+            gulp.watch('src/ts/background/**/*.ts', gulp.series('compile_es5', 'background.js'));
             gulp.watch('spec/**/*.ts', gulp.series('compile_es5', 'all-spec.js'));
             gulp.watch('src/scss/content-script/**', gulp.series('content-script.css'));
             gulp.watch('src/scss/popup/**', gulp.series('popup.css'));
@@ -148,6 +165,7 @@ gulp.task('default', gulp.series(
         gulp.series(
             'compile_es5',
             gulp.parallel(
+                'background.js',
                 'content-script.js',
                 'popup.js',
                 'YouDanMu.js',
