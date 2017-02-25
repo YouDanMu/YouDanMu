@@ -113,11 +113,11 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    fetch(url: string): Promise<string> {
+    fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
         return new Promise((resolve, reject) => {
             this.tx.next({
                 type: 'fetch',
-                data: url,
+                data: { input, init },
                 delayed: { resolve, reject }
             });
         });
