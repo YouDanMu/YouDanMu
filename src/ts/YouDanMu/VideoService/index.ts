@@ -32,4 +32,4 @@ export interface VideoService {
     onAdEnd: Observable<void>;
 }
 
-export * from './YouTubeService';
+export * from './YouTubeVideoService';
