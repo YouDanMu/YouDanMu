@@ -151,8 +151,10 @@ export class Segments {
                 }
             }
             // Merge into left segment if the references equal
-            if (prev && s.ref === prev.ref)
-                segments.splice(--i, 2, new Segment(prev.start, s.end, s.ref));
+            if (prev && s.ref === prev.ref) {
+                s = new Segment(prev.start, s.end, s.ref);
+                segments.splice(--i, 2, s);
+            }
             prev = s;
         }
         return new Segment(start, end, depth + delta);
