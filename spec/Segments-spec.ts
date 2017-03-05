@@ -171,5 +171,12 @@ describe('util/Segments', () => {
         p1 = s.deref(p1);
         expect(p1.toString()).to.equal('[30, (2), 50]');
         expect(s.toString()).to.equal('{ [20, (0), 25], [25, (1), 35], [35, (2), 45], [45, (1), 55], [55, (0), 100] }');
+        p3 = s.deref(p3);
+        expect(p3.toString()).to.equal('[25, (1), 40]');
+        expect(s.toString()).to.equal('{ [20, (0), 35], [35, (1), 40], [40, (2), 45], [45, (1), 55], [55, (0), 100] }');
+        expect(s.deref(40, 55).toString()).to.equal('[40, (1), 55]');
+        expect(s.toString()).to.equal('{ [20, (0), 35], [35, (1), 45], [45, (0), 100] }');
+        expect(s.deref(35, 45).toString()).to.equal('[35, (0), 45]');
+        expect(s.toString()).to.equal('{ [20, (0), 100] }');
     });
 });
