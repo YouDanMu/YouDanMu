@@ -1,12 +1,70 @@
 import isSame = require('shallowequal');
 import 'core-js/es6/symbol';
 
+
+export interface DurationData<T> {
+  data: T;
+  value: number;
+}
+
+export default class DurationIntervalTree<T>{
+
+  private dataTree = new DataIntervalTree<DurationData<T>>();
+  private durationFn: (start: number) => {low: number, high: number}
+  constructor(durationFn: (start: number) => {low: number, high: number}) {
+    this.durationFn = durationFn;
+  }
+
+  public insert(data: T, value: number) {
+    let interval = this.durationFn(value);
+
+    return this.dataTree.insert(interval.low, interval.high, {data, value});
+  }
+
+  public remove(data: T, value: number) {
+    let interval = this.durationFn(value);
+    return this.dataTree.remove(interval.low, interval.high, {data, value});
+  }
+
+  public search(intervalStart: number) {
+    let interval = this.durationFn(intervalStart);
+    return this.dataTree.search(interval.low,interval.high);
+  }
+
+  public changeDurationFn(durationFn: (start: number) => {low: number, high: number}) {
+    let iterator = this.inOrder();
+    this.dataTree = new DataIntervalTree<DurationData<T>>();
+    this.durationFn = durationFn;
+    let next = iterator.next();
+
+    while(!next.done) {
+      this.insert(next.value.data.data,next.value.low);
+    }
+  }
+
+  public inOrder() {
+    return this.dataTree.inOrder()
+  }
+
+  public preOrder() {
+    return this.dataTree.preOrder()
+  }
+
+  get count () {
+    return this.dataTree.count
+  }
+}
+
+
+
+
+
 export interface DataInterval<T> extends Interval {
   data: T
 }
 
-export default class DataIntervalTree<T> {
-  private tree = new IntervalTree<DataInterval<T>>()
+export class DataIntervalTree<T> {
+  protected tree = new IntervalTree<DataInterval<T>>()
 
   public insert(low: number, high: number, data: T) {
     return this.tree.insert({ low, high, data})
