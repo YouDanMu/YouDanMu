@@ -1,36 +1,73 @@
 import { Subject } from 'rxjs/Subject';
 
 import { RenderService } from '.';
-import { Danmaku } from '../Danmaku';
+import { Danmaku, Mode } from '../Danmaku';
 import { Seconds } from '../VideoService';
-import { IntervalTree } from '../util/IntervalTree';
+import { Screen } from '../VideoService';
+import {
+    DataIntervalTree as IntervalTree,
+    DataIntervalTreeIterator as IntervalTreeIterator
+} from '../util/IntervalTree';
 
-class Canvas {
-    e: SVGElement;
+class Canvas implements Iterable<DanmakuObject> {
+    parent: HTMLDivElement;
+    layers: SVGElement[] = [];
+    prepare: SVGElement;
 
-    get width(): number {
-        return this.e.clientWidth;
+    width: number;
+    height: number;
+
+    private danmakuSet = new Set<DanmakuObject>();
+
+    constructor(layers: number) {
+        this.parent = document.createElement('div');
+        this.prepare = document.createElementNS(
+            'http://www.w3.org/2000/svg', 'svg');
+        this.parent.classList.add('ydm-svg-canvas');
+        this.prepare.classList.add('ydm-svg-canvas-prepare');
+        for (let i = 0; i < layers; i++) {
+            const layer = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'svg');
+            layer.classList.add('ydm-svg-canvas-layer');
+            this.layers.push(layer);
+            this.parent.appendChild(layer);
+        }
+        this.parent.appendChild(this.prepare);
     }
 
-    get height(): number {
-        return this.e.clientHeight;
+    add(d: DanmakuObject) {
+        this.danmakuSet.add(d);
+        this.layers[d.layer].appendChild(d.getDOM());
+    }
+
+    remove(d: DanmakuObject) {
+        this.danmakuSet.delete(d);
+        this.layers[d.layer].removeChild(d.getDOM());
+    }
+
+    getDOM() {
+        return this.parent;
     }
 
     clear() {
-        while (this.e.firstChild) {
-            this.e.removeChild(this.e.firstChild);
+        for (let d of this.danmakuSet) {
+            d.conceal();
         }
+    }
+
+    [Symbol.iterator](): Iterator<DanmakuObject> {
+        return this.danmakuSet[Symbol.iterator]();
     }
 }
 
 class DanmakuObject {
     d: Danmaku;
     e: SVGTextElement;
-
-    width: number;
-    height: number;
-
     canvas: Canvas;
+
+    private _width: number;
+    private _height: number;
+    private _canvasW: number;
 
     constructor(d: Danmaku, canvas: Canvas) {
         this.d = d;
@@ -45,6 +82,7 @@ class DanmakuObject {
         this.e.style.fontFamily = d.font;
         this.e.style.textShadow = d.shadow;
         this.e.style.padding = d.padding;
+        this._canvasW = canvas.width;
     }
 
     get startTime(): Seconds {
@@ -56,7 +94,7 @@ class DanmakuObject {
     }
 
     get duration(): Seconds {
-        return this.canvas.width / this.speed;
+        return this._canvasW / this.speed;
     }
 
     get speed(): number {
@@ -71,8 +109,34 @@ class DanmakuObject {
         this.e.setAttribute('x', x.toString());
     }
 
+    get y(): number {
+        return parseFloat(this.e.getAttribute('y'));
+    }
+
+    set y(y: number) {
+        this.e.setAttribute('y', y.toString());
+    }
+
+    get width(): number {
+        if (this._width == null) this.measure();
+        return this._width;
+    }
+
+    get height(): number {
+        if (this._height == null) this.measure();
+        return this._height;
+    }
+
+    get layer(): number {
+        return this.d.mode;
+    }
+
+    getDOM(): SVGTextElement {
+        return this.e;
+    }
+
     isDisplay(): boolean {
-        return this.e.parentNode === this.canvas.e;
+        return this.e.parentNode != null;
     }
 
     isDisplayAt(time: Seconds): boolean {
@@ -80,16 +144,28 @@ class DanmakuObject {
     }
 
     display(time: Seconds) {
-        this.x = this.canvas.width - time * this.speed;
-        this.canvas.e.appendChild(this.e);
+        this.x = this._canvasW - time * this.speed;
+        this.canvas.add(this);
     }
 
     conceal() {
-        this.e.remove();
+        this.canvas.remove(this);
     }
 
     frameUpdate(timeslice: Seconds) {
-        this.x -= timeslice * this.speed;
+        if (this.d.mode === Mode.MARQUEE) {
+            const x = this.x - timeslice * this.speed;
+            if (x < -this.width) return void this.conceal();
+            this.x = x;
+        }
+    }
+
+    private measure() {
+        const e = <SVGTextElement>this.e.cloneNode(true);
+        this.canvas.prepare.appendChild(e);
+        this._width = e.clientWidth;
+        this._height = e.clientHeight;
+        e.remove();
     }
 }
 
@@ -97,9 +173,14 @@ export class SVGRenderService implements RenderService {
     danmakuInput = new Subject<Danmaku>();
     playInput = new Subject<Seconds>();
     pauseInput = new Subject<Seconds>();
+    screenInitInput = new Subject<Screen>();
+    screenResizeInput = new Subject<Screen>();
 
     private canvas: Canvas;
-    private timeline = new IntervalTree();
+    private timeline = new IntervalTree<DanmakuObject>();
+    private timelineIterator: IntervalTreeIterator<DanmakuObject>;
+
+    private screenCache = new Map<string,IntervalTree<DanmakuObject>>();
 
     private playing = false;
 
@@ -108,7 +189,11 @@ export class SVGRenderService implements RenderService {
     private animationFrame: number = null;
 
     constructor() {
-        this.danmakuInput.subscribe(this.onDanmakuInput.bind(this));
+        // Create canvas with one layer for each Danmaku mode
+        this.canvas = new Canvas(Mode._modeCount);
+        this.danmakuInput.subscribe(d => this.onDanmakuInput(d));
+        this.screenInitInput.subscribe(s => this.onScreenInit(s));
+        this.screenResizeInput.subscribe(s => this.onScreenResize(s));
     }
 
     private onDanmakuInput(danmaku: Danmaku) {
@@ -116,6 +201,28 @@ export class SVGRenderService implements RenderService {
         this.timeline.add(d, d.startTime, d.endTime);
         if (d.isDisplayAt(this.time))
             d.display(this.time);
+    }
+
+    private onScreenInit(screen: Screen) {
+        this.canvas.width = screen.width;
+        this.canvas.height = screen.height;
+        screen.installCanvas(this.canvas.getDOM());
+    }
+
+    private onScreenResize(screen: Screen) {
+        const previousScreenId = `${this.canvas.width}`;
+        this.screenCache.set(previousScreenId, this.timeline);
+        const screenId = `${screen.width}`;
+        this.canvas.width = screen.width;
+        this.canvas.height = screen.height;
+        if (this.screenCache.has(screenId)) {
+            this.timeline = this.screenCache.get(screenId);
+        } else {
+            const timeline = new IntervalTree<DanmakuObject>();
+            for (const dOld of this.timeline) {
+                const dNew = new DanmakuObject(dOld.d, this.canvas);
+            }
+        }
     }
 
     /**
@@ -134,7 +241,7 @@ export class SVGRenderService implements RenderService {
         for (let d in timeline.overlapAt(time)) {
             d.display(time);
         }
-        this.danmakuIterator = timeline.iterateFrom(time);
+        this.timelineIterator = timeline.iterateFrom(time);
         if (this.playing) {
             this.timestamp = performance.now();
             this.animationFrame = requestAnimationFrame(
@@ -156,12 +263,15 @@ export class SVGRenderService implements RenderService {
         const timeslice = (timestamp - this.timestamp) / 1000;
         this.time += timeslice;
         this.timestamp = timestamp;
-        for (const d in this.timeline.overlapAt(this.time)) {
-            if (d.isDisplay()) {
-                d.frameUpdate();
-            } else {
-                d.display(this.time);
-            }
+        for (const d of this.canvas) {
+            d.frameUpdate(timeslice);
+        }
+        while (
+            this.timelineIterator.hasNext() &&
+            this.timelineIterator.peek().startTime < this.time
+        ) {
+            const d = this.timelineIterator.next();
+            d.display(this.time);
         }
         this.animationFrame = requestAnimationFrame(
             this.nextFrame.bind(this)
