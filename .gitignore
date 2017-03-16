@@ -1,6 +1,8 @@
 /node_modules
 /build
-
+/.idea
+*.iml
+*.bak
 /.vscode
 
 # OS generated files #
