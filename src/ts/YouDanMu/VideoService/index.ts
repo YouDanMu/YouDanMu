@@ -15,6 +15,8 @@ export interface Screen {
     width: number;
     height: number;
     fullscreen?: boolean;
+    installCanvas: (canvas: HTMLElement) => void;
+    uninstallCanvas: (canvas: HTMLElement) => void;
 }
 
 export interface VideoService {

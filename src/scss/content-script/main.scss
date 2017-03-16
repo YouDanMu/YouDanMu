@@ -1,4 +1,4 @@
-#ydm-overlay {
+.ydm-svg-canvas {
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -7,12 +7,18 @@
   z-index: 11;
 }
 
-#ydm-prepare {
-  top: 100%;
+.ydm-svg-canvas-layer {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.ydm-svg-canvas-prepare {
+  top: 0;
   left: 100%;
   width: 100%;
-  height: 0;
-  overflow: hidden;
+  height: 100%;
   position: absolute;
-  white-space: nowrap;
 }
