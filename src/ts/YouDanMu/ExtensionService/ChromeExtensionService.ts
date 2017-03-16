@@ -1,3 +1,5 @@
+import { YouDanMu } from '..';
+
 import { Subject } from 'rxjs/Subject';
 import { Observer } from 'rxjs/Observer';
 import { Observable } from 'rxjs/Observable';
@@ -60,11 +62,13 @@ class ContentScriptTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
+    private ydm: YouDanMu;
     private rx = new Subject<Message>();
     private tx = new Subject<Message>();
     private delayedMap = new Map<string, Delayed<any>>();
 
-    constructor() {
+    constructor(ydm: YouDanMu) {
+        this.ydm = ydm;
         (new ContentScriptReceiver()).rx
             .subscribe(this.onRx.bind(this));
         this.tx.map((m: Message) => {

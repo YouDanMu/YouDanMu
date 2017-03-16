@@ -1,5 +1,7 @@
 /// <reference path="../../typings/YouTube.d.ts" />
 
+import { YouDanMu } from '..';
+
 import { Subject } from 'rxjs/Subject';
 import { Observer } from 'rxjs/Observer';
 import { Observable } from 'rxjs/Observable';
@@ -28,7 +30,7 @@ interface ScreenSize {
     height: number;
 }
 
-export class YouTubeService implements VideoService {
+export class YouTubeVideoService implements VideoService {
     video: Video;
     screen: Screen;
 
@@ -44,13 +46,16 @@ export class YouTubeService implements VideoService {
     onAdStart = new Subject<void>();
     onAdEnd = new Subject<void>();
 
+    private ydm: YouDanMu;
+
     private playing = false;
     private adStarted = false;
     private speedRate = 1;
     private resizeCaptureInterval: number = null;
     private _resizeObserver: Subject<Screen>;
 
-    constructor() {
+    constructor(ydm: YouDanMu) {
+        this.ydm = ydm;
         // Bounces happens when entering fullscreen
         // Use sampleTime to debound resize events.
         this.onScreenResize = (<Observable<Screen>>(

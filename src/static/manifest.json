@@ -49,6 +49,6 @@
         "cookies",
         "storage",
         "unlimitedStorage",
-        "*://example.com/*"
+        "*://*.bilibili.com/*"
     ]
 }
