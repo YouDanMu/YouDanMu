@@ -37,12 +37,12 @@ export default class DurationIntervalTree<T> {
         let start = next.value.low;
         let overlap = 9007199254740992;
         while(!next.done) {
-            let resLength = this.dataTree.search(next.value.low, next.value.low + duration);
+            let resLength = this.dataTree.search(next.value.low, next.value.low + duration).length;
             if(resLength < overlap && next.value.low + duration <= max) {
                 overlap = resLength;
                 start = next.value.low; 
             }
-            resLength = this.dataTree.search(next.value.high, next.value.high + duration)
+            resLength = this.dataTree.search(next.value.high, next.value.high + duration).length;
             if(resLength < overlap && next.value.high + duration <= max) {
                 overlap = resLength;
                 start = next.value.high; 
