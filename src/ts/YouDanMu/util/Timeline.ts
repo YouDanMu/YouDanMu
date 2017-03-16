@@ -1,10 +1,10 @@
-export class TimeLineNode<V> {
+export class TimelineNode<V> {
     key: number;
     value: V;
-    next: TimeLineNode<V>;
-    prev: TimeLineNode<V>;
+    next: TimelineNode<V>;
+    prev: TimelineNode<V>;
     
-    constructor(k: number, v: V, n: TimeLineNode<V> = null, p: TimeLineNode<V> = null) {
+    constructor(k: number, v: V, n: TimelineNode<V> = null, p: TimelineNode<V> = null) {
         this.key = k;
         this.value = v;
         this.next = n;
@@ -12,15 +12,15 @@ export class TimeLineNode<V> {
     }
 }
 
-export class TimeLine<V> {
+export default class Timeline<V> {
 
-    private root: TimeLineNode<V>;
+    private root: TimelineNode<V>;
     constructor() {
         this.root = null;
     }
 
-    public static createFromNodeArray<V>(array: TimeLineNode<V>[]) : TimeLine<V> {
-        let timeline = new TimeLine<V>();
+    public static createFromNodeArray<V>(array: TimelineNode<V>[]) : Timeline<V> {
+        let timeline = new Timeline<V>();
         let sortedArray = array.sort((a,b)=> a.key - b.key);
         //sorted in assending order
         for(let node of sortedArray) {
@@ -30,7 +30,7 @@ export class TimeLine<V> {
     }
 
     public insert(key: number, value: V) {
-        let newNode = new TimeLineNode<V>(key,value);
+        let newNode = new TimelineNode<V>(key,value);
         if(this.root == null) {
             this.root = newNode;
             newNode.next = newNode;
@@ -54,7 +54,7 @@ export class TimeLine<V> {
 
 
     public insertKVIgnoreKeyOrder(key: number, value: V) {
-        let newNode = new TimeLineNode<V>(key,value);
+        let newNode = new TimelineNode<V>(key,value);
         if(this.root == null) {
             this.root = newNode;
             newNode.next = newNode;
@@ -64,7 +64,7 @@ export class TimeLine<V> {
         }
     }
 
-    public insertNodeIgnoreKeyOrder(toInsert: TimeLineNode<V>) {
+    public insertNodeIgnoreKeyOrder(toInsert: TimelineNode<V>) {
         if(this.root == null) {
             this.root = toInsert;
             toInsert.next = toInsert;
@@ -75,23 +75,97 @@ export class TimeLine<V> {
     }
     
     //insert right before 'AT' Node
-    public insertAt(toInsert: TimeLineNode<V>, at: TimeLineNode<V>) {
-            at.prev.next = toInsert;
-            toInsert.prev = at.prev;
-            at.prev = toInsert;
-            toInsert.next = at;
+    public insertAt(toInsert: TimelineNode<V>, at: TimelineNode<V>) {
+        at.prev.next = toInsert;
+        toInsert.prev = at.prev;
+        at.prev = toInsert;
+        toInsert.next = at;
     }
 
-    get rootKey() {
-        return this.root.key;
+    public search(key: number) : TimelineNode<V>[] {
+        let result = [];
+        let it = this.iterator();
+        it.seekByKey(key);
+        let next = it.next();
+        while(!next.done && next.value.key == key) {
+            result.push(next.value);
+            next = it.next();
+        }
+        return result;
+    }
+
+    public removeFirstByKey(key: number) : TimelineNode<V> {
+        let it = this.iterator();
+        let node = it.seekByKey(key);
+        if(node != null) {
+            this.remove(node);
+        }
+        return node;
+    }
+
+    public remove(toRemove: TimelineNode<V>) {
+        if(toRemove.prev == null || toRemove.next == null) {
+            return null;
+        }
+        toRemove.prev.next = toRemove.next;
+        toRemove.next.prev = toRemove.prev;
+        return toRemove;
+    }
+
+    public iterator() {
+        return new TimelineIterator<V>(this);
+    }
+    get rootNode() {
+        return this.root;
     }
 }
 
-export class TimeLineIterator {
-    private timeline: TimeLine<V>
-    private startingKey: number;
-    constructor(timeline: TimeLine<V>) {
+export interface TimelineIteratResult<V> {
+    done: boolean;
+    value: V;
+}
+
+export class TimelineIterator<V> {
+    private timeline: Timeline<V>
+    private currentNode: TimelineNode<V>;
+    private done: boolean;
+    constructor(timeline: Timeline<V>) {
         this.timeline = timeline;
-        this.startingKey = timeline.rootKey;
+        this.currentNode = timeline.rootNode;
+        this.done = false;
     }
+
+    public seekByKey(key: number) {
+        this.currentNode = this.timeline.rootNode;
+        let maxKey = this.currentNode.prev.key;
+        if(key > maxKey) {
+            this.done = true;
+            return null;
+        }
+        this.done = false;
+        while(key > this.currentNode.key) {
+            this.currentNode = this.currentNode.next;
+        }
+        return this.currentNode;
+    }
+
+    public next() : TimelineIteratResult<TimelineNode<V>> {
+        let node = this.currentNode;
+        let done = this.done;
+        this.currentNode = this.currentNode.next;
+        if(this.currentNode = this.timeline.rootNode) {
+            this.done = true;
+        }
+        return {done: done, value: node};
+    }
+
+    public hasNext() : boolean {
+        return this.done;
+    }
+
+    public reset() {
+        this.done = false;
+        this.currentNode = this.timeline.rootNode;
+    }
+
 }
