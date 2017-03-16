@@ -11,10 +11,33 @@ import 'rxjs/add/operator/map';
 
 const console = new Logger('BilibiliService');
 
+interface MetaData {
+    page: string;
+    pagename: string;
+    cid: string;
+}
+
 export class BilibiliDanmakuService {
     private ydm: YouDanMu;
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
+    }
+
+    fetchByUrl(url: string): Observable<Danmaku> {
+        const matches = url.match(/https?:\/\/www\.bilibili\.com\/video\/av(\d+)(\/index_(\d+)\.html)?/);
+        if (!matches) throw new Error('Invalid URL!');
+        const aid = matches[1];
+        const page = matches[3];
+        const uri = `https://www.bilibili.com/widget/getPageList?aid=${aid}`;
+        return Observable.fromPromise(this.ydm.extensionService
+            .fetch(uri))
+            .mergeMap((data): Observable<Danmaku> => {
+                const json: MetaData[] = JSON.parse(data);
+                if (!json || !json.length) throw new Error('Unable to fetch Bilibili meta data.');
+                const found = json.find(m => !page || m.page == page);
+                if (!found) throw new Error('Video page not found.');
+                return this.fetchById(found.cid);
+            });
     }
 
     fetchById(id: string): Observable<Danmaku> {

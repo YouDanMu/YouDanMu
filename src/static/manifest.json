@@ -48,6 +48,7 @@
     "permissions": [
         "cookies",
         "storage",
-        "unlimitedStorage"
+        "unlimitedStorage",
+        "*://*.bilibili.com/*"
     ]
 }
