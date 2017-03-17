@@ -1,3 +1,5 @@
+import { Color } from 'color';
+
 export enum Mode {
     MARQUEE = 0,
     TOP,
@@ -7,7 +9,7 @@ export enum Mode {
 
 /**
  * The very basic Danmaku object that is common to most of the Danmaku
- * services. Extra fields and attributes can be added into a Map.
+ * services.
  * 
  * @export
  * @interface Danmaku
@@ -21,7 +23,7 @@ export interface Danmaku {
      */
     text: string;
     /**
-     * The entry satrt time relative to the video.
+     * The entry satrt time in seconds relative to the video.
      * 
      * @type {number}
      * @memberOf Danmaku
@@ -42,45 +44,10 @@ export interface Danmaku {
      */
     size: string;
     /**
-     * The text color in CSS string.
+     * The text color.
      * 
-     * @type {string}
+     * @type {Color}
      * @memberOf Danmaku
      */
-    color: string;
-    /**
-     * The opacity in CSS string.
-     * 
-     * @type {string}
-     * @memberOf Danmaku
-     */
-    opacity: string;
-    /**
-     * The font family in CSS string.
-     * 
-     * @type {string}
-     * @memberOf Danmaku
-     */
-    font: string;
-    /**
-     * The text shadow in CSS string.
-     * 
-     * @type {string}
-     * @memberOf Danmaku
-     */
-    shadow: string;
-    /**
-     * The padding around the text in CSS string.
-     * 
-     * @type {string}
-     * @memberOf Danmaku
-     */
-    padding: string;
-    /**
-     * Extra fields for Danmaku service, and render service specifics.
-     * 
-     * @type {Map<string,any>}
-     * @memberOf Danmaku
-     */
-    extra: Map<string,any>;
+    color: Color;
 }

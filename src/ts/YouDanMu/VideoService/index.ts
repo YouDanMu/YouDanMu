@@ -1,6 +1,16 @@
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Canvas } from '../RenderService';
 
 export type Seconds = number;
+
+export enum PlayerState {
+    Idel,
+    Cued,
+    ScreenInit,
+    Ready,
+    Playing,
+    AdPlaying
+}
 
 export interface Video {
     id: string;
@@ -15,23 +25,18 @@ export interface Screen {
     width: number;
     height: number;
     fullscreen?: boolean;
-    installCanvas: (canvas: HTMLElement) => void;
-    uninstallCanvas: (canvas: HTMLElement) => void;
 }
 
 export interface VideoService {
-    video: Video;
-    screen: Screen;
-    
-    onCue: Observable<Video>;
-    onPlay: Observable<Seconds>;
-    onPause: Observable<Seconds>;
-    onSpeedChange: Observable<number>;
-    onScreenInit: Observable<Screen>;
-    onScreenResize: Observable<Screen>;
-    onScreenDestroy: Observable<void>;
-    onAdStart: Observable<void>;
-    onAdEnd: Observable<void>;
+    state: BehaviorSubject<PlayerState>;
+    screen: BehaviorSubject<Screen>;
+    video: BehaviorSubject<Video>;
+    speed: BehaviorSubject<number>;
+
+    installCanvas(canvas: Canvas);
+    uninstallCanvas(canvas: Canvas);
+
+    getTime(): number;
 }
 
 export * from './YouTubeVideoService';

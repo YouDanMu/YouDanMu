@@ -1,8 +1,10 @@
 /// <reference path="../../typings/YouTube.d.ts" />
 
 import { YouDanMu } from '..';
+import { Canvas } from '../RenderService';
 
 import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observer } from 'rxjs/Observer';
 import { Observable } from 'rxjs/Observable';
 
@@ -11,11 +13,11 @@ import 'rxjs/add/operator/sampleTime';
 import 'rxjs/add/operator/multicast';
 
 import { Logger } from '../util';
-import { Seconds, Video, Screen, VideoService } from './';
+import { Seconds, Video, Screen, VideoService, PlayerState } from './';
 
 const console = new Logger('YouTubeService');
 
-enum State {
+enum YouTubeState {
     UNSTARTED = -1,
     ENDED,
     PLAYING,
@@ -31,177 +33,230 @@ interface ScreenSize {
 }
 
 export class YouTubeVideoService implements VideoService {
-    video: Video;
-    screen: Screen;
+    state = new BehaviorSubject(PlayerState.Idel);
+    screen = new BehaviorSubject<Screen>(null);
+    video = new BehaviorSubject<Video>(null);
+    speed = new BehaviorSubject(1);
 
     player: YouTube.Player;
 
-    onCue = new Subject<Video>();
-    onPlay = new Subject<Seconds>();
-    onPause = new Subject<Seconds>();
-    onSpeedChange = new Subject<number>();
-    onScreenInit = new Subject<Screen>();
-    onScreenResize: Observable<Screen>;
-    onScreenDestroy = new Subject<void>();
-    onAdStart = new Subject<void>();
-    onAdEnd = new Subject<void>();
-
     private ydm: YouDanMu;
-
-    private playing = false;
-    private adStarted = false;
     private speedRate = 1;
-    private resizeCaptureInterval: number = null;
-    private _resizeObserver: Subject<Screen>;
+    private resizeCaptureInterval: number;
+    private _resizeObserver = new Subject<Screen>();
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         // Bounces happens when entering fullscreen
         // Use sampleTime to debound resize events.
-        this.onScreenResize = (<Observable<Screen>>(
-            this._resizeObserver = new Subject<Screen>()
-        ))
-            .sampleTime(1000)
-            .multicast(new Subject<Screen>())
-            .refCount();
+        (<Observable<Screen>>(this._resizeObserver))
+            .sampleTime(1000).subscribe(this.screen);
         Observable.fromEvent(document, 'DOMContentLoaded')
             .subscribe(() => this.hijectYouTubePlayerReady());
         // Development level logging
-        this.onCue.subscribe((video) => console.log(3, 'Video Cued:', video));
-        this.onPause.subscribe((time) => console.log(3, 'Video Paused:', time));
-        this.onPlay.subscribe((time) => console.log(3, 'Video Played:', time));
-        this.onSpeedChange.subscribe((rate) => console.log(3, 'Video Speed Changed:', rate));
-        this.onScreenDestroy.subscribe(() => console.log(3, 'Screen Destroyed'));
-        this.onScreenInit.subscribe((screen) => console.log(3, 'Screen Inited:', screen));
-        this.onScreenResize.subscribe((screen) => console.log(3, 'Screen Resized:', screen));
-        this.onAdStart.subscribe(() => console.log(3, 'Ad Started'));
-        this.onAdEnd.subscribe(() => console.log(3, 'Ad Ended'));
+        this.state.subscribe(state => console.log(3, 'State:', PlayerState[state]));
     }
 
     cue() {
         const { player } = this;
         const videoData = player.getVideoData();
-        if (this.video && this.video.id === videoData.video_id)
-            return;
-        this.video = {
+        if (this.video.value && this.video.value.id === videoData.video_id)
+            return; // Actually video unchanged
+        this.video.next({
             id: videoData.video_id,
             url: player.getVideoUrl(),
             title: videoData.title,
             service: 'YouTube',
             duration: player.getDuration()
-        };
-        this.onCue.next(this.video);
+        });
+        switch (this.state.value) {
+            case PlayerState.Idel:
+                this.state.next(PlayerState.Cued);
+                break;
+            case PlayerState.ScreenInit:
+                this.state.next(PlayerState.Ready);
+                break;
+            case PlayerState.Ready:
+            case PlayerState.Cued:
+                break; // State unchanged.
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     play() {
-        if (this.playing) return;
-        const { player } = this;
-        this.screenInit();
-        this.cue();
-        this.playing = true;
-        this.onPlay.next(player.getCurrentTime());
+        switch (this.state.value) {
+            case PlayerState.Idel:
+                this.screenInit();
+            case PlayerState.ScreenInit:
+                this.cue();
+            case PlayerState.Cued:
+                this.screenInit();
+            case PlayerState.Ready:
+                this.state.next(PlayerState.Playing);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     pause() {
-        if (!this.playing) return;
-        this.playing = false;
-        this.onPause.next(this.player.getCurrentTime());
-    }
-
-    setSpeed(rate: number) {
-        if (this.speedRate === rate) return;
-        this.speedRate = rate
-        this.onSpeedChange.next(rate);
+        switch (this.state.value) {
+            case PlayerState.Playing:
+                this.state.next(PlayerState.Ready);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     screenInit() {
-        if (this.screen) return;
         const { player } = this;
         const videoConfig = player.getCurrentVideoConfig();
         const e = document.getElementById(videoConfig.attrs.id);
-        this.screen = {
+        this.screen.next({
             e: e,
             width: e.clientWidth,
             height: e.clientHeight,
             fullscreen: false
-        };
+        });
         this.startCaptureResize();
-        this.onScreenInit.next(this.screen);
+        switch (this.state.value) {
+            case PlayerState.Idel:
+                this.state.next(PlayerState.ScreenInit);
+                break;
+            case PlayerState.Cued:
+                this.state.next(PlayerState.Ready);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     screenDestroy() {
-        if (!this.screen) return;
         this.stopCaptureResize();
-        this.screen = null;
-        this.onScreenDestroy.next();
-    }
-
-    startCaptureResize() {
-        if (this.resizeCaptureInterval != null) return;
-        this.resizeCaptureInterval = setInterval(this.resizeCaptureFn.bind(this), 20);
-    }
-
-    stopCaptureResize() {
-        if (this.resizeCaptureInterval == null) return;
-        clearInterval(this.resizeCaptureInterval);
-        this.resizeCaptureInterval = null;
-    }
-
-    resizeCaptureFn() {
-        if (!this.screen) return;
-        const rect = this.getScreenSize();
-        if (rect.width === this.screen.width &&
-            rect.height === this.screen.height)
-            return;
-        this.screen.width = rect.width;
-        this.screen.height = rect.height;
-        this._resizeObserver.next(this.screen);
+        this.screen.next(null);
+        switch (this.state.value) {
+            case PlayerState.Ready:
+                this.state.next(PlayerState.Cued);
+                break;
+            case PlayerState.ScreenInit:
+                this.state.next(PlayerState.Idel);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     adStart() {
-        if (this.adStarted) return;
-        this.pause();
-        this.onAdStart.next();
+        switch (this.state.value) {
+            case PlayerState.Playing:
+                this.pause();
+            case PlayerState.Cued:
+                this.screenInit();
+            case PlayerState.ScreenInit:
+                this.cue();
+            case PlayerState.Ready:
+                this.state.next(PlayerState.AdPlaying);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     adEnd() {
-        if (!this.adStarted) return;
-        this.onAdEnd.next();
-        this.play();
+        switch (this.state.value) {
+            case PlayerState.AdPlaying:
+                this.state.next(PlayerState.Ready);
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
     }
 
     unplay() {
-        this.pause();
-        this.screenDestroy();
+        switch (this.state.value) {
+            case PlayerState.Playing:
+                this.pause();
+            case PlayerState.AdPlaying:
+                this.adEnd();
+            case PlayerState.Ready:
+            case PlayerState.ScreenInit:
+                this.screenDestroy();
+                break;
+            default:
+                throw new Error('Invalid state transition.');
+        }
+    }
+
+    setSpeed(speed: number) {
+        this.speed.next(speed);
     }
 
     setFullscreen(state: YouTube.FullscreenState) {
-        if (!this.screen) return;
-        if (this.screen.fullscreen == state.fullscreen) return;
-        this.screen.fullscreen = state.fullscreen;
+        const screen = this.screen.value;
+        this._resizeObserver.next({
+            e: screen.e,
+            width: screen.width,
+            height: screen.height,
+            fullscreen: state.fullscreen
+        });
     }
 
-    private getScreenSize(): ScreenSize {
-        return {
-            width: this.screen.e.offsetWidth,
-            height: this.screen.e.offsetHeight
-        };
+    installCanvas(canvas: Canvas) {
+        const e = canvas.getDOM();
+        const screen = this.screen.value;
+        // The video content has z-index of 10.
+        // Puts the canvas on z-index 11 to just top the video.
+        e.style.zIndex = '11';
+        screen.e.appendChild(e);
     }
 
-    private onStateChanged(state: State) {
+    uninstallCanvas(canvas: Canvas) {
+        const e = canvas.getDOM();
+        e.remove();
+    }
+
+    getTime(): number {
+        return this.player.getCurrentTime();
+    }
+
+    private startCaptureResize() {
+        this.resizeCaptureInterval = setInterval(this.resizeCaptureFn.bind(this), 20);
+    }
+
+    private stopCaptureResize() {
+        this.resizeCaptureInterval = void clearInterval(this.resizeCaptureInterval);
+    }
+
+    private resizeCaptureFn() {
+        const screen = this.screen.value;
+        const width = screen.e.offsetWidth;
+        const height = screen.e.offsetHeight;
+        if (width !== screen.width || height !== screen.height) {
+            this._resizeObserver.next({
+                e: screen.e,
+                width: width,
+                height: height,
+                fullscreen: screen.fullscreen
+            });
+        }
+    }
+
+    private onStateChanged(state: YouTubeState) {
         const { player } = this;
         switch (state) {
-            case State.PLAYING:
+            case YouTubeState.PLAYING:
                 this.play();
                 break;
-            case State.UNSTARTED:
+            case YouTubeState.UNSTARTED:
                 this.unplay();
                 break;
-            case State.BUFFERING:
+            case YouTubeState.BUFFERING:
                 this.cue();
                 break;
-            case State.CUED:
-            case State.PAUSED:
+            case YouTubeState.CUED:
+            case YouTubeState.PAUSED:
                 this.pause();
                 break;
         }

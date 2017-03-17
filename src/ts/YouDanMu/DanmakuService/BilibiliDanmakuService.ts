@@ -1,7 +1,8 @@
 import { YouDanMu } from '..';
-import { Danmaku } from '../Danmaku';
+import { Danmaku, Mode } from '../Danmaku';
 import { Logger } from '../util';
 
+import Color from 'color';
 import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/observable/from';
@@ -16,6 +17,12 @@ interface MetaData {
     pagename: string;
     cid: string;
 }
+
+function RRGGBB(color: number|string): Color.Color {
+    const t = Number(color).toString(16).toUpperCase();
+    const c = '#' + (Array(7).join('0') + t).slice(-6);
+    return Color(c);
+};
 
 export class BilibiliDanmakuService {
     private ydm: YouDanMu;
@@ -51,23 +58,18 @@ export class BilibiliDanmakuService {
 
     private parseDanmaku(n: Element): Danmaku {
         let info = n.getAttribute('p').split(',');
-        let d = new Danmaku(
-            n.textContent,
-            Number(info[0]) * 1000,
-            [undefined,
-                Danmaku.MODE.MARQUEE,
-                Danmaku.MODE.MARQUEE,
-                Danmaku.MODE.MARQUEE,
-                Danmaku.MODE.BOTTOM,
-                Danmaku.MODE.TOP
-            ][Number(info[1])]
-        );
-        d.size = Number(info[2]);
-        d.color = Number(info[3]);
-        d.create = new Date(Number(info[4]));
-        d.pool = info[5];
-        d.user = info[6];
-        d.id = info[7];
-        return d;
+        return {
+            text: n.textContent,
+            time: Number(info[0]),
+            mode: [undefined,
+                Mode.MARQUEE,
+                Mode.MARQUEE,
+                Mode.MARQUEE,
+                Mode.BOTTOM,
+                Mode.TOP
+            ][Number(info[1])],
+            size: info[2] + 'px',
+            color: RRGGBB(Number(info[3]))
+        };
     }
 }
