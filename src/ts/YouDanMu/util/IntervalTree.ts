@@ -1,7 +1,3 @@
-import isSame = require('shallowequal');
-import 'core-js/es6/symbol';
-
-
 export interface DurationData<T> {
     data: T;
     value: number;
@@ -571,7 +567,7 @@ export class IntervalTree<T extends Interval> {
             if (node !== undefined) {
                 // Check the records in this node if there already is the one with same low, high, data
                 for (let i = 0; i < node.records.length; i++) {
-                    if (isSame(node.records[ i ], record)) {
+                    if (node.records[ i ] === record) {
                         // This record is same as the one we're trying to insert; return false to indicate
                         // nothing has been inserted
                         return false;
@@ -620,7 +616,7 @@ export class IntervalTree<T extends Interval> {
                 let removedRecord: T | undefined;
                 // Node with this key has 2 or more records. Find the one we need and remove it
                 for (let i = 0; i < node.records.length; i++) {
-                    if (isSame(node.records[ i ], record)) {
+                    if (node.records[ i ] === record) {
                         removedRecord = node.records[ i ];
                         node.records.splice(i, 1);
                         break;
@@ -653,7 +649,7 @@ export class IntervalTree<T extends Interval> {
             } else if (node.records.length === 1) {
                 // Node with this key has only 1 record. Check if the remaining record in this node is
                 // actually the one we want to remove
-                if (isSame(node.records[ 0 ], record)) {
+                if (node.records[ 0 ] === record) {
                     // The remaining record is the one we want to remove. Remove the whole node from the tree
                     if (this.root.key === node.key) {
                         // We're removing the root element. Create a dummy node that will temporarily take

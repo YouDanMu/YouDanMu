@@ -1,6 +1,7 @@
 import { Danmaku } from '../../Danmaku';
 import { SVGCanvas } from './SVGCanvas';
 import { SVGDanmaku } from './SVGDanmaku';
+import { Segments } from '../../util/Segments';
 
 export class SVGDanmakuMarquee extends SVGDanmaku {
     /**
@@ -86,9 +87,28 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
         this.x = this.canvasW - (this.beginEntryTime - time) * this.speed;
     }
 
-    nextFrame(time: number, timeslice: number): boolean {
-        if (time > this.fullyLeaveTime) return false; // No more next frames
+    nextFrame(time: number, timeslice: number) {
         this.x -= timeslice * this.speed;
-        return true; // Has next frame
+    }
+
+    allocateY(s: Segments) {
+        this.y = s.take(this.height).end;
+    }
+
+    expire(time: number): boolean {
+        return time < this.beginEntryTime || time > this.fullyLeaveTime;
+    }
+
+    collide(d: SVGDanmakuMarquee): boolean {
+        return (
+            (d.beginEntryTime > this.beginEntryTime &&
+                d.beginEntryTime < this.fullyEntryTime) ||
+            (this.beginEntryTime > d.beginEntryTime &&
+                this.beginEntryTime < d.fullyEntryTime) ||
+            (d.beginLeaveTime > this.beginLeaveTime &&
+                d.beginLeaveTime < this.fullyLeaveTime) ||
+            (this.beginLeaveTime > d.beginLeaveTime &&
+                this.beginLeaveTime < d.fullyLeaveTime)
+        );
     }
 }

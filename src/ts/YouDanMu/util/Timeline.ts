@@ -12,7 +12,7 @@ export class TimelineNode<V> {
     }
 }
 
-export default class Timeline<V> {
+export class Timeline<V> {
 
     private root: TimelineNode<V>;
     constructor() {

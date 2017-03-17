@@ -16,12 +16,6 @@
     "url": "https://github.com/YouDanMu/YouDanMu/issues"
   },
   "homepage": "https://github.com/YouDanMu/YouDanMu",
-  "dependencies": {
-    "@types/core-js": "^0.9.34",
-    "@types/shallowequal": "^0.2.1",
-    "core-js": "^2.4.1",
-    "shallowequal": "^0.2.2"
-  },
   "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/chrome": "0.0.40",

@@ -1,7 +1,8 @@
 import { Canvas } from '..';
 import { SVGDanmaku } from './SVGDanmaku';
+import { Segments } from '../../util/Segments';
 
-export class SVGCanvas implements Canvas, Iterable<SVGDanmaku> {
+export class SVGCanvas implements Canvas {
     parent: HTMLDivElement;
     layers: SVGElement[] = [];
     prepare: SVGElement;
@@ -9,7 +10,8 @@ export class SVGCanvas implements Canvas, Iterable<SVGDanmaku> {
     width: number;
     height: number;
 
-    private danmakuSet = new Set<SVGDanmaku>();
+    private time: number;
+    private list: Set<SVGDanmaku>[] = [];
 
     constructor(layers: number) {
         this.parent = document.createElement('div');
@@ -23,17 +25,24 @@ export class SVGCanvas implements Canvas, Iterable<SVGDanmaku> {
             layer.classList.add('ydm-svg-canvas-layer');
             this.layers.push(layer);
             this.parent.appendChild(layer);
+            this.list.push(new Set<SVGDanmaku>());
         }
         this.parent.appendChild(this.prepare);
     }
 
     add(d: SVGDanmaku) {
-        this.danmakuSet.add(d);
+        const s = new Segments(0, this.height);
+        this.list[d.layer].forEach((x) => {
+            if (d.collide(x)) s.ref(x.y - x.height, x.y);
+        });
+        d.allocateY(s);
+        d.baseFrame(this.time);
+        this.list[d.layer].add(d);
         this.layers[d.layer].appendChild(d.getDOM());
     }
 
     remove(d: SVGDanmaku) {
-        this.danmakuSet.delete(d);
+        this.list[d.layer].delete(d);
         this.layers[d.layer].removeChild(d.getDOM());
     }
 
@@ -42,12 +51,20 @@ export class SVGCanvas implements Canvas, Iterable<SVGDanmaku> {
     }
 
     clear() {
-        for (let d of this.danmakuSet) {
-            d.conceal();
-        }
+        this.list.forEach(l => l.forEach(d => this.remove(d)));
     }
 
-    [Symbol.iterator](): Iterator<SVGDanmaku> {
-        return this.danmakuSet[Symbol.iterator]();
+    baseFrame(time: number) {
+        this.time = time;
+        this.clear();
+    }
+
+    nextFrame(time: number, timeslice: number) {
+        this.time = time;
+        this.list.forEach(l =>
+            l.forEach(d => {
+                if (d.expire(time)) this.remove(d);
+                else d.nextFrame(time, timeslice);
+            }));
     }
 }

@@ -1,6 +1,9 @@
 import { Danmaku, Mode } from '../../Danmaku';
 import { SVGCanvas } from './SVGCanvas';
+import { SVGDanmakuTop } from './SVGDanmakuTop';
+import { SVGDanmakuBottom } from './SVGDanmakuBottom';
 import { SVGDanmakuMarquee } from './SVGDanmakuMarquee';
+import { Segments } from '../../util/Segments';
 
 export abstract class SVGDanmaku {
     /**
@@ -38,6 +41,10 @@ export abstract class SVGDanmaku {
         e.style.fontWeight = 'bold';
         e.style.lineHeight = '1.125';
         switch (d.mode) {
+            case Mode.TOP:
+                return new SVGDanmakuTop(d, e, canvas);
+            case Mode.BOTTOM:
+                return new SVGDanmakuBottom(d, e, canvas);
             case Mode.MARQUEE:
                 return new SVGDanmakuMarquee(d, e, canvas);
             default:
@@ -145,11 +152,43 @@ export abstract class SVGDanmaku {
      * 
      * @param {number} time 
      * @param {number} timeslice 
-     * @returns {boolean} has next frame
      * 
      * @memberOf SVGDanmaku
      */
-    abstract nextFrame(time: number, timeslice: number): boolean;
+    abstract nextFrame(time: number, timeslice: number);
+
+    /**
+     * Test if two Danmaku objects will collide in their lifecycle.
+     * 
+     * @abstract
+     * @param {SVGDanmaku} d 
+     * @returns {boolean} 
+     * 
+     * @memberOf SVGDanmaku
+     */
+    abstract collide(d: SVGDanmaku): boolean;
+
+    /**
+     * Called when first added to the canvas. Find an available space
+     * from the given Segments structure, and assign its y value.
+     * 
+     * @abstract
+     * @param {Segments} s 
+     * 
+     * @memberOf SVGDanmaku
+     */
+    abstract allocateY(s: Segments);
+
+    /**
+     * Test if the Danmaku object will expire at the given time.
+     * 
+     * @abstract
+     * @param {number} time 
+     * @returns {boolean} 
+     * 
+     * @memberOf SVGDanmaku
+     */
+    abstract expire(time: number): boolean;
 
     /**
      * Clone a SVG Text node and measure it inside the prepare area
