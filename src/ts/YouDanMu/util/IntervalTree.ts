@@ -31,6 +31,27 @@ export default class DurationIntervalTree<T> {
         return this.dataTree.search(interval.low, interval.high);
     }
 
+    public findLeastOverlap(duration: number, max: number) {
+        let iterator = this.inOrder();
+        let next = iterator.next();
+        let start = next.value.low;
+        let overlap = 9007199254740992;
+        while(!next.done) {
+            let resLength = this.dataTree.search(next.value.low, next.value.low + duration).length;
+            if(resLength < overlap && next.value.low + duration <= max) {
+                overlap = resLength;
+                start = next.value.low; 
+            }
+            resLength = this.dataTree.search(next.value.high, next.value.high + duration).length;
+            if(resLength < overlap && next.value.high + duration <= max) {
+                overlap = resLength;
+                start = next.value.high; 
+            }
+            next = iterator.next();
+        }
+        return {start, overlap};
+    }
+
     public changeDurationFn(durationFn: (start: number) => { low: number, high: number }) {
         let iterator = this.inOrder();
         this.dataTree = new DataIntervalTree<DurationData<T>>();
@@ -39,6 +60,7 @@ export default class DurationIntervalTree<T> {
 
         while (!next.done) {
             this.insert(next.value.data.data, next.value.low);
+            next = iterator.next();
         }
     }
 
