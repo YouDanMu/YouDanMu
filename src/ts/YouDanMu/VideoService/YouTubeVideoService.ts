@@ -50,7 +50,10 @@ export class YouTubeVideoService implements VideoService {
         // Bounces happens when entering fullscreen
         // Use sampleTime to debound resize events.
         (<Observable<Screen>>(this._resizeObserver))
-            .sampleTime(1000).subscribe(this.screen);
+            .sampleTime(1000).subscribe(s => {
+                this.screen.next(s);
+                this.event.next(PlayerEvent.ScreenResize);
+            });
         Observable.fromEvent(document, 'DOMContentLoaded')
             .subscribe(() => this.hijectYouTubePlayerReady());
         // Development level logging
@@ -196,7 +199,6 @@ export class YouTubeVideoService implements VideoService {
             height: screen.height,
             fullscreen: state.fullscreen
         });
-        this.event.next(PlayerEvent.ScreenResize);
     }
 
     installCanvas(canvas: Canvas) {
@@ -236,7 +238,6 @@ export class YouTubeVideoService implements VideoService {
                 height: height,
                 fullscreen: screen.fullscreen
             });
-            this.event.next(PlayerEvent.ScreenResize);
         }
     }
 
