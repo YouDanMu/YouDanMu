@@ -41,15 +41,15 @@ export class SVGDanmakuTop extends SVGDanmaku {
         this.leaveTime = d.time + 5;
     }
 
-    baseFrame(time: number) {
+    baseFrame(time: number): void {
         this.x = (this.canvasW - this.width) / 2;
     }
 
-    nextFrame(time: number, timeslice: number) {
+    nextFrame(time: number, timeslice: number): void {
         return void(0);
     }
 
-    allocateY(s: Segments) {
+    allocateY(s: Segments): void {
         this.y = s.take(this.height).end;
     }
 

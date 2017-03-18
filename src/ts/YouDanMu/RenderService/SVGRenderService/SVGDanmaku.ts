@@ -145,7 +145,7 @@ export abstract class SVGDanmaku {
      * 
      * @memberOf SVGDanmaku
      */
-    abstract baseFrame(time: number);
+    abstract baseFrame(time: number): void;
 
     /**
      * Called for consecutive frame updates.
@@ -155,7 +155,7 @@ export abstract class SVGDanmaku {
      * 
      * @memberOf SVGDanmaku
      */
-    abstract nextFrame(time: number, timeslice: number);
+    abstract nextFrame(time: number, timeslice: number): void;
 
     /**
      * Test if two Danmaku objects will collide in their lifecycle.
@@ -177,7 +177,7 @@ export abstract class SVGDanmaku {
      * 
      * @memberOf SVGDanmaku
      */
-    abstract allocateY(s: Segments);
+    abstract allocateY(s: Segments): void;
 
     /**
      * Test if the Danmaku object will expire at the given time.

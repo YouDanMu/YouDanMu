@@ -34,7 +34,7 @@ interface ScreenSize {
 
 export class YouTubeVideoService implements VideoService {
     event = new Subject<PlayerEvent>();
-    state = new BehaviorSubject(PlayerState.Idel);
+    state = new BehaviorSubject(PlayerState.Idle);
     screen = new BehaviorSubject<Screen>(null);
     video = new BehaviorSubject<Video>(null);
     speed = new BehaviorSubject(1);
@@ -55,6 +55,7 @@ export class YouTubeVideoService implements VideoService {
             .subscribe(() => this.hijectYouTubePlayerReady());
         // Development level logging
         this.state.subscribe(state => console.log(3, 'State:', PlayerState[state]));
+        this.event.subscribe(event => console.log(3, 'Event:', PlayerEvent[event]));
     }
 
     cue() {
@@ -70,7 +71,7 @@ export class YouTubeVideoService implements VideoService {
             duration: player.getDuration()
         });
         switch (this.state.value) {
-            case PlayerState.Idel:
+            case PlayerState.Idle:
                 this.event.next(PlayerEvent.Cue);
                 this.state.next(PlayerState.Cued);
                 break;
@@ -82,24 +83,19 @@ export class YouTubeVideoService implements VideoService {
             case PlayerState.Cued:
                 break; // State unchanged.
             default:
-                throw new Error('Invalid state transition.');
+                this.unknownEventTransition(PlayerEvent.Cue);
         }
     }
 
     play() {
-        switch (this.state.value) {
-            case PlayerState.Idel:
-                this.screenInit();
-            case PlayerState.ScreenInit:
-                this.cue();
-            case PlayerState.Cued:
-                this.screenInit();
-            case PlayerState.Ready:
-                this.event.next(PlayerEvent.Play);
-                this.state.next(PlayerState.Playing);
-                break;
-            default:
-                throw new Error('Invalid state transition.');
+        if (this.state.value === PlayerState.Idle) this.screenInit();
+        if (this.state.value === PlayerState.ScreenInit) this.cue();
+        if (this.state.value === PlayerState.Cued) this.screenInit();
+        if (this.state.value === PlayerState.Ready) {
+            this.event.next(PlayerEvent.Play);
+            this.state.next(PlayerState.Playing);
+        } else {
+            this.unknownEventTransition(PlayerEvent.Play);
         }
     }
 
@@ -110,7 +106,7 @@ export class YouTubeVideoService implements VideoService {
                 this.state.next(PlayerState.Ready);
                 break;
             default:
-                throw new Error('Invalid state transition.');
+                this.unknownEventTransition(PlayerEvent.Pause);
         }
     }
 
@@ -126,7 +122,7 @@ export class YouTubeVideoService implements VideoService {
         });
         this.startCaptureResize();
         switch (this.state.value) {
-            case PlayerState.Idel:
+            case PlayerState.Idle:
                 this.event.next(PlayerEvent.ScreenInit);
                 this.state.next(PlayerState.ScreenInit);
                 break;
@@ -135,7 +131,7 @@ export class YouTubeVideoService implements VideoService {
                 this.state.next(PlayerState.Ready);
                 break;
             default:
-                throw new Error('Invalid state transition.');
+                this.unknownEventTransition(PlayerEvent.ScreenInit);
         }
     }
 
@@ -149,27 +145,22 @@ export class YouTubeVideoService implements VideoService {
                 break;
             case PlayerState.ScreenInit:
                 this.event.next(PlayerEvent.ScreenDestroy);
-                this.state.next(PlayerState.Idel);
+                this.state.next(PlayerState.Idle);
                 break;
             default:
-                throw new Error('Invalid state transition.');
+                this.unknownEventTransition(PlayerEvent.ScreenDestroy);
         }
     }
 
     adStart() {
-        switch (this.state.value) {
-            case PlayerState.Playing:
-                this.pause();
-            case PlayerState.Cued:
-                this.screenInit();
-            case PlayerState.ScreenInit:
-                this.cue();
-            case PlayerState.Ready:
-                this.event.next(PlayerEvent.AdPlay);
-                this.state.next(PlayerState.AdPlaying);
-                break;
-            default:
-                throw new Error('Invalid state transition.');
+        if (this.state.value === PlayerState.Playing) this.pause();
+        if (this.state.value === PlayerState.Cued) this.screenInit();
+        if (this.state.value === PlayerState.ScreenInit) this.cue();
+        if (this.state.value === PlayerState.Ready) {
+            this.event.next(PlayerEvent.AdPlay);
+            this.state.next(PlayerState.AdPlaying);
+        } else {
+            this.unknownEventTransition(PlayerEvent.AdPlay);
         }
     }
 
@@ -180,23 +171,16 @@ export class YouTubeVideoService implements VideoService {
                 this.state.next(PlayerState.Ready);
                 break;
             default:
-                throw new Error('Invalid state transition.');
+                this.unknownEventTransition(PlayerEvent.AdPause);
         }
     }
 
     unplay() {
-        switch (this.state.value) {
-            case PlayerState.Playing:
-                this.pause();
-            case PlayerState.AdPlaying:
-                this.adEnd();
-            case PlayerState.Ready:
-            case PlayerState.ScreenInit:
-                this.screenDestroy();
-                break;
-            default:
-                throw new Error('Invalid state transition.');
-        }
+        if (this.state.value === PlayerState.Playing) this.pause();
+        if (this.state.value === PlayerState.AdPlaying) this.adEnd();
+        if (this.state.value === PlayerState.Ready ||
+            this.state.value === PlayerState.ScreenInit)
+            this.screenDestroy();
     }
 
     setSpeed(speed: number) {
@@ -300,5 +284,9 @@ export class YouTubeVideoService implements VideoService {
             .subscribe(this.setSpeed.bind(this));
         Observable.fromEvent(player, 'onFullscreenChange')
             .subscribe(this.setFullscreen.bind(this));
+    }
+
+    private unknownEventTransition(event: PlayerEvent) {
+        console.error(1, `Unknown event "${PlayerEvent[event]}" transition from state "${PlayerState[this.state.value]}".`);
     }
 }

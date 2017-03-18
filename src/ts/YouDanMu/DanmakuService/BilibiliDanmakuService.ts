@@ -2,7 +2,6 @@ import { YouDanMu } from '..';
 import { Danmaku, Mode } from '../Danmaku';
 import { Logger } from '../util';
 
-import Color from 'color';
 import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/observable/from';
@@ -10,6 +9,7 @@ import 'rxjs/add/observable/fromPromise';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/map';
 
+const Color = require('color');
 const console = new Logger('BilibiliService');
 
 interface MetaData {
@@ -18,7 +18,7 @@ interface MetaData {
     cid: string;
 }
 
-function RRGGBB(color: number|string): Color.Color {
+function RRGGBB(color: number | string): Color.Color {
     const t = Number(color).toString(16).toUpperCase();
     const c = '#' + (Array(7).join('0') + t).slice(-6);
     return Color(c);

@@ -1,4 +1,3 @@
-import Color from 'color';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/toArray';
@@ -33,7 +32,7 @@ export class SVGRenderService implements RenderService {
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
     }
 
-    loadDanmaku(list: Danmaku[]) {
+    loadDanmaku(list: Danmaku[]): void {
         const nodeArray = list.map(d => new TimelineNode(d.time, d));
         this.timeline = Timeline.createFromNodeArray(nodeArray);
     }

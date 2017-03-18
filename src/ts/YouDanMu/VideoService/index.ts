@@ -5,7 +5,7 @@ import { Canvas } from '../RenderService';
 export type Seconds = number;
 
 export enum PlayerState {
-    Idel,
+    Idle,
     Cued,
     ScreenInit,
     Ready,
@@ -47,8 +47,8 @@ export interface VideoService {
     video: BehaviorSubject<Video>;
     speed: BehaviorSubject<number>;
 
-    installCanvas(canvas: Canvas);
-    uninstallCanvas(canvas: Canvas);
+    installCanvas(canvas: Canvas): void;
+    uninstallCanvas(canvas: Canvas): void;
 
     getTime(): number;
 }
