@@ -191,8 +191,19 @@ export class SVGRenderService implements RenderService {
      */
     private play(): void {
         if (!this.timeline) return;
+        const { time } = this;
         this.time = this.ydm.videoService.getTime();
-        this.baseFrame();
+        if (time && Math.abs(time - this.time) > 0.1) {
+            // Seeked to a distant frame
+            this.baseFrame();
+        } else {
+            // Probably resumed from pause
+            this.timelineIterator = this.timeline.iterateFrom(time);
+            this.timestamp = performance.now();
+            this.animationFrame = requestAnimationFrame(
+                this.nextFrame.bind(this)
+            );
+        }
     }
 
     /**
