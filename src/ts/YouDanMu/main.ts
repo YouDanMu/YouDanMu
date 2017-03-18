@@ -1,4 +1,5 @@
 import { YouDanMu } from '.';
+import { SVGRenderService } from './RenderService';
 import { YouTubeVideoService } from './VideoService';
 import { BilibiliDanmakuService } from './DanmakuService';
 import { ChromeExtensionService } from './ExtensionService';
@@ -14,7 +15,12 @@ console.log(0, '__MSG_YDM_welcome_log__');
 
 const ydm = new YouDanMu();
 ydm.videoService = new YouTubeVideoService(ydm);
-ydm.danmakuService = new BilibiliDanmakuService(ydm);
 ydm.extensionService = new ChromeExtensionService(ydm);
+ydm.renderService = new SVGRenderService(ydm);
+
+const danmakuService = new BilibiliDanmakuService(ydm);
+const stream = danmakuService.fetchByUrl('https://www.bilibili.com/video/av8898537');
+
+stream.toArray().subscribe(l => ydm.renderService.loadDanmaku(l));
 
 (<any>window).ydm = ydm;

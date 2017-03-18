@@ -1,9 +1,9 @@
 import { VideoService } from './VideoService';
-import { DanmakuService } from './DanmakuService';
+import { RenderService } from './RenderService';
 import { ExtensionService } from './ExtensionService';
 
 export class YouDanMu {
     videoService: VideoService;
-    danmakuService: DanmakuService;
+    renderService: RenderService;
     extensionService: ExtensionService;
 }
