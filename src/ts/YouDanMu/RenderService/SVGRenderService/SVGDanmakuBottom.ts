@@ -50,7 +50,7 @@ export class SVGDanmakuBottom extends SVGDanmaku {
     }
 
     allocateY(s: Segments): void {
-        this.y = s.take(this.height, true).end;
+        this.y = s.take(this.height, true).end - 8;
     }
 
     expire(time: number): boolean {
