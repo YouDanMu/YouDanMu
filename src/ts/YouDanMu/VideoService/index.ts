@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Canvas } from '../RenderService';
 
@@ -10,6 +11,18 @@ export enum PlayerState {
     Ready,
     Playing,
     AdPlaying
+}
+
+export enum PlayerEvent {
+    ScreenInit,
+    ScreenResize,
+    ScreenDestroy,
+    Cue,
+    Play,
+    Pause,
+    AdPlay,
+    AdPause,
+    SpeedChange
 }
 
 export interface Video {
@@ -28,6 +41,7 @@ export interface Screen {
 }
 
 export interface VideoService {
+    event: Subject<PlayerEvent>;
     state: BehaviorSubject<PlayerState>;
     screen: BehaviorSubject<Screen>;
     video: BehaviorSubject<Video>;

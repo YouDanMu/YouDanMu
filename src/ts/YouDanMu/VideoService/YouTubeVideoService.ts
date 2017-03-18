@@ -13,7 +13,7 @@ import 'rxjs/add/operator/sampleTime';
 import 'rxjs/add/operator/multicast';
 
 import { Logger } from '../util';
-import { Seconds, Video, Screen, VideoService, PlayerState } from './';
+import { Seconds, Video, Screen, VideoService, PlayerEvent, PlayerState } from './';
 
 const console = new Logger('YouTubeService');
 
@@ -33,6 +33,7 @@ interface ScreenSize {
 }
 
 export class YouTubeVideoService implements VideoService {
+    event = new Subject<PlayerEvent>();
     state = new BehaviorSubject(PlayerState.Idel);
     screen = new BehaviorSubject<Screen>(null);
     video = new BehaviorSubject<Video>(null);
@@ -41,7 +42,6 @@ export class YouTubeVideoService implements VideoService {
     player: YouTube.Player;
 
     private ydm: YouDanMu;
-    private speedRate = 1;
     private resizeCaptureInterval: number;
     private _resizeObserver = new Subject<Screen>();
 
@@ -71,9 +71,11 @@ export class YouTubeVideoService implements VideoService {
         });
         switch (this.state.value) {
             case PlayerState.Idel:
+                this.event.next(PlayerEvent.Cue);
                 this.state.next(PlayerState.Cued);
                 break;
             case PlayerState.ScreenInit:
+                this.event.next(PlayerEvent.Cue);
                 this.state.next(PlayerState.Ready);
                 break;
             case PlayerState.Ready:
@@ -93,6 +95,7 @@ export class YouTubeVideoService implements VideoService {
             case PlayerState.Cued:
                 this.screenInit();
             case PlayerState.Ready:
+                this.event.next(PlayerEvent.Play);
                 this.state.next(PlayerState.Playing);
                 break;
             default:
@@ -103,6 +106,7 @@ export class YouTubeVideoService implements VideoService {
     pause() {
         switch (this.state.value) {
             case PlayerState.Playing:
+                this.event.next(PlayerEvent.Pause);
                 this.state.next(PlayerState.Ready);
                 break;
             default:
@@ -123,9 +127,11 @@ export class YouTubeVideoService implements VideoService {
         this.startCaptureResize();
         switch (this.state.value) {
             case PlayerState.Idel:
+                this.event.next(PlayerEvent.ScreenInit);
                 this.state.next(PlayerState.ScreenInit);
                 break;
             case PlayerState.Cued:
+                this.event.next(PlayerEvent.ScreenInit);
                 this.state.next(PlayerState.Ready);
                 break;
             default:
@@ -138,9 +144,11 @@ export class YouTubeVideoService implements VideoService {
         this.screen.next(null);
         switch (this.state.value) {
             case PlayerState.Ready:
+                this.event.next(PlayerEvent.ScreenDestroy);
                 this.state.next(PlayerState.Cued);
                 break;
             case PlayerState.ScreenInit:
+                this.event.next(PlayerEvent.ScreenDestroy);
                 this.state.next(PlayerState.Idel);
                 break;
             default:
@@ -157,6 +165,7 @@ export class YouTubeVideoService implements VideoService {
             case PlayerState.ScreenInit:
                 this.cue();
             case PlayerState.Ready:
+                this.event.next(PlayerEvent.AdPlay);
                 this.state.next(PlayerState.AdPlaying);
                 break;
             default:
@@ -167,6 +176,7 @@ export class YouTubeVideoService implements VideoService {
     adEnd() {
         switch (this.state.value) {
             case PlayerState.AdPlaying:
+                this.event.next(PlayerEvent.AdPause);
                 this.state.next(PlayerState.Ready);
                 break;
             default:
@@ -191,6 +201,7 @@ export class YouTubeVideoService implements VideoService {
 
     setSpeed(speed: number) {
         this.speed.next(speed);
+        this.event.next(PlayerEvent.SpeedChange);
     }
 
     setFullscreen(state: YouTube.FullscreenState) {
@@ -201,6 +212,7 @@ export class YouTubeVideoService implements VideoService {
             height: screen.height,
             fullscreen: state.fullscreen
         });
+        this.event.next(PlayerEvent.ScreenResize);
     }
 
     installCanvas(canvas: Canvas) {
@@ -240,6 +252,7 @@ export class YouTubeVideoService implements VideoService {
                 height: height,
                 fullscreen: screen.fullscreen
             });
+            this.event.next(PlayerEvent.ScreenResize);
         }
     }
 
