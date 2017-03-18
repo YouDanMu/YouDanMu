@@ -12,6 +12,7 @@ export class SVGCanvas implements Canvas {
 
     private time: number;
     private list: Set<SVGDanmaku>[] = [];
+    private _tmpCssDisplay: string;
 
     constructor(layers: number) {
         this.parent = document.createElement('div');
@@ -66,5 +67,14 @@ export class SVGCanvas implements Canvas {
                 if (d.expire(time)) this.remove(d);
                 else d.nextFrame(time, timeslice);
             }));
+    }
+
+    show() {
+        this.parent.style.display = this._tmpCssDisplay;
+    }
+
+    hide() {
+        this._tmpCssDisplay = this.parent.style.display;
+        this.parent.style.display = 'none';
     }
 }

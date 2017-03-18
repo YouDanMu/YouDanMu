@@ -1,23 +1,24 @@
 import Color from 'color';
 import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/toArray';
 
 import { YouDanMu } from '../..';
 import { RenderService } from '..';
+import { SVGDanmaku } from './SVGDanmaku';
 import { Danmaku, Mode } from '../../Danmaku';
-import { Screen, Seconds } from '../../VideoService';
-import { Timeline, TimelineNode, TimelineIterator } from '../../util/Timeline';
+import { Screen, Seconds, PlayerState, PlayerEvent } from '../../VideoService';
+import { Timeline, TimelineNode, TimelineIterator } from '../../util';
 
 import { SVGCanvas } from './SVGCanvas';
 
 export class SVGRenderService implements RenderService {
-    danmakuInput = new Subject<Danmaku>();
-
     private canvas = new SVGCanvas(Mode._modeCount);
     private timeline: Timeline<Danmaku>;
     private timelineIterator: TimelineIterator<Danmaku>;
 
-    private playing: boolean;
+    private speed: BehaviorSubject<number>;
+    private playerState: BehaviorSubject<PlayerState>;
 
     private time: Seconds;
     private timestamp: number;
@@ -27,29 +28,58 @@ export class SVGRenderService implements RenderService {
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
-        this.danmakuInput.toArray().subscribe(list => this.onDanmakuInput(list));
-        ydm.videoService.onPlay.subscribe(p => this.onPlay(p));
-        ydm.videoService.onScreenInit.subscribe(s => this.onScreenInit(s));
-        ydm.videoService.onScreenResize.subscribe(s => this.onScreenResize(s));
-        ydm.videoService.onScreenDestroy.subscribe(() => this.onScreenDestroy());
+        this.speed = ydm.videoService.speed;
+        this.playerState = ydm.videoService.state;
+        ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
     }
 
-    private onDanmakuInput(list: Danmaku[]) {
+    loadDanmaku(list: Danmaku[]) {
         const nodeArray = list.map(d => new TimelineNode(d.time, d));
         this.timeline = Timeline.createFromNodeArray(nodeArray);
     }
 
-    private onScreenInit(screen: Screen) {
-        this.ydm.videoService.installCanvas(this.canvas);
-        this.onScreenResize(screen);
+    private onPlayerEvent(event: PlayerEvent) {
+        switch (event) {
+            case PlayerEvent.Play:
+                this.play();
+                break;
+            case PlayerEvent.Pause:
+                this.pause();
+                break;
+            case PlayerEvent.AdPlay:
+                this.canvas.hide();
+                break;
+            case PlayerEvent.AdPause:
+                this.canvas.show();
+                break;
+            case PlayerEvent.ScreenInit:
+                this.screenInit();
+                break;
+            case PlayerEvent.ScreenResize:
+                this.screenResize();
+                break;
+            case PlayerEvent.ScreenDestroy:
+                this.screenDestroy();
+                break;
+            case PlayerEvent.Cue:
+            case PlayerEvent.SpeedChange:
+            default:
+                break;
+        }
     }
 
-    private onScreenResize(screen: Screen) {
+    private screenInit() {
+        this.ydm.videoService.installCanvas(this.canvas);
+        this.screenResize();
+    }
+
+    private screenResize() {
+        const screen = this.ydm.videoService.screen.value;
         this.canvas.width = screen.width;
         this.canvas.height = screen.height;
     }
 
-    private onScreenDestroy() {
+    private screenDestroy() {
         this.ydm.videoService.uninstallCanvas(this.canvas)
     }
 
@@ -65,9 +95,9 @@ export class SVGRenderService implements RenderService {
      */
     private baseFrame() {
         const { timeline, time } = this;
-        this.canvas.clear();
+        this.canvas.baseFrame(time);
         this.timelineIterator = timeline.iterateFrom(time);
-        if (this.playing) {
+        if (this.playerState.value === PlayerState.Playing) {
             this.timestamp = performance.now();
             this.animationFrame = requestAnimationFrame(
                 this.nextFrame.bind(this)
@@ -85,18 +115,14 @@ export class SVGRenderService implements RenderService {
      * @memberOf SVGRenderService
      */
     private nextFrame(timestamp: number) {
-        const timeslice = (timestamp - this.timestamp) / 1000;
+        const timeslice = (timestamp - this.timestamp) * this.speed.value / 1000;
         this.time += timeslice;
         this.timestamp = timestamp;
-        for (const d of this.canvas) {
-            // Animate the object.
-            // If duration expires, remove it.
-            d.frameUpdate(timeslice);
-        }
+        this.canvas.nextFrame(this.time, timeslice);
         const it = this.timelineIterator;
-        while (it.hasNext() && it.peek().startTime < this.time) {
-            const d = new DanmakuObject(it.next(), this.canvas);
-            d.display(this.time);
+        while (it.hasNext() && it.peek().key < this.time) {
+            const d = SVGDanmaku.create(it.next().value, this.canvas);
+            this.canvas.add(d);
         }
         this.animationFrame = requestAnimationFrame(
             this.nextFrame.bind(this)
@@ -104,17 +130,25 @@ export class SVGRenderService implements RenderService {
     }
 
     /**
-     * Play or pause the redering timer and animation.
+     * Resume the redering timer and animation.
      * 
      * @private
-     * @param {boolean} playing 
-     * @returns 
      * 
      * @memberOf SVGRenderService
      */
-    private onPlay(playing: boolean) {
-        if (this.playing === playing) return;
-        this.playing = playing;
+    private play() {
+        this.time = this.ydm.videoService.getTime();
+        this.baseFrame();
+    }
+
+    /**
+     * Pause the redering timer and animation.
+     * 
+     * @private
+     * 
+     * @memberOf SVGRenderService
+     */
+    private pause() {
         this.time = this.ydm.videoService.getTime();
         if (this.animationFrame) {
             this.animationFrame = void cancelAnimationFrame(
