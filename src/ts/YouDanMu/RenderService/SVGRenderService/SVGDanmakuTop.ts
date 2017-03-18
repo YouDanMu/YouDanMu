@@ -59,9 +59,9 @@ export class SVGDanmakuTop extends SVGDanmaku {
 
     collide(d: SVGDanmakuTop): boolean {
         return (
-            (d.entryTime > this.entryTime &&
+            (d.entryTime >= this.entryTime &&
                 d.entryTime < this.leaveTime) ||
-            (this.entryTime > d.entryTime &&
+            (this.entryTime >= d.entryTime &&
                 this.entryTime < d.leaveTime)
         );
     }

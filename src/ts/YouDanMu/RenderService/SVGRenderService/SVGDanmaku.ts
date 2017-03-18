@@ -1,57 +1,8 @@
 import { Danmaku, Mode } from '../../Danmaku';
 import { SVGCanvas } from './SVGCanvas';
-import { SVGDanmakuTop } from './SVGDanmakuTop';
-import { SVGDanmakuBottom } from './SVGDanmakuBottom';
-import { SVGDanmakuMarquee } from './SVGDanmakuMarquee';
 import { Segments } from '../../util/Segments';
 
 export abstract class SVGDanmaku {
-    /**
-     * Create a SVGDanmaku.
-     * 
-     * @static
-     * @param {Danmaku} d 
-     * @param {SVGCanvas} canvas 
-     * @returns {SVGDanmaku} 
-     * 
-     * @memberOf SVGDanmaku
-     */
-    static create(d: Danmaku, canvas: SVGCanvas): SVGDanmaku {
-        const e = document.createElementNS(
-            'http://www.w3.org/2000/svg', 'text');
-        e.classList.add('ydn-svg-danmaku');
-        e.textContent = d.text;
-        e.style.fontSize = d.size;
-        e.style.fill = d.color.string();
-        // TODO: apply defaults
-        if (d.color.dark()) {
-            e.style.textShadow =
-                'rgb(255, 255, 255) 1px 0px 1px'
-                + ', rgb(255, 255, 255) 0px 1px 1px'
-                + ', rgb(255, 255, 255) 0px -1px 1px'
-                + ', rgb(255, 255, 255) -1px 0px 1px';
-        } else {
-            e.style.textShadow =
-                'rgb(0, 0, 0) 1px 0px 1px'
-                + ', rgb(0, 0, 0) 0px 1px 1px'
-                + ', rgb(0, 0, 0) 0px -1px 1px'
-                + ', rgb(0, 0, 0) -1px 0px 1px';
-        }
-        e.style.fontFamily = 'SimHei, "Microsoft JhengHei", Arial, Helvetica, sans-serif';
-        e.style.fontWeight = 'bold';
-        e.style.lineHeight = '1.125';
-        switch (d.mode) {
-            case Mode.TOP:
-                return new SVGDanmakuTop(d, e, canvas);
-            case Mode.BOTTOM:
-                return new SVGDanmakuBottom(d, e, canvas);
-            case Mode.MARQUEE:
-                return new SVGDanmakuMarquee(d, e, canvas);
-            default:
-                throw new Error('Unknown Danmaku mode.');
-        }
-    }
-
     /**
      * The Danmaku meta data object.
      * 
