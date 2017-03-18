@@ -45,25 +45,37 @@ export class Timeline<V> {
         return node;
     }
 
-    insert(key: number, value: V, descent = false) {
+    insert(key: number, value: V, descent = false): void {
         const node = new TimelineNode(key, value);
         this.insertNode(node, descent);
     }
 
-    insertNode(node: TimelineNode<V>, descent = false) {
+    insertNode(node: TimelineNode<V>, descent = false): void {
         if (!this.head || !this.tail) {
             this.head = node;
             this.tail = node;
         } else if (descent) {
             let next = this.tail;
-            while (next.prev && node.key <= next.prev.key)
-                next = next.prev;
-            this.insertBefore(node, next);
+            if (node.key > next.key) {
+                this.tail = node;
+                node.prev = next;
+                next.next = node;
+            } else {
+                while (next.prev && node.key <= next.prev.key)
+                    next = next.prev;
+                this.insertBefore(node, next);
+            }
         } else {
             let prev = this.head;
-            while (prev.next && prev.next.key < node.key)
-                prev = prev.next;
-            this.insertAfter(node, prev);
+            if (node.key <= prev.key) {
+                this.head = node;
+                node.next = prev;
+                prev.prev = node;
+            } else {
+                while (prev.next && prev.next.key < node.key)
+                    prev = prev.next;
+                this.insertAfter(node, prev);
+            }
         }
     }
 
@@ -75,7 +87,7 @@ export class Timeline<V> {
      * 
      * @memberOf Timeline
      */
-    insertBefore(node: TimelineNode<V>, next: TimelineNode<V>) {
+    insertBefore(node: TimelineNode<V>, next: TimelineNode<V>): void {
         if (node.prev = next.prev)
             node.prev.next = node;
         node.next = next;
@@ -90,7 +102,7 @@ export class Timeline<V> {
      * 
      * @memberOf Timeline
      */
-    insertAfter(node: TimelineNode<V>, prev: TimelineNode<V>) {
+    insertAfter(node: TimelineNode<V>, prev: TimelineNode<V>): void {
         if (node.next = prev.next)
             node.next.prev = node;
         node.prev = prev;
