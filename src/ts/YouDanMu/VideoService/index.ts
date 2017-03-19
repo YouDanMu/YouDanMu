@@ -18,6 +18,7 @@ export enum PlayerEvent {
     ScreenResize,
     ScreenDestroy,
     Cue,
+    Uncue,
     Play,
     Pause,
     AdPlay,

@@ -61,6 +61,8 @@ function createSVGDanmaku(d: Danmaku, canvas: SVGCanvas): SVGDanmaku {
 }
 
 export class SVGRenderService implements RenderService {
+    danmakuInput = new Subject<Danmaku>();
+
     private canvas = new SVGCanvas(Mode._modeCount);
     private timeline = new IntervalTree<SVGDanmaku>();
     private timelineIterator: IntervalTreeIterator<SVGDanmaku>;
@@ -82,10 +84,11 @@ export class SVGRenderService implements RenderService {
         this.ydm = ydm;
         this.speed = ydm.videoService.speed;
         this.playerState = ydm.videoService.state;
+        this.danmakuInput.subscribe(d => this.onDanmaku(d));
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
     }
 
-    loadDanmaku(d: Danmaku): void {
+    private onDanmaku(d: Danmaku): void {
         const svgd = createSVGDanmaku(d, this.canvas);
         this.timeline.insert(svgd.startTime, svgd.endTime, svgd)
         if (this.isPlaying) {
@@ -116,8 +119,8 @@ export class SVGRenderService implements RenderService {
             case PlayerEvent.ScreenDestroy:
                 this.screenDestroy();
                 break;
-            case PlayerEvent.Cue:
-                this.cue();
+            case PlayerEvent.Uncue:
+                this.uncue();
                 break;
             case PlayerEvent.SpeedChange:
             default:
@@ -252,7 +255,7 @@ export class SVGRenderService implements RenderService {
         }
     }
 
-    private cue(): void {
+    private uncue(): void {
         this.timeline = new IntervalTree<SVGDanmaku>();
         this.timelineIterator = null;
     }

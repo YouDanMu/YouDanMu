@@ -1,8 +1,8 @@
 import { YouDanMu } from '.';
 import { SVGRenderService } from './RenderService';
-import { YouTubeVideoService } from './VideoService';
 import { BilibiliDanmakuService } from './DanmakuService';
 import { ChromeExtensionService } from './ExtensionService';
+import { YouTubeVideoService, PlayerEvent } from './VideoService';
 import { Logger } from './util';
 
 // Enable development level logging
@@ -18,9 +18,13 @@ ydm.videoService = new YouTubeVideoService(ydm);
 ydm.extensionService = new ChromeExtensionService(ydm);
 ydm.renderService = new SVGRenderService(ydm);
 
-const danmakuService = new BilibiliDanmakuService(ydm);
-const stream = danmakuService.fetchByUrl('https://www.bilibili.com/video/av8898537');
-
-stream.subscribe(d => ydm.renderService.loadDanmaku(d));
+ydm.videoService.event.subscribe(event => {
+    if (event === PlayerEvent.Cue) {
+        const testURL = 'https://www.bilibili.com/video/av8898537';
+        const danmakuService = new BilibiliDanmakuService(ydm);
+        const stream = danmakuService.fetchByUrl(testURL);
+        stream.subscribe(d => ydm.renderService.danmakuInput.next(d));
+    }
+});
 
 (<any>window).ydm = ydm;

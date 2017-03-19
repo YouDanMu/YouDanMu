@@ -181,12 +181,28 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
+    uncue() {
+        switch (this.state.value) {
+            case PlayerState.Ready:
+                this.event.next(PlayerEvent.Uncue);
+                this.state.next(PlayerState.ScreenInit);
+                break;
+            case PlayerState.Cued:
+                this.event.next(PlayerEvent.Uncue);
+                this.state.next(PlayerState.Idle);
+                break;
+            default:
+                this.unknownEventTransition(PlayerEvent.AdPause);
+        }
+    }
+
     unplay() {
         if (this.state.value === PlayerState.Playing) this.pause();
         if (this.state.value === PlayerState.AdPlaying) this.adEnd();
         if (this.state.value === PlayerState.Ready ||
             this.state.value === PlayerState.ScreenInit)
             this.screenDestroy();
+        this.uncue();
     }
 
     setSpeed(speed: number) {
