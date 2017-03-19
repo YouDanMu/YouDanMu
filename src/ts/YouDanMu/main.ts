@@ -21,6 +21,6 @@ ydm.renderService = new SVGRenderService(ydm);
 const danmakuService = new BilibiliDanmakuService(ydm);
 const stream = danmakuService.fetchByUrl('https://www.bilibili.com/video/av8898537');
 
-stream.toArray().subscribe(l => ydm.renderService.loadDanmaku(l));
+stream.subscribe(d => ydm.renderService.loadDanmaku(d));
 
 (<any>window).ydm = ydm;

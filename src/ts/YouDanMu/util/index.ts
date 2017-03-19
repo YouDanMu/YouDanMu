@@ -1,3 +1,3 @@
 export * from './Logger';
 export * from './Segments';
-export * from './Timeline';
+export * from './IntervalTree';

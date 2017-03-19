@@ -6,7 +6,7 @@ export interface Canvas {
 }
 
 export interface RenderService {
-    loadDanmaku(list: Danmaku[]): void;
+    loadDanmaku(d: Danmaku): void;
 }
 
 export * from './SVGRenderService';

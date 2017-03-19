@@ -5,22 +5,20 @@ import { Segments } from '../../util/Segments';
 
 export class SVGDanmakuBottom extends SVGDanmaku {
     /**
-     * Time the Danmaku enters the canvas.
+     * Time the Danmaku first draw on the canvas.
      * 
-     * @private
      * @type {number}
-     * @memberOf SVGDanmakuBottom
+     * @memberOf SVGDanmaku
      */
-    private entryTime: number;
+    startTime: number;
 
     /**
-     * Time the Danmaku leaves the canvas.
+     * Time the Danmaku is cleared from the canvas.
      * 
-     * @private
      * @type {number}
-     * @memberOf SVGDanmakuBottom
+     * @memberOf SVGDanmaku
      */
-    private leaveTime: number;
+    endTime: number;
 
     /**
      * The canvas width. We need to save it since it might change
@@ -37,8 +35,8 @@ export class SVGDanmakuBottom extends SVGDanmaku {
 
         // Calculate properties
         this.canvasW = canvas.width;
-        this.entryTime = d.time;
-        this.leaveTime = d.time + 5;
+        this.startTime = d.time;
+        this.endTime = d.time + 5;
     }
 
     baseFrame(time: number): void {
@@ -54,15 +52,15 @@ export class SVGDanmakuBottom extends SVGDanmaku {
     }
 
     expire(time: number): boolean {
-        return time < this.entryTime || time > this.leaveTime;
+        return time < this.startTime || time > this.endTime;
     }
 
     collide(d: SVGDanmakuBottom): boolean {
         return (
-            (d.entryTime >= this.entryTime &&
-                d.entryTime < this.leaveTime) ||
-            (this.entryTime >= d.entryTime &&
-                this.entryTime < d.leaveTime)
+            (d.startTime >= this.startTime &&
+                d.startTime < this.endTime) ||
+            (this.startTime >= d.startTime &&
+                this.startTime < d.endTime)
         );
     }
 }

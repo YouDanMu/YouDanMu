@@ -53,6 +53,22 @@ export abstract class SVGDanmaku {
      */
     height: number;
 
+    /**
+     * Time the Danmaku first draw on the canvas.
+     * 
+     * @type {number}
+     * @memberOf SVGDanmaku
+     */
+    abstract startTime: number;
+
+    /**
+     * Time the Danmaku is cleared from the canvas.
+     * 
+     * @type {number}
+     * @memberOf SVGDanmaku
+     */
+    abstract endTime: number;
+
     get x(): number {
         return parseFloat(this.e.getAttribute('x'));
     }

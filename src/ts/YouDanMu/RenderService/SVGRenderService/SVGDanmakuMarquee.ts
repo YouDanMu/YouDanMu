@@ -4,14 +4,6 @@ import { SVGDanmaku } from './SVGDanmaku';
 import { Segments } from '../../util/Segments';
 
 export class SVGDanmakuMarquee extends SVGDanmaku {
-    /**
-     * Moving speed, px/second.
-     * 
-     * @private
-     * @type {number}
-     * @memberOf SVGDanmakuMarquee
-     */
-    private speed: number;
 
     /**
      * Time the Danmaku starts entering the canvas.
@@ -23,7 +15,7 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
      * @type {number}
      * @memberOf SVGDanmakuMarquee
      */
-    private beginEntryTime: number;
+    startTime: number;
 
     /**
      * Time the Danmaku fully entered the canvas.
@@ -35,7 +27,7 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
      * @type {number}
      * @memberOf SVGDanmakuMarquee
      */
-    private fullyEntryTime: number;
+    fullyEntryTime: number;
 
     /**
      * Time the Danmaku starts leaving the canvas.
@@ -47,7 +39,7 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
      * @type {number}
      * @memberOf SVGDanmakuMarquee
      */
-    private beginLeaveTime: number;
+    beginLeaveTime: number;
 
     /**
      * Time the Danmaku fully left the canvas.
@@ -59,7 +51,16 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
      * @type {number}
      * @memberOf SVGDanmakuMarquee
      */
-    private fullyLeaveTime: number;
+    endTime: number;
+
+    /**
+     * Moving speed, px/second.
+     * 
+     * @private
+     * @type {number}
+     * @memberOf SVGDanmakuMarquee
+     */
+    private speed: number;
 
     /**
      * The canvas width. We need to save it since it might change
@@ -77,14 +78,14 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
         // Calculate properties
         this.canvasW = canvas.width;
         this.speed = 0.22 * this.width + 113.78;
-        this.beginEntryTime = d.time;
+        this.startTime = d.time;
         this.fullyEntryTime = d.time + (this.width / this.speed);
         this.beginLeaveTime = d.time + (canvas.width / this.speed);
-        this.fullyLeaveTime = d.time + ((this.width + canvas.width) / this.speed);
+        this.endTime = d.time + ((this.width + canvas.width) / this.speed);
     }
 
     baseFrame(time: number) {
-        this.x = this.canvasW - (this.beginEntryTime - time) * this.speed;
+        this.x = this.canvasW - (time - this.startTime) * this.speed;
     }
 
     nextFrame(time: number, timeslice: number) {
@@ -96,19 +97,19 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
     }
 
     expire(time: number): boolean {
-        return time < this.beginEntryTime || time > this.fullyLeaveTime;
+        return time < this.startTime || time > this.endTime;
     }
 
     collide(d: SVGDanmakuMarquee): boolean {
         return (
-            (d.beginEntryTime >= this.beginEntryTime &&
-                d.beginEntryTime < this.fullyEntryTime) ||
-            (this.beginEntryTime >= d.beginEntryTime &&
-                this.beginEntryTime < d.fullyEntryTime) ||
+            (d.startTime >= this.startTime &&
+                d.startTime < this.fullyEntryTime) ||
+            (this.startTime >= d.startTime &&
+                this.startTime < d.fullyEntryTime) ||
             (d.beginLeaveTime >= this.beginLeaveTime &&
-                d.beginLeaveTime < this.fullyLeaveTime) ||
+                d.beginLeaveTime < this.endTime) ||
             (this.beginLeaveTime >= d.beginLeaveTime &&
-                this.beginLeaveTime < d.fullyLeaveTime)
+                this.beginLeaveTime < d.endTime)
         );
     }
 }

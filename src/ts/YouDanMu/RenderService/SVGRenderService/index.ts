@@ -10,7 +10,7 @@ import { SVGDanmakuBottom } from './SVGDanmakuBottom';
 import { SVGDanmakuMarquee } from './SVGDanmakuMarquee';
 import { Danmaku, Mode } from '../../Danmaku';
 import { Screen, Seconds, PlayerState, PlayerEvent } from '../../VideoService';
-import { Timeline, TimelineNode, TimelineIterator } from '../../util';
+import { IntervalTree, IntervalNode, IntervalTreeIterator } from '../../util';
 
 import { SVGCanvas } from './SVGCanvas';
 
@@ -62,8 +62,8 @@ function createSVGDanmaku(d: Danmaku, canvas: SVGCanvas): SVGDanmaku {
 
 export class SVGRenderService implements RenderService {
     private canvas = new SVGCanvas(Mode._modeCount);
-    private timeline: Timeline<Danmaku>;
-    private timelineIterator: TimelineIterator<Danmaku>;
+    private timeline = new IntervalTree<SVGDanmaku>();
+    private timelineIterator: IntervalTreeIterator<SVGDanmaku>;
 
     private speed: BehaviorSubject<number>;
     private playerState: BehaviorSubject<PlayerState>;
@@ -74,6 +74,10 @@ export class SVGRenderService implements RenderService {
 
     private ydm: YouDanMu;
 
+    get isPlaying(): boolean {
+        return this.playerState.value === PlayerState.Playing;
+    }
+
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         this.speed = ydm.videoService.speed;
@@ -81,11 +85,11 @@ export class SVGRenderService implements RenderService {
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
     }
 
-    loadDanmaku(list: Danmaku[]): void {
-        const nodeArray = list.map(d => new TimelineNode(d.time, d));
-        this.timeline = Timeline.createFromNodeArray(nodeArray);
-        if (this.playerState.value === PlayerState.Playing) {
-            this.play();
+    loadDanmaku(d: Danmaku): void {
+        const svgd = createSVGDanmaku(d, this.canvas);
+        this.timeline.insert(svgd.startTime, svgd.endTime, svgd)
+        if (this.isPlaying) {
+            this.timelineIterator = this.timeline.iterateFrom(this.time);
         }
     }
 
@@ -128,12 +132,36 @@ export class SVGRenderService implements RenderService {
 
     private screenResize(): void {
         const screen = this.ydm.videoService.screen.value;
-        this.canvas.width = screen.width;
-        this.canvas.height = screen.height;
+        if (
+            this.canvas.width !== screen.width ||
+            this.canvas.height !== screen.height
+        ) {
+            this.canvas.width = screen.width;
+            this.canvas.height = screen.height;
+            this.rebuildTimeline();
+        }
     }
 
     private screenDestroy(): void {
         this.ydm.videoService.uninstallCanvas(this.canvas)
+    }
+
+    private rebuildTimeline() {
+        if (this.isPlaying) {
+            this.pause();
+        }
+        const it = this.timeline.iterate();
+        this.timeline = new IntervalTree<SVGDanmaku>();
+        while (it.hasNext()) {
+            it.next().values.forEach(d => {
+                const svgd = createSVGDanmaku(d.d, this.canvas);
+                this.timeline.insert(svgd.startTime, svgd.endTime, svgd);
+            });
+        }
+        if (this.isPlaying) {
+            this.time = this.ydm.videoService.getTime();
+            this.baseFrame();
+        }
     }
 
     /**
@@ -149,6 +177,11 @@ export class SVGRenderService implements RenderService {
     private baseFrame(): void {
         const { timeline, time } = this;
         this.canvas.baseFrame(time);
+        this.timeline.searchPoint(time).forEach(i => {
+            i.values.forEach(d => {
+                this.canvas.add(d);
+            });
+        });
         this.timelineIterator = timeline.iterateFrom(time);
         this.timestamp = performance.now();
         this.animationFrame = requestAnimationFrame(
@@ -171,11 +204,10 @@ export class SVGRenderService implements RenderService {
         this.timestamp = timestamp;
         this.canvas.nextFrame(this.time, timeslice);
         const it = this.timelineIterator;
-        while (it.hasNext() && it.peek().key < this.time) {
-            const d = createSVGDanmaku(it.next().value, this.canvas);
-            this.canvas.add(d);
+        while (it.hasNext() && it.peek().start <= this.time) {
+            it.next().values.forEach(d => this.canvas.add(d));
         }
-        if (this.playerState.value === PlayerState.Playing) {
+        if (this.isPlaying) {
             this.animationFrame = requestAnimationFrame(
                 this.nextFrame.bind(this)
             );
@@ -190,15 +222,14 @@ export class SVGRenderService implements RenderService {
      * @memberOf SVGRenderService
      */
     private play(): void {
-        if (!this.timeline) return;
-        const { time } = this;
+        const { time, timeline } = this;
         this.time = this.ydm.videoService.getTime();
         if (time && Math.abs(time - this.time) > 0.1) {
             // Seeked to a distant frame
             this.baseFrame();
         } else {
             // Probably resumed from pause
-            this.timelineIterator = this.timeline.iterateFrom(time);
+            this.timelineIterator = timeline.iterateFrom(this.time);
             this.timestamp = performance.now();
             this.animationFrame = requestAnimationFrame(
                 this.nextFrame.bind(this)
@@ -214,8 +245,6 @@ export class SVGRenderService implements RenderService {
      * @memberOf SVGRenderService
      */
     private pause(): void {
-        if (!this.timeline) return;
-        this.time = this.ydm.videoService.getTime();
         if (this.animationFrame) {
             this.animationFrame = void cancelAnimationFrame(
                 this.animationFrame
@@ -224,7 +253,7 @@ export class SVGRenderService implements RenderService {
     }
 
     private cue(): void {
-        this.timeline = null;
+        this.timeline = new IntervalTree<SVGDanmaku>();
         this.timelineIterator = null;
     }
 }
