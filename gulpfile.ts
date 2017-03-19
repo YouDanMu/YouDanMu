@@ -1,12 +1,18 @@
+const fs = require('fs');
 const del = require('del');
+const path = require('path');
 const gulp = require('gulp');
+const rsa = require('node-rsa');
 const opn = require('gulp-open');
 const sass = require('gulp-sass');
 const gutil = require('gulp-util');
+const minimist = require('minimist');
 const rename = require('gulp-rename');
 const uglify = require('gulp-uglify');
 const buffer = require('vinyl-buffer');
+const ChromeExtension = require("crx");
 const browserify = require('browserify');
+const cleanCSS = require('gulp-clean-css');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const typescript = require('gulp-typescript');
@@ -17,129 +23,187 @@ const Task = (name?: string): Function =>
         void (gulp.task(name || key, self[key]));
 
 const ts2es5 = typescript.createProject('tsconfig.json');
+const knownOptions = {
+    boolean: 'sourcemap',
+    default: {
+        sourcemap: true
+    }
+};
+const options = minimist(process.argv.slice(2), knownOptions);
 
 class Gulpfile {
 
     @Task()
     compile_es5() {
-        return gulp.src(['src/ts/**/*.ts', 'spec*/**/*.ts'])
-            .pipe(sourcemaps.init())
-            .pipe(ts2es5())
-            .pipe(sourcemaps.write())
-            .pipe(gulp.dest('build/es5'));
+        let task = gulp.src(['src/ts/**/*.ts', 'spec*/**/*.ts']);
+        if (options.sourcemap) {
+            task = task.pipe(sourcemaps.init());
+        }
+        task = task.pipe(ts2es5())
+        if (options.sourcemap) {
+            task = task.pipe(sourcemaps.write())
+        }
+        return task.pipe(gulp.dest('build/es5'));
     }
 
-    @Task('background.js')
+    @Task('dev/background.js')
     background() {
-        let b = browserify({
+        let task = browserify({
             entries: './build/es5/background/main.js',
             debug: true
-        });
-
-        return b.bundle()
-            .pipe(source('background.js'))
-            .pipe(buffer())
-            .pipe(sourcemaps.init({ loadMaps: true }))
-            // .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest('./build/dist/js'))
+        })
+            .bundle()
+            .pipe(source('background.js'));
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }))
+                .pipe(sourcemaps.write('./'));
+        }
+        return task.pipe(gulp.dest('./build/dev/js'))
     }
 
-    @Task('content-script.js')
+    @Task('dev/content-script.js')
     content_script() {
-        let b = browserify({
+        let task = browserify({
             entries: './build/es5/content-script/main.js',
             debug: true
-        });
-
-        return b.bundle()
-            .pipe(source('content-script.js'))
-            .pipe(buffer())
-            .pipe(sourcemaps.init({ loadMaps: true }))
-            // .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest('./build/dist/js'))
+        })
+            .bundle()
+            .pipe(source('content-script.js'));
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }))
+                .pipe(sourcemaps.write('./'));
+        }
+        return task.pipe(gulp.dest('./build/dev/js'))
     }
 
-    @Task('popup.js')
+    @Task('dev/popup.js')
     popup() {
-        let b = browserify({
+        let task = browserify({
             entries: './build/es5/popup/main.js',
             debug: true
-        });
-
-        return b.bundle()
-            .pipe(source('popup.js'))
-            .pipe(buffer())
-            .pipe(sourcemaps.init({ loadMaps: true }))
-            // .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest('./build/dist/js'))
+        })
+            .bundle()
+            .pipe(source('popup.js'));
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }))
+                .pipe(sourcemaps.write('./'));
+        }
+        return task.pipe(gulp.dest('./build/dev/js'))
     }
 
-    @Task('YouDanMu.js')
+    @Task('dev/YouDanMu.js')
     YouDanMu() {
-        let b = browserify({
+        let task = browserify({
             entries: './build/es5/YouDanMu/main.js',
             debug: true
-        });
-
-        return b.bundle()
-            .pipe(source('YouDanMu.js'))
-            .pipe(buffer())
-            .pipe(sourcemaps.init({ loadMaps: true }))
-            // .pipe(uglify()).on('error', gutil.log)
-            .pipe(sourcemaps.write())
-            .pipe(gulp.dest('./build/dist/js'))
+        })
+            .bundle()
+            .pipe(source('YouDanMu.js'));
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }))
+                .pipe(sourcemaps.write());
+        }
+        return task.pipe(gulp.dest('./build/dev/js'))
     }
 
     @Task('all-spec.js')
     spec() {
-        let b = browserify({
+        let task = browserify({
             entries: './build/es5/spec/all-spec.js',
             debug: true
-        });
-
-        return b.bundle()
-            .pipe(source('all-spec.js'))
-            .pipe(gulp.dest('./build/spec'))
+        })
+            .bundle()
+            .pipe(source('all-spec.js'));
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }))
+                .pipe(sourcemaps.write('./'));
+        }
+        return task.pipe(gulp.dest('./build/spec'))
     }
 
-    @Task('content-script.css')
+    @Task('dev/content-script.css')
     content_script_css() {
         return gulp.src('src/scss/content-script/main.scss')
             .pipe(sass()).on('error', sass.logError)
             .pipe(autoprefixer())
             .pipe(rename('content-script.css'))
-            .pipe(gulp.dest('build/dist/css'));
+            .pipe(gulp.dest('build/dev/css'));
     }
 
-    @Task('popup.css')
+    @Task('dev/popup.css')
     popup_css() {
         return gulp.src('src/scss/popup/main.scss')
             .pipe(sass()).on('error', sass.logError)
             .pipe(autoprefixer())
             .pipe(rename('popup.css'))
+            .pipe(gulp.dest('build/dev/css'));
+    }
+
+    @Task('dev/static')
+    dev_static() {
+        return gulp.src("src/static/**")
+            .pipe(gulp.dest("build/dev"));
+    }
+
+    @Task('dist/static')
+    dist_static() {
+        return gulp.src([
+            'build/dev/*_locales/**',
+            'build/dev/*images/**',
+            'build/dev/manifest.json',
+            'build/dev/popup.html'
+        ]).pipe(gulp.dest('build/dist'));
+    }
+
+    @Task('dist/js')
+    dist_js() {
+        let task = gulp.src('build/dev/js/*.js')
+        if (options.sourcemap) {
+            task = task.pipe(buffer())
+                .pipe(sourcemaps.init({ loadMaps: true }));
+        }
+        task = task.pipe(uglify()).on('error', gutil.log);
+        if (options.sourcemap) {
+            task = task.pipe(sourcemaps.write());
+        }
+        return task.pipe(gulp.dest('build/dist/js'));
+    }
+
+    @Task('dist/css')
+    dist_css() {
+        return gulp.src('build/dev/css/*.css')
+            .pipe(cleanCSS()).on('error', gutil.log)
             .pipe(gulp.dest('build/dist/css'));
     }
 
     @Task()
-    copy_static() {
-        return gulp.src("src/static/**")
-            .pipe(gulp.dest("build/dist"));
+    crx() {
+        const crx = new ChromeExtension({
+            privateKey: (new rsa({b: 2048})).exportKey('pkcs1-private-pem')
+        });
+        return crx.load(path.resolve('build/dist'))
+            .then((crx: any) => crx.pack())
+            .then((crxBuffer: any) => {
+                fs.writeFileSync('build/YouDanMu.crx', crxBuffer);
+            });
     }
 
     @Task()
     watch(done: Function) {
         return gulp.series('default', () => {
-            gulp.watch('src/ts/content-script/**/*.ts', gulp.series('compile_es5', 'content-script.js'));
-            gulp.watch('src/ts/popup/**/*.ts', gulp.series('compile_es5', 'popup.js'));
-            gulp.watch('src/ts/YouDanMu/**/*.ts', gulp.series('compile_es5', 'YouDanMu.js'));
-            gulp.watch('src/ts/background/**/*.ts', gulp.series('compile_es5', 'background.js'));
+            gulp.watch('src/ts/content-script/**/*.ts', gulp.series('compile_es5', 'dev/content-script.js'));
+            gulp.watch('src/ts/popup/**/*.ts', gulp.series('compile_es5', 'dev/popup.js'));
+            gulp.watch('src/ts/YouDanMu/**/*.ts', gulp.series('compile_es5', 'dev/YouDanMu.js'));
+            gulp.watch('src/ts/background/**/*.ts', gulp.series('compile_es5', 'dev/background.js'));
             gulp.watch('spec/**/*.ts', gulp.series('compile_es5', 'all-spec.js'));
-            gulp.watch('src/scss/content-script/**', gulp.series('content-script.css'));
-            gulp.watch('src/scss/popup/**', gulp.series('popup.css'));
-            gulp.watch('src/static/**', gulp.series('copy_static'));
+            gulp.watch('src/scss/content-script/**', gulp.series('dev/content-script.css'));
+            gulp.watch('src/scss/popup/**', gulp.series('dev/popup.css'));
+            gulp.watch('src/static/**', gulp.series('dev/static'));
         })(done);
     }
 
@@ -159,15 +223,25 @@ class Gulpfile {
 gulp.task('default', gulp.series(
     'clean',
     gulp.parallel(
-        'copy_static',
-        'content-script.css',
-        'popup.css',
+        'dev/static',
+        'dev/content-script.css',
+        'dev/popup.css',
         gulp.series(
             'compile_es5',
             gulp.parallel(
-                'background.js',
-                'content-script.js',
-                'popup.js',
-                'YouDanMu.js',
+                'dev/background.js',
+                'dev/content-script.js',
+                'dev/popup.js',
+                'dev/YouDanMu.js',
                 'all-spec.js'
             )))));
+
+gulp.task('dist', gulp.series(
+    'default',
+    gulp.parallel(
+        'dist/static',
+        'dist/css',
+        'dist/js'
+    ),
+    'crx'
+))
