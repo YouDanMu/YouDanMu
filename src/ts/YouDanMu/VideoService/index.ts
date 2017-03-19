@@ -22,7 +22,8 @@ export enum PlayerEvent {
     Pause,
     AdPlay,
     AdPause,
-    SpeedChange
+    SpeedChange,
+    DanmakuButton
 }
 
 export interface Video {

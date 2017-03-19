@@ -42,6 +42,7 @@ export class YouTubeVideoService implements VideoService {
     player: YouTube.Player;
 
     private ydm: YouDanMu;
+    private _button: HTMLButtonElement;
     private resizeCaptureInterval: number;
     private _resizeObserver = new Subject<Screen>();
 
@@ -123,6 +124,7 @@ export class YouTubeVideoService implements VideoService {
             height: e.clientHeight,
             fullscreen: false
         });
+        this.installDanmakuButton();
         this.startCaptureResize();
         switch (this.state.value) {
             case PlayerState.Idle:
@@ -141,6 +143,7 @@ export class YouTubeVideoService implements VideoService {
     screenDestroy() {
         this.stopCaptureResize();
         this.screen.next(null);
+        this.uninstallDanmakuButton();
         switch (this.state.value) {
             case PlayerState.Ready:
                 this.event.next(PlayerEvent.ScreenDestroy);
@@ -217,6 +220,49 @@ export class YouTubeVideoService implements VideoService {
 
     getTime(): number {
         return this.player.getCurrentTime();
+    }
+
+    private installDanmakuButton() {
+        if (!this._button) {
+            this.generateDanmakuButton();
+        }
+        const controls = this.screen.value.e
+            .querySelector('.ytp-right-controls');
+        if (controls) {
+            controls.appendChild(this._button);
+            controls.insertBefore(this._button, controls.firstChild);
+        }
+    }
+
+    private uninstallDanmakuButton() {
+        if (this._button) {
+            this._button.remove();
+        }
+    }
+
+    private generateDanmakuButton() {
+        this._button = document.createElement('button');
+        this._button.setAttribute('id', 'ydm-youtube-danmaku-button');
+        this._button.classList.add('ytp-button');
+        this._button.setAttribute('title', 'Danmaku Settings');
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        icon.setAttribute('height', '100%');
+        icon.setAttribute('viewBox', '0 0 36 36');
+        icon.setAttribute('width', '100%');
+        const usetag = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        usetag.classList.add('ytp-svg-shadow');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M 23.33 10 H 12.67 A 2.66 2.66 0 0 0 10 12.67 v 6.66 A 2.66 2.66 0 0 0 12.67 22 H 14.8 L 18 26 V 22 h 5.33 A 2.66 2.66 0 0 0 26 19.33 V 12.67 A 2.66 2.66 0 0 0 23.33 10 Z M 19 17 H 13 V 15 h 6 Z m 4 0 H 20 V 15 h 3 Z m 0 -3 H 13 V 12 H 23 Z');
+        path.setAttribute('fill', '#fff');
+        path.setAttribute('transform', 'translate(0 2)');
+        icon.appendChild(usetag);
+        icon.appendChild(path);
+        this._button.appendChild(icon);
+        this._button.addEventListener('click', this.onDanmakuButtonClicked.bind(this));
+    }
+
+    private onDanmakuButtonClicked() {
+        this.event.next(PlayerEvent.DanmakuButton);
     }
 
     private startCaptureResize() {
