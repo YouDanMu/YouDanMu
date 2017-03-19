@@ -1,4 +1,5 @@
 import { YouDanMu } from '..';
+import { DanmakuService } from '.';
 import { Danmaku, Mode } from '../Danmaku';
 import { Logger } from '../util';
 
@@ -25,7 +26,7 @@ function RRGGBB(color: number | string): Color.Color {
     return Color(c);
 };
 
-export class BilibiliDanmakuService {
+export class BilibiliDanmakuService implements DanmakuService {
     private ydm: YouDanMu;
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
