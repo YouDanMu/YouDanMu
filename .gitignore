@@ -1,6 +1,8 @@
 /node_modules
 /build
 
+/key.pem
+
 /.idea
 *.iml
 *.bak

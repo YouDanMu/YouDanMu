@@ -31,6 +31,40 @@ const knownOptions = {
 };
 const options = minimist(process.argv.slice(2), knownOptions);
 
+/**
+ * Read a specified key file from disk
+ * @param {String} keyPath path to the key to read
+ * @returns {Promise}
+ */
+const readKeyFile = (keyPath: string) =>
+    new Promise((resolve, reject) => {
+        fs.readFile(keyPath, (err: any, data: any) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+
+/**
+ * Generate a new key file
+ * @param {String} keyPath path of the key file to create
+ * @returns {Promise}
+ */
+const generateKeyFile = (keyPath: string) =>
+    new Promise((resolve, reject) => {
+        const key = new rsa({b: 2048});
+        const keyVal = key.exportKey('pkcs1-private-pem');
+
+        fs.writeFile(keyPath, keyVal, (err: any) => {
+            if (err) {
+                throw err;
+            }
+            resolve(keyVal);
+        });
+    });
+
 class Gulpfile {
 
     @Task()
@@ -183,14 +217,24 @@ class Gulpfile {
 
     @Task()
     crx() {
-        const crx = new ChromeExtension({
-            privateKey: (new rsa({b: 2048})).exportKey('pkcs1-private-pem')
+        const keyPath = 'key.pem';
+        const crx = new ChromeExtension();
+        return readKeyFile(keyPath).then(null, err => {
+            // If the key file doesn't exist, create one
+            if (err.code === 'ENOENT') {
+                return generateKeyFile(keyPath);
+            } else {
+                throw err;
+            }
+        }).then(key => {
+            crx.privateKey = key;
+        }).then(() => {
+            return crx.load(path.resolve('build/dist'))
+                .then((crx: any) => crx.pack())
+                .then((crxBuffer: any) => {
+                    fs.writeFileSync('build/YouDanMu.crx', crxBuffer);
+                });
         });
-        return crx.load(path.resolve('build/dist'))
-            .then((crx: any) => crx.pack())
-            .then((crxBuffer: any) => {
-                fs.writeFileSync('build/YouDanMu.crx', crxBuffer);
-            });
     }
 
     @Task()
