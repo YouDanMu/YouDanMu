@@ -14,5 +14,9 @@
     "YDM_welcome_log": {
         "message": "歡迎使用有弾幕！",
         "description": "Console log welcome message immediately after the main script is injected on the page."
+    },
+    "SettingsViewTitle": {
+        "message": "有弾幕設置",
+        "description": "Title at Danmaku settings view."
     }
 }

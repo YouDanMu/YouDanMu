@@ -14,5 +14,9 @@
     "YDM_welcome_log": {
         "message": "Thank you for using YouDanMu!",
         "description": "Console log welcome message immediately after the main script is injected on the page."
+    },
+    "SettingsViewTitle": {
+        "message": "YouDanMu Settings",
+        "description": "Title at Danmaku settings view."
     }
 }
