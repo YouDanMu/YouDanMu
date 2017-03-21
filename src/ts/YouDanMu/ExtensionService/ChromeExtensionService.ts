@@ -32,10 +32,10 @@ class ContentScriptReceiver {
 
     constructor() {
         Observable.fromEvent(document, this.channel)
-            .subscribe(this.onReceive.bind(this));
+            .subscribe(this.onReceive);
     }
 
-    private onReceive(e: CustomEvent): void {
+    private onReceive = (e: CustomEvent): void => {
         if (!e.detail) return void console.error(0, 'Received mal-formatted event:', e);
         const m = <Message>e.detail;
         console.log(3, 'Received message from content-script:', m.type, m);
@@ -49,10 +49,10 @@ class ContentScriptTransmitter {
     private channel = 'YDM: injected -> content-script';
 
     constructor() {
-        this.tx.subscribe(this.onTransmit.bind(this));
+        this.tx.subscribe(this.onTransmit);
     }
 
-    private onTransmit(m: Message): void {
+    private onTransmit = (m: Message): void => {
         console.log(3, 'Sending message to content-script:', m.type, m);
         document.dispatchEvent(
             new CustomEvent(
@@ -70,7 +70,7 @@ export class ChromeExtensionService implements ExtensionService {
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         (new ContentScriptReceiver()).rx
-            .subscribe(this.onRx.bind(this));
+            .subscribe(this.onRx);
         this.tx.map((m: Message) => {
             if (m.timestamp == null && m.delayed != null) {
                 // Init command message
@@ -84,10 +84,11 @@ export class ChromeExtensionService implements ExtensionService {
         }).subscribe((new ContentScriptTransmitter()).tx);
     }
 
-    private onRx(m: Message) {
+    private onRx = (m: Message) => {
         if (this.delayedMap.has(m.timestamp)) {
             // Event received.
             m.delayed = this.delayedMap.get(m.timestamp);
+            this.delayedMap.delete(m.timestamp);
             if (m.error != null) m.delayed.reject(m.error);
             else m.delayed.resolve(m.data);
         } else {
@@ -125,5 +126,13 @@ export class ChromeExtensionService implements ExtensionService {
                 delayed: { resolve, reject }
             });
         });
+    }
+
+    private onExtensionIconClicked = () => {
+        this.ydm.settingsView.toggle();
+    }
+
+    private onContextMenuClicked = () => {
+        this.ydm.settingsView.show();
     }
 }
