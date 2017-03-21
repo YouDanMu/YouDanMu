@@ -115,22 +115,6 @@ class Gulpfile {
         return task.pipe(gulp.dest('./build/dev/js'))
     }
 
-    @Task('dev/popup.js')
-    popup() {
-        let task = browserify({
-            entries: './build/es5/popup/main.js',
-            debug: true
-        })
-            .bundle()
-            .pipe(source('popup.js'));
-        if (options.sourcemap) {
-            task = task.pipe(buffer())
-                .pipe(sourcemaps.init({ loadMaps: true }))
-                .pipe(sourcemaps.write('./'));
-        }
-        return task.pipe(gulp.dest('./build/dev/js'))
-    }
-
     @Task('dev/YouDanMu.js')
     YouDanMu() {
         let task = browserify({
@@ -172,15 +156,6 @@ class Gulpfile {
             .pipe(gulp.dest('build/dev/css'));
     }
 
-    @Task('dev/popup.css')
-    popup_css() {
-        return gulp.src('src/scss/popup/main.scss')
-            .pipe(sass()).on('error', sass.logError)
-            .pipe(autoprefixer())
-            .pipe(rename('popup.css'))
-            .pipe(gulp.dest('build/dev/css'));
-    }
-
     @Task('dev/static')
     dev_static() {
         return gulp.src("src/static/**")
@@ -192,8 +167,7 @@ class Gulpfile {
         return gulp.src([
             'build/dev/*_locales/**',
             'build/dev/*images/**',
-            'build/dev/manifest.json',
-            'build/dev/popup.html'
+            'build/dev/manifest.json'
         ]).pipe(gulp.dest('build/dist'));
     }
 
@@ -244,12 +218,10 @@ class Gulpfile {
     watch(done: Function) {
         return gulp.series('default', () => {
             gulp.watch('src/ts/content-script/**/*.ts?(x)', gulp.series('compile_es5', 'dev/content-script.js'));
-            gulp.watch('src/ts/popup/**/*.ts?(x)', gulp.series('compile_es5', 'dev/popup.js'));
             gulp.watch('src/ts/YouDanMu/**/*.ts?(x)', gulp.series('compile_es5', 'dev/YouDanMu.js'));
             gulp.watch('src/ts/background/**/*.ts?(x)', gulp.series('compile_es5', 'dev/background.js'));
             gulp.watch('spec/**/*.ts?(x)', gulp.series('compile_es5', 'all-spec.js'));
             gulp.watch('src/scss/content-script/**', gulp.series('dev/content-script.css'));
-            gulp.watch('src/scss/popup/**', gulp.series('dev/popup.css'));
             gulp.watch('src/static/**', gulp.series('dev/static'));
         })(done);
     }
@@ -272,13 +244,11 @@ gulp.task('default', gulp.series(
     gulp.parallel(
         'dev/static',
         'dev/content-script.css',
-        'dev/popup.css',
         gulp.series(
             'compile_es5',
             gulp.parallel(
                 'dev/background.js',
                 'dev/content-script.js',
-                'dev/popup.js',
                 'dev/YouDanMu.js',
                 'all-spec.js'
             )))));
