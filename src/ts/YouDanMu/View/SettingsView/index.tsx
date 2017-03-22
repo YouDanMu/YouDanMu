@@ -15,7 +15,7 @@ export class SettingsView {
         render(<Settings ydm={ydm} />, this.parent);
     }
 
-    toggle() {
+    toggle(): void {
         if (this.shown) {
             this.hide();
         } else {
@@ -23,12 +23,14 @@ export class SettingsView {
         }
     }
 
-    show() {
+    show(): void {
+        if (this.shown) return;
         this.shown = true;
         document.body.appendChild(this.parent);
     }
 
-    hide() {
+    hide(): void {
+        if (!this.shown) return;
         this.shown = false;
         this.parent.remove();
     }

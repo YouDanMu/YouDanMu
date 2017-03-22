@@ -18,5 +18,25 @@
     "SettingsViewTitle": {
         "message": "有弾幕設置",
         "description": "Title at Danmaku settings view."
+    },
+    "DanmakuContentPlaceholder": {
+        "message": "說些什麼吧...",
+        "description": "Placeholder at the Danmaku posting input textarea."
+    },
+    "Post": {
+        "message": "發送",
+        "description": "Button text to post Danmaku."
+    },
+    "DanmakuURLPlaceholder": {
+        "message": "弾幕源URL...",
+        "description": "Placeholder at the Danmaku source URL input box."
+    },
+    "Load": {
+        "message": "加載",
+        "description": "Button text to load Danmaku source URL."
+    },
+    "Opacity": {
+        "message": "不透明度",
+        "description": "Danmaku setting type that corresponds to Danmaku transparency."
     }
 }

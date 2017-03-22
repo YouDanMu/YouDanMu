@@ -18,5 +18,25 @@
     "SettingsViewTitle": {
         "message": "YouDanMu Settings",
         "description": "Title at Danmaku settings view."
+    },
+    "DanmakuContentPlaceholder": {
+        "message": "Say something...",
+        "description": "Placeholder at the Danmaku posting input textarea."
+    },
+    "Post": {
+        "message": "Post",
+        "description": "Button text to post Danmaku."
+    },
+    "DanmakuURLPlaceholder": {
+        "message": "Danmaku Source URL...",
+        "description": "Placeholder at the Danmaku source URL input box."
+    },
+    "Load": {
+        "message": "Load",
+        "description": "Button text to load Danmaku source URL."
+    },
+    "Opacity": {
+        "message": "Opacity",
+        "description": "Danmaku setting type that corresponds to Danmaku transparency."
     }
 }
