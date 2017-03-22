@@ -23,13 +23,56 @@
   position: absolute;
 }
 
-.ydm-settings {
+.ydm-popup {
   top: 0;
   right: 0;
   margin: 5px;
+  padding: 10px;
   position: fixed;
   background-color: #fff;
   z-index: 9999999999999999;
   border: 1px solid #23AEE7;
+  border-radius: 5px;
   box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+  transition:visibility 0s linear 0.4s,opacity 0.4s linear;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.ydm-popup.show {
+  visibility: visible;
+  opacity: 1;
+  transition-delay:0s;
+}
+
+
+.ydm-popup .close {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  transition: all 200ms;
+  font-size: 25px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+
+.ydm-popup .content {
+  margin-top: 20px;
+  transition: all 200ms;
+}
+.ydm-popup  h1 {
+  margin:0px;
+}
+
+.ydm-popup .close:hover {
+  color: #23AEE7;
+}
+
+.ydm-poster {
+  margin: 0;
+}
+
+.ydm-settings {
+  margin: 0;
 }
