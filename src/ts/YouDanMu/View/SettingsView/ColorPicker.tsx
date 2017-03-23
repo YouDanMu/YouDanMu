@@ -23,6 +23,28 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
     this.state.color = props.defaultColor;
   }
 
+  static rgb2Hex(rgb: string) {
+    let match = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+    return (match && match.length === 4) ? "#" +
+      ("0" + parseInt(match[1], 10).toString(16)).slice(-2) +
+      ("0" + parseInt(match[2], 10).toString(16)).slice(-2) +
+      ("0" + parseInt(match[3], 10).toString(16)).slice(-2) : '';
+  }
+
+  static hex2Rgb(hex: string) {
+    let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
   static percent_to_color = (x: number) => {
     let r: number[];
     if (x < 0.2) r = [255, Math.floor(255 * x / 0.2), 0];
