@@ -67,16 +67,15 @@
     margin: 0;
 }
 .cp-color {
-    width: 36px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border-radius: 2px;
-    //background: `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`;
 }
 .cp-swatch {
     padding: 5px;
     background: #fff;
     border-radius: 1px;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.1);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
     display: inline-block;
     cursor: pointer;
 }
@@ -90,4 +89,16 @@
     right: 0px;
     bottom: 0px;
     left: 0px;
+}
+
+.color-picker {
+    position: absolute;
+    z-index: 20;
+    width: 200px; 
+    height: 100px;
+    right: 5px;
+    box-sizing: initial; 
+    background: rgba(0, 0, 0,0); 
+    border-radius: 4px; 
+    box-shadow: rgba(0, 0, 0, 0.14902) 0px 0px 0px 1px, rgba(0, 0, 0, 0.14902) 0px 8px 16px;
 }
