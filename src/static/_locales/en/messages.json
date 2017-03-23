@@ -86,5 +86,17 @@
     "Opacity": {
         "message": "Opacity",
         "description": "Section title of Settings view for Danmaku transparency."
+    },
+    "DeveloperMode": {
+        "message": "Developer Mode",
+        "description": "Section title of Settings view for developer mode."
+    },
+    "EnableDeveloperMode": {
+        "message": "Enable developer mode",
+        "description": "Button title to enable developer mode."
+    },
+    "DisableDeveloperMode": {
+        "message": "Disable developer mode",
+        "description": "Button title to disable developer mode."
     }
 }
