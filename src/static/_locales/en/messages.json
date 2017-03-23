@@ -18,5 +18,9 @@
     "SettingsViewTitle": {
         "message": "YouDanMu Settings",
         "description": "Title at Danmaku settings view."
+    },
+    "DanmukuPosterPlaceholder": {
+        "message": "Type in your Danmuku~",
+        "description": "Danmuku input box placeholder"
     }
 }

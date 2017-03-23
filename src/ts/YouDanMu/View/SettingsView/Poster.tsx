@@ -22,7 +22,7 @@ export class Poster extends Component<PosterProps,PosterState> {
     render(props: PosterProps) {
         return ( 
             <div class='ydm-poster'>
-                <h1>__MSG_SettingsViewTitle__</h1>
+                <input type="text" name="poster-input" placeholder="__MSG_DanmukuPosterPlaceholder__"/>
             </div>
         );
     }

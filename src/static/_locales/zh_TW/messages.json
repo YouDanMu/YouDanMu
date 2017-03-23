@@ -18,5 +18,9 @@
     "SettingsViewTitle": {
         "message": "有弾幕設置",
         "description": "Title at Danmaku settings view."
+    },
+    "DanmukuPosterPlaceholder": {
+        "message": "鍵入彈幕吐槽哦~",
+        "description": "Danmuku input box placeholder"
     }
 }

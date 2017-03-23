@@ -1,7 +1,7 @@
 import { YouDanMu } from '../../';
 import { Settings } from './Settings';
 import { Poster } from './Poster';
-
+import { ColorPicker} from './ColorPicker';
 import { h, render, Component } from 'preact';
 
 export class SettingsView {
@@ -22,6 +22,7 @@ export class SettingsView {
         this.content = document.createElement('div');
         this.content.classList.add('content');
         this.parent.appendChild(this.content);
+        render(<ColorPicker defaultColor="#000000" />, this.content);
         render(<Poster ydm={ydm} show={true} />,this.content);
         render(<Settings ydm={ydm} />, this.content);
     }
@@ -38,6 +39,7 @@ export class SettingsView {
         this.shown = true;
         document.body.appendChild(this.parent);
         this.parent.classList.add('show');
+
     }
 
     hide() {

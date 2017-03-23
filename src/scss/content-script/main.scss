@@ -1,78 +1,210 @@
 .ydm-svg-canvas {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 11;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 11;
 }
-
 .ydm-svg-canvas-layer {
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
-
 .ydm-svg-canvas-prepare {
-  top: 0;
-  left: 100%;
-  width: 100%;
-  height: 100%;
-  position: absolute;
+    top: 0;
+    left: 100%;
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
-
 .ydm-popup {
-  top: 0;
-  right: 0;
-  margin: 5px;
-  padding: 10px;
-  position: fixed;
-  background-color: #fff;
-  z-index: 9999999999999999;
-  border: 1px solid #23AEE7;
-  border-radius: 5px;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
-  transition:visibility 0s linear 0.4s,opacity 0.4s linear;
-  visibility: hidden;
-  opacity: 0;
+    top: 0;
+    right: 0;
+    margin: 5px;
+    padding: 10px;
+    position: fixed;
+    background-color: #fff;
+    z-index: 9999999999999999;
+    border: 1px solid #23AEE7;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    transition: visibility 0s linear 0.4s, opacity 0.4s linear;
+    visibility: hidden;
+    opacity: 0;
 }
-
 .ydm-popup.show {
-  visibility: visible;
-  opacity: 1;
-  transition-delay:0s;
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
 }
-
-
 .ydm-popup .close {
-  position: absolute;
-  top: 0px;
-  right: 10px;
-  transition: all 200ms;
-  font-size: 25px;
-  font-weight: bold;
-  text-decoration: none;
-  color: #333;
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    transition: all 200ms;
+    font-size: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
 }
-
 .ydm-popup .content {
-  margin-top: 20px;
-  transition: all 200ms;
+    margin-top: 20px;
+    transition: all 200ms;
 }
-.ydm-popup  h1 {
-  margin:0px;
+.ydm-popup h1 {
+    margin: 0px;
 }
-
 .ydm-popup .close:hover {
-  color: #23AEE7;
+    color: #23AEE7;
 }
-
 .ydm-poster {
-  margin: 0;
+    margin: 0;
+}
+.ydm-settings {
+    margin: 0;
+}
+.cp-color {
+    width: 36px;
+    height: 14px;
+    border-radius: 2px;
+    //background: `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`;
+}
+.cp-swatch {
+    padding: 5px;
+    background: #fff;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.1);
+    display: inline-block;
+    cursor: pointer;
+}
+.cp-popover {
+    position: absolute;
+    z-index: 2;
+}
+.cp-cover {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
 }
 
-.ydm-settings {
-  margin: 0;
+
+.color-picker,
+.color-picker:before,
+.color-picker:after,
+.color-picker *,
+.color-picker *:before,
+.color-picker *:after {
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  box-sizing:border-box;
+}
+.color-picker {
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:9999;
+}
+.color-picker-control {
+  border:1px solid #000;
+  -webkit-box-shadow:1px 5px 10px rgba(0,0,0,.5);
+  -moz-box-shadow:1px 5px 10px rgba(0,0,0,.5);
+  box-shadow:1px 5px 10px rgba(0,0,0,.5);
+}
+.color-picker-control *,
+.color-picker-control *:before,
+.color-picker-control *:after {border-color:inherit}
+.color-picker-control:after {
+  content:" ";
+  display:table;
+  clear:both;
+}
+.color-picker i {font:inherit}
+.color-picker-h {
+  position:relative;
+  width:20px;
+  height:150px;
+  float:right;
+  border-left:1px solid;
+  border-left-color:inherit;
+  cursor:ns-resize;
+  background:transparent url('color-picker-h.png') no-repeat 50% 50%;
+  background-image:-webkit-linear-gradient(to top,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%);
+  background-image:-moz-linear-gradient(to top,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%);
+  background-image:linear-gradient(to top,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%);
+  -webkit-background-size:100% 100%;
+  -moz-background-size:100% 100%;
+  background-size:100% 100%;
+  overflow:hidden;
+}
+.color-picker-h i {
+  position:absolute;
+  top:-3px;
+  right:0;
+  left:0;
+  z-index:3;
+  display:block;
+  height:6px;
+}
+.color-picker-h i:before {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  display:block;
+  border:3px solid;
+  border-color:inherit;
+  border-top-color:transparent;
+  border-bottom-color:transparent;
+}
+.color-picker-sv {
+  position:relative;
+  width:150px;
+  height:150px;
+  float:left;
+  background:transparent url('color-picker-sv.png') no-repeat 50% 50%;
+  background-image:-webkit-linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0));
+  background-image:-moz-linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0));
+  background-image:linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0));
+  -webkit-background-size:100% 100%;
+  -moz-background-size:100% 100%;
+  background-size:100% 100%;
+  cursor:crosshair;
+}
+.color-picker-sv i {
+  position:absolute;
+  top:-4px;
+  right:-4px;
+  z-index:3;
+  display:block;
+  width:8px;
+  height:8px;
+}
+.color-picker-sv i:before,
+.color-picker-sv i:after {
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  display:block;
+  border:1px solid;
+  border-color:inherit;
+  -webkit-border-radius:100%;
+  -moz-border-radius:100%;
+  border-radius:100%;
+}
+.color-picker-sv i:before {
+  top:-1px;
+  right:-1px;
+  bottom:-1px;
+  left:-1px;
+  border-color:#fff;
 }

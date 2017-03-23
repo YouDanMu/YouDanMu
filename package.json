@@ -25,6 +25,7 @@
     "browserify": "^14.0.0",
     "chai": "^3.5.0",
     "color": "^1.0.3",
+    "color-picker": "git+ssh://git@github.com/tovic/color-picker.git",
     "crx": "^3.2.1",
     "del": "^2.2.2",
     "gulp": "github:gulpjs/gulp#4.0",
