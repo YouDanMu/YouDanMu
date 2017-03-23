@@ -1,0 +1,110 @@
+.ydm-settings {
+    @include toggleable;
+    top: 0;
+    right: 0;
+    width: 300px;
+    margin: 5px;
+    position: fixed;
+    background-color: #fff;
+    z-index: 9999999999999999;
+    border: 1px solid #23AEE7;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    font-family: 'Roboto';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    user-select: none;
+    * {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+    textarea,
+    input[type="text"],
+    input[type="password"],
+    input[type="url"] {
+        @include input-text;
+    }
+    input[type="number"] {
+        @include input-number;
+    }
+    &-part,
+    &-sections,
+    &-container {
+        display: flex;
+        position: relative;
+        flex-direction: column;
+    }
+    &-part {
+        padding: 10px;
+        border-top: 1px solid #aaa;
+    }
+    &-title-bar {
+        font-size: 20px;
+        position: relative;
+        text-align: center;
+        &-title {
+            align-items: center;
+            display: inline-flex;
+            padding: 5px;
+            * {
+                margin-right: 5px;
+            }
+            *:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+    &-close {
+        @extend .ydm-icon;
+        @include button(#fff, #fff, $main-color, $active-color);
+        top: 0;
+        right: 0;
+        position: absolute;
+    }
+    &-section-title {
+        font-size: 17px;
+        padding-bottom: 5px;
+    }
+    &-controls {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        font-size: 15px;
+        * {
+            margin-right: 5px;
+            &:first-child {
+                margin-right: 0;
+            }
+        }
+        .ydm-button {
+            @include button(#fff, #fff, $main-color, $active-color);
+            height: calc(1em + 10px);
+            padding: 5px 10px;
+        }
+        .ydm-input-range {
+            flex: 1;
+        }
+        .ydm-input-value {
+            width: 30px;
+        }
+        .ydm-radio-group {
+            display: flex;
+            * {
+                margin: 0;
+            }
+            input[type="radio"] {
+                display: none;
+                +label {
+                    @include button($main-color, #fff, none, $active-color);
+                    padding: 5px 10px;
+                    height: calc(1em + 10px);
+                }
+                &:checked {
+                    +label {
+                        @include button(#fff, #fff, $main-color, $main-color);
+                    }
+                }
+            }
+        }
+    }
+}

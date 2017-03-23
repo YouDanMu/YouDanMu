@@ -19,13 +19,57 @@
         "message": "有弾幕設置",
         "description": "Title at Danmaku settings view."
     },
+    "EnableDanmaku": {
+        "message": "啓用有弾幕",
+        "description": "Button title to enable Danmaku extension."
+    },
+    "DisableDanmaku": {
+        "message": "禁用有弾幕",
+        "description": "Button title to disable Danmaku extension."
+    },
+    "PostDanmaku": {
+        "message": "發送弾幕",
+        "description": "Section title of Settings view for posting Danmaku."
+    },
     "DanmakuContentPlaceholder": {
         "message": "說些什麼吧...",
         "description": "Placeholder at the Danmaku posting input textarea."
     },
+    "DanmakuPositionTop": {
+        "message": "頂部弾幕",
+        "description": "Danmaku position type of fixed top."
+    },
+    "DanmakuPositionBottom": {
+        "message": "底部弾幕",
+        "description": "Danmaku position type of fixed bottom."
+    },
+    "DanmakuPositionMarquee": {
+        "message": "滾動弾幕",
+        "description": "Danmaku position type of rolling marquee."
+    },
+    "DanmakuSizeSmallFull": {
+        "message": "小字號",
+        "description": "Danmaku small font size description."
+    },
+    "DanmakuSizeSmallAbbrv": {
+        "message": "小",
+        "description": "Danmaku small font size abbreviation show on button."
+    },
+    "DanmakuSizeLargeFull": {
+        "message": "大字號",
+        "description": "Danmaku large font size description."
+    },
+    "DanmakuSizeLargeAbbrv": {
+        "message": "大",
+        "description": "Danmaku large font size abbreviation show on button."
+    },
     "Post": {
         "message": "發送",
         "description": "Button text to post Danmaku."
+    },
+    "DanmakuSource": {
+        "message": "弾幕源",
+        "description": "Section title of Settings view for load/unload Danmaku."
     },
     "DanmakuURLPlaceholder": {
         "message": "弾幕源URL...",
@@ -34,6 +78,10 @@
     "Load": {
         "message": "加載",
         "description": "Button text to load Danmaku source URL."
+    },
+    "Unload": {
+        "message": "卸載",
+        "description": "Button text to unload Danmaku source."
     },
     "Opacity": {
         "message": "不透明度",

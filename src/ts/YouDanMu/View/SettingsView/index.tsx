@@ -6,16 +6,17 @@ import { h, render } from 'preact';
 export class SettingsView {
     private ydm: YouDanMu;
     private parent: HTMLElement;
-    private shown: boolean;
+    private shown = false;
     
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         this.parent = document.createElement('div');
         this.parent.classList.add('ydm-settings');
+        this.parent.classList.add('ydm-toggleable-hidden');
         render(<Settings ydm={ydm} />, this.parent);
     }
 
-    toggle(): void {
+    toggle = (): void => {
         if (this.shown) {
             this.hide();
         } else {
@@ -23,15 +24,20 @@ export class SettingsView {
         }
     }
 
-    show(): void {
+    show = (): void => {
         if (this.shown) return;
         this.shown = true;
         document.body.appendChild(this.parent);
+        this.parent.classList.remove('ydm-toggleable-hide');
+        this.parent.classList.remove('ydm-toggleable-hidden');
+        this.parent.classList.add('ydm-toggleable-show');
     }
 
-    hide(): void {
+    hide = (): void => {
         if (!this.shown) return;
         this.shown = false;
-        this.parent.remove();
+        this.parent.classList.remove('ydm-toggleable-show');
+        this.parent.classList.remove('ydm-toggleable-hidden');
+        this.parent.classList.add('ydm-toggleable-hide');
     }
 }
