@@ -1,6 +1,6 @@
 import { YouDanMu } from '../../';
 import { Settings } from './Settings';
-
+import { ColorPicker } from './ColorPicker';
 import { h, render } from 'preact';
 
 export class SettingsView {
@@ -13,9 +13,9 @@ export class SettingsView {
         this.parent = document.createElement('div');
         this.parent.classList.add('ydm-settings');
         this.parent.classList.add('ydm-toggleable-hidden');
+        //render(<ColorPicker defaultColor="rgb(255,0,0)" onChange={(c) => console.log(c)} />, this.parent);
         render(<Settings ydm={ydm} />, this.parent);
     }
-
     toggle = (): void => {
         if (this.shown) {
             this.hide();

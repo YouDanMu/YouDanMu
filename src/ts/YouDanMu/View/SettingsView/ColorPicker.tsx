@@ -77,7 +77,6 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
 
   render(props: ColorPickerProps) {
-    this.state.color = props.defaultColor;
 
     const picker = (
       <div class="color-picker">
@@ -106,7 +105,6 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
         </svg>
       </div>
     )
-
 
     const p = (
       <div>
