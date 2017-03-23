@@ -13,8 +13,10 @@ export interface ColorPickerState {
 
 export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
-  private cp;
-  private pickerMount: Element;
+  //private cp;
+  private picker;
+  private svg: SVGSVGElement;
+  //private pickerMount: Element;
 
   constructor(props: ColorPickerProps) {
     super(props);
@@ -26,6 +28,17 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
     this.setState({ color: color.rgb } as ColorPickerState)
   };
 
+  handleClick = (e : MouseEvent) => {
+    //document.rootElement;
+    let point = this.svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    let cpt = point.matrixTransform(this.svg.getScreenCTM().inverse());
+
+  }
+
+
+/*
   componentDidMount() {
     if(this.cp == null) {
       this.cp = new CP(this.pickerMount);
@@ -40,6 +53,8 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
       this.cp.add("change", this.handleChange);
     }
   }
+
+  */
   
   render(props: ColorPickerProps) {
 
@@ -48,6 +63,7 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
         <div class='cp-swatch' ref={(element) => this.pickerMount = element}>
           <div class='cp-color' />
         </div>
+
         {/*this.state.displayColorthis.Picker ? this.picker: null*/}
       </div>
     );
@@ -57,7 +73,7 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
 }
 
-
+/*
 //ported from https://github.com/tovic/color-picker
 //all credits goes to original author
 export class CP {
@@ -375,7 +391,7 @@ export class CP {
     let z = y.h > w.h; // has vertical scroll bar
     let ww = this.offset(window);
     let yy = this.offset(this.h);
-    let w_W = z ? /* Math.max(y.w, w.w) */ y.w : w.w + ww.l;
+    let w_W = z ? /* Math.max(y.w, w.w) */ /* y.w : w.w + ww.l;
     let w_H = z ? w.h + ww.t : Math.max(y.h, w.h);
     let to = this.offset(this.target);
     let left = to.l;
@@ -609,3 +625,4 @@ export class CP {
 
 
 }
+*/
