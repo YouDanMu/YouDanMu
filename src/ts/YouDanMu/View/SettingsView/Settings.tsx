@@ -1,11 +1,16 @@
 import { YouDanMu } from '../../';
 import { h, Component } from 'preact';
 
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
 export interface SettingsProps {
     ydm: YouDanMu;
 }
 
 export class Settings extends Component<SettingsProps, any> {
+    enable: BehaviorSubject<boolean>;
+    devMode: BehaviorSubject<boolean>;
+
     render(props: SettingsProps) {
         return (
             <div className="ydm-settings-container">
