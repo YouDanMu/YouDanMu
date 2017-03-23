@@ -1,4 +1,5 @@
 import { YouDanMu } from '..';
+import { Settings } from '../SettingsService';
 
 import { Subject } from 'rxjs/Subject';
 import { Observer } from 'rxjs/Observer';
@@ -7,7 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/map';
 
-import { Logger } from '../util';
+import { Logger, objToMap } from '../util';
 import { ExtensionService } from './';
 
 const console = new Logger('ChromeExtensionService');
@@ -62,6 +63,8 @@ class ContentScriptTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
+    settingsChanged = new Subject<Map<string,any>>();
+
     private ydm: YouDanMu;
     private rx = new Subject<Message>();
     private tx = new Subject<Message>();
@@ -119,13 +122,29 @@ export class ChromeExtensionService implements ExtensionService {
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
+        return this.sendCommand('fetch', { input, init });
+    }
+
+    getSettings(): Promise<Settings> {
+        return this.sendCommand('getSettings');
+    }
+
+    setSetting(k: string, v: any): void {
+        this.sendCommand('setSetting', { k, v });
+    }
+
+    private sendCommand<ReturnType>(cmd: string, data?: any): Promise<ReturnType> {
         return new Promise((resolve, reject) => {
             this.tx.next({
-                type: 'fetch',
-                data: { input, init },
+                type: cmd,
+                data: data,
                 delayed: { resolve, reject }
             });
         });
+    }
+
+    private onSettingsChanged = (changes: {[key: string]: any}): void => {
+        this.settingsChanged.next(objToMap(changes));
     }
 
     private onExtensionIconClicked = () => {

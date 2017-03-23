@@ -1,0 +1,17 @@
+@mixin button($color-normal, $color-active, $bg-normal, $bg-active) {
+    fill: $color-normal;
+    color: $color-normal;
+    background: $bg-normal;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    cursor: pointer;
+    align-items: center;
+    display: inline-flex;
+    transition: background .6s cubic-bezier(.19, 1, .22, 1);
+    &:hover {
+        fill: $color-active;
+        color: $color-active;
+        background: $bg-active;
+    }
+}

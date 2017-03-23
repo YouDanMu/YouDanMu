@@ -1,37 +1,22 @@
 import { YouDanMu } from '../../';
 import { Settings } from './Settings';
-import { Poster } from './Poster';
-import { ColorPicker} from './ColorPicker';
-import { h, render, Component } from 'preact';
+
+import { h, render } from 'preact';
 
 export class SettingsView {
     private ydm: YouDanMu;
     private parent: HTMLElement;
-    private content: HTMLElement;
-    private shown: boolean;
-    private closeBtn: JSX.Element;
+    private shown = false;
     
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         this.parent = document.createElement('div');
-        this.parent.classList.add('ydm-popup');
-        this.shown = false;
-
-        this.closeBtn = <a class="close" onClick={() => this.hide()}>&times;</a>
-        render(this.closeBtn,this.parent);
-        this.content = document.createElement('div');
-        this.content.classList.add('content');
-        this.parent.appendChild(this.content);
-        render(<ColorPicker defaultColor="rgb(0,0,255)" onChange={this.onColorChange}/>, this.content);
-        render(<Poster ydm={ydm} show={true} />,this.content);
-        render(<Settings ydm={ydm} />, this.content);
+        this.parent.classList.add('ydm-settings');
+        this.parent.classList.add('ydm-toggleable-hidden');
+        render(<Settings ydm={ydm} />, this.parent);
     }
 
-    onColorChange = (color: string) => {
-        console.log(color);   
-    }
-
-    toggle() {
+    toggle = (): void => {
         if (this.shown) {
             this.hide();
         } else {
@@ -39,16 +24,20 @@ export class SettingsView {
         }
     }
 
-    show() {
+    show = (): void => {
+        if (this.shown) return;
         this.shown = true;
         document.body.appendChild(this.parent);
-        this.parent.classList.add('show');
-
+        this.parent.classList.remove('ydm-toggleable-hide');
+        this.parent.classList.remove('ydm-toggleable-hidden');
+        this.parent.classList.add('ydm-toggleable-show');
     }
 
-    hide() {
+    hide = (): void => {
+        if (!this.shown) return;
         this.shown = false;
-        this.parent.classList.remove('show');
-        //this.parent.remove();
+        this.parent.classList.remove('ydm-toggleable-show');
+        this.parent.classList.remove('ydm-toggleable-hidden');
+        this.parent.classList.add('ydm-toggleable-hide');
     }
 }

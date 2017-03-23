@@ -16,11 +16,87 @@
         "description": "Console log welcome message immediately after the main script is injected on the page."
     },
     "SettingsViewTitle": {
-        "message": "YouDanMu Settings",
+        "message": "YouDanMu",
         "description": "Title at Danmaku settings view."
     },
-    "DanmukuPosterPlaceholder": {
-        "message": "Type in your Danmuku~",
-        "description": "Danmuku input box placeholder"
+    "EnableDanmaku": {
+        "message": "Enable Danmaku",
+        "description": "Button title to enable Danmaku extension."
+    },
+    "DisableDanmaku": {
+        "message": "Disable Danmaku",
+        "description": "Button title to disable Danmaku extension."
+    },
+    "PostDanmaku": {
+        "message": "Post Danmaku",
+        "description": "Section title of Settings view for posting Danmaku."
+    },
+    "DanmakuContentPlaceholder": {
+        "message": "Say something...",
+        "description": "Placeholder at the Danmaku posting input textarea."
+    },
+    "DanmakuPositionTop": {
+        "message": "Top Danmkau",
+        "description": "Danmaku position type of fixed top."
+    },
+    "DanmakuPositionBottom": {
+        "message": "Bottom Danmaku",
+        "description": "Danmaku position type of fixed bottom."
+    },
+    "DanmakuPositionMarquee": {
+        "message": "Rolling marquee Danmaku",
+        "description": "Danmaku position type of rolling marquee."
+    },
+    "DanmakuSizeSmallFull": {
+        "message": "Small font size",
+        "description": "Danmaku small font size description."
+    },
+    "DanmakuSizeSmallAbbrv": {
+        "message": "S",
+        "description": "Danmaku small font size abbreviation show on button."
+    },
+    "DanmakuSizeLargeFull": {
+        "message": "Large font size",
+        "description": "Danmaku large font size description."
+    },
+    "DanmakuSizeLargeAbbrv": {
+        "message": "L",
+        "description": "Danmaku large font size abbreviation show on button."
+    },
+    "Post": {
+        "message": "Post",
+        "description": "Button text to post Danmaku."
+    },
+    "DanmakuSource": {
+        "message": "Danmaku Source",
+        "description": "Section title of Settings view for load/unload Danmaku."
+    },
+    "DanmakuURLPlaceholder": {
+        "message": "Danmaku Source URL...",
+        "description": "Placeholder at the Danmaku source URL input box."
+    },
+    "Load": {
+        "message": "Load",
+        "description": "Button text to load Danmaku source URL."
+    },
+    "Unload": {
+        "message": "Unload",
+        "description": "Button text to unload Danmaku source."
+    },
+    "Opacity": {
+        "message": "Opacity",
+        "description": "Section title of Settings view for Danmaku transparency."
+    },
+    "DeveloperMode": {
+        "message": "Developer Mode",
+        "description": "Section title of Settings view for developer mode."
+    },
+    "EnableDeveloperMode": {
+        "message": "Enable developer mode",
+        "description": "Button title to enable developer mode."
+    },
+    "DisableDeveloperMode": {
+        "message": "Disable developer mode",
+        "description": "Button title to disable developer mode."
     }
 }

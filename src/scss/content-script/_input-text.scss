@@ -1,0 +1,7 @@
+@mixin input-text {
+    border: none;
+    outline: none;
+    resize: vertical;
+    padding: 4px;
+    box-shadow: inset 0px 0px 0px 1px #aaa;
+}

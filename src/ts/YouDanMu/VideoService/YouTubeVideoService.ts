@@ -274,6 +274,7 @@ export class YouTubeVideoService implements VideoService {
         icon.appendChild(usetag);
         icon.appendChild(path);
         this._button.appendChild(icon);
+        this._button.title = '__MSG_SettingsViewTitle__';
         this._button.addEventListener('click', this.onDanmakuButtonClicked.bind(this));
     }
 

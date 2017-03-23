@@ -19,8 +19,84 @@
         "message": "有弾幕设置",
         "description": "Title at Danmaku settings view."
     },
-    "DanmukuPosterPlaceholder": {
-        "message": "输入弹幕吐槽哦~",
-        "description": "Danmuku input box placeholder"
+    "EnableDanmaku": {
+        "message": "启用有弾幕",
+        "description": "Button title to enable Danmaku extension."
+    },
+    "DisableDanmaku": {
+        "message": "禁用有弾幕",
+        "description": "Button title to disable Danmaku extension."
+    },
+    "PostDanmaku": {
+        "message": "发送弾幕",
+        "description": "Section title of Settings view for posting Danmaku."
+    },
+    "DanmakuContentPlaceholder": {
+        "message": "说些什么吧...",
+        "description": "Placeholder at the Danmaku posting input textarea."
+    },
+    "DanmakuPositionTop": {
+        "message": "顶部弾幕",
+        "description": "Danmaku position type of fixed top."
+    },
+    "DanmakuPositionBottom": {
+        "message": "底部弾幕",
+        "description": "Danmaku position type of fixed bottom."
+    },
+    "DanmakuPositionMarquee": {
+        "message": "滚动弾幕",
+        "description": "Danmaku position type of rolling marquee."
+    },
+    "DanmakuSizeSmallFull": {
+        "message": "小字号",
+        "description": "Danmaku small font size description."
+    },
+    "DanmakuSizeSmallAbbrv": {
+        "message": "大字号",
+        "description": "Danmaku small font size abbreviation show on button."
+    },
+    "DanmakuSizeLargeFull": {
+        "message": "小",
+        "description": "Danmaku large font size description."
+    },
+    "DanmakuSizeLargeAbbrv": {
+        "message": "大",
+        "description": "Danmaku large font size abbreviation show on button."
+    },
+    "Post": {
+        "message": "发送",
+        "description": "Button text to post Danmaku."
+    },
+    "DanmakuSource": {
+        "message": "弾幕源",
+        "description": "Section title of Settings view for load/unload Danmaku."
+    },
+    "DanmakuURLPlaceholder": {
+        "message": "弾幕源URL...",
+        "description": "Placeholder at the Danmaku source URL input box."
+    },
+    "Load": {
+        "message": "加载",
+        "description": "Button text to load Danmaku source URL."
+    },
+    "Unload": {
+        "message": "卸载",
+        "description": "Button text to unload Danmaku source."
+    },
+    "Opacity": {
+        "message": "不透明度",
+        "description": "Danmaku setting type that corresponds to Danmaku transparency."
+    },
+    "DeveloperMode": {
+        "message": "开发者模式",
+        "description": "Section title of Settings view for developer mode."
+    },
+    "EnableDeveloperMode": {
+        "message": "启用开发者模式",
+        "description": "Button title to enable developer mode."
+    },
+    "DisableDeveloperMode": {
+        "message": "禁用开发者模式",
+        "description": "Button title to disable developer mode."
     }
 }
