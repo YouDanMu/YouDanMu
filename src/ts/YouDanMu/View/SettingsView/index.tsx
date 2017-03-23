@@ -22,7 +22,7 @@ export class SettingsView {
         this.content = document.createElement('div');
         this.content.classList.add('content');
         this.parent.appendChild(this.content);
-        render(<ColorPicker defaultColor="#000000" />, this.content);
+        render(<ColorPicker defaultColor="rgb(0,0,0)" />, this.content);
         render(<Poster ydm={ydm} show={true} />,this.content);
         render(<Settings ydm={ydm} />, this.content);
     }

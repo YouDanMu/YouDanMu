@@ -8,66 +8,89 @@ export interface ColorPickerProps {
 export interface ColorPickerState {
   displayColorPicker: boolean,
   color: string;
-
 }
 
 export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
   //private cp;
-  private picker;
+  //private picker;
   private svg: SVGSVGElement;
-  //private pickerMount: Element;
+  private panel: HTMLElement;
+  private pickerMount: Element;
 
   constructor(props: ColorPickerProps) {
     super(props);
     this.state.color = props.defaultColor;
   }
 
-  handleChange = (color) => {
+  static percent_to_color = (x: number) => {
+    let r : number[];
+    if(x<0.2) r = [255,Math.floor(255*x/0.2),0];
+    else if(x<0.4) r = [Math.floor(255*(1-(x-0.2)/0.2)),255,0];
+    else if(x<0.6) r =  [0,255,Math.floor(255*(x-0.4)/0.2)];
+    else if(x<0.8) r = [0,Math.floor(255*(1-(x-0.6)/0.2)),255];
+    else r = [Math.floor(255*(x-0.8)/0.2),0,255];
+    return r;
+  }
+
+  handleChange = (color:string) => {
     console.log("colorpicker change:" + color);
-    this.setState({ color: color.rgb } as ColorPickerState)
+    this.setState({ color: color } as ColorPickerState);
+
   };
 
   handleClick = (e : MouseEvent) => {
     //document.rootElement;
+    this.svg = this.pickerMount.getElementsByClassName("picker-svg")[0] as SVGSVGElement;
     let point = this.svg.createSVGPoint();
     point.x = e.clientX;
     point.y = e.clientY;
     let cpt = point.matrixTransform(this.svg.getScreenCTM().inverse());
+    let rgb = ColorPicker.percent_to_color(cpt.x/800);
+    this.setState({color: "rgb(${rgb[0]},${rgb[1]},${rgb[2]})"} as ColorPickerState);
 
   }
 
-
-/*
-  componentDidMount() {
-    if(this.cp == null) {
-      this.cp = new CP(this.pickerMount);
-      this.cp.add("change", this.handleChange);
-    }
-  
-  }
-
-  shouldComponentUpdate() {
-    if(this.cp == null) {
-      this.cp = new CP(this.pickerMount);
-      this.cp.add("change", this.handleChange);
-    }
-  }
-
-  */
   
   render(props: ColorPickerProps) {
 
+    const picker = (
+      <div class="color-picker">
+      <svg ref = {(e) => {this.svg = e as SVGSVGElement;} } 
+        viewBox="0 0 800 400" style={{cursor:"crosshair"}} onClick={this.handleClick}
+        onMouseEnter={(e) => {this.panel.style.fill="url(#rb)"}}
+        onMouseLeave={(e) => {this.panel.style.fill="none"}} >
+        </svg>
+        <g>
+          <defs>
+            <linearGradient id="rb">
+              <stop offset="0%" stopColor="#ff0000" />
+              <stop offset="20%" stopColor="#ffff00" />
+              <stop offset="40%" stopColor="#00ff00" />
+              <stop offset="60%" stopColor="#00ffff" />
+              <stop offset="80%" stopColor="#0000ff" />
+              <stop offset="100%" stopColor="#ff00ff" />
+            </linearGradient>
+          </defs>
+          <rect fill={props.defaultColor} width="800" height="400"/>
+          <rect ref={(e) => {this.panel = e as HTMLElement;}} fill="none" y="100" width="800" height="300" />
+        </g>
+        <rect fill="none" stroke="#000" strokeWidth="10" width="800" height="400"/>
+      </div>
+    )
+    
+
     const p = (
       <div>
-        <div class='cp-swatch' ref={(element) => this.pickerMount = element}>
+        <div class='cp-swatch' ref={(element) => this.pickerMount = element} 
+          onMouseEnter = {(e) => {this.setState({displayColorPicker: true} as ColorPickerState)}}>
           <div class='cp-color' />
         </div>
 
-        {/*this.state.displayColorthis.Picker ? this.picker: null*/}
+        {this.state.displayColorPicker ? picker: null}
       </div>
     );
-    console.log("did render");
+    //console.log("did render");
     return p;
   }
 
