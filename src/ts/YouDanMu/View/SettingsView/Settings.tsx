@@ -1,5 +1,6 @@
 import { YouDanMu } from '../../';
 import { h, Component } from 'preact';
+import { ColorPicker } from './ColorPicker'
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -55,6 +56,7 @@ export class Settings extends Component<SettingsProps, any> {
                                 <input id="ydm-settings-post-size-large" name="ydm-settings-post-size" type="radio" checked />
                                 <label for="ydm-settings-post-size-large" title="__MSG_DanmakuSizeLargeFull__">__MSG_DanmakuSizeLargeAbbrv__</label>
                             </div>
+                            <ColorPicker className="ydm-color-picker" defaultColor="rgb(0,0,0)" onChange={(c) => console.log(c)}/>
                         </div>
                         <div className="ydm-overlay"></div>
                     </div>

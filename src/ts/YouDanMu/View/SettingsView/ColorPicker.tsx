@@ -4,6 +4,7 @@ import { SettingsView } from './index'
 export interface ColorPickerProps {
   defaultColor: string;
   onChange: (color: string) => void;
+  className: string;
 }
 
 export interface ColorPickerState {
@@ -79,7 +80,7 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
   render(props: ColorPickerProps) {
 
     const picker = (
-      <div class="color-picker">
+      <div className="color-picker">
         <svg ref={(e) => { this.svg = e as SVGSVGElement; }}
           viewBox="0 0 800 400" style={{ cursor: "crosshair" }}
 
@@ -107,10 +108,10 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
     )
 
     const p = (
-      <div>
-        <div class='cp-swatch' ref={(element) => this.pickerMount = element}
+      <div className={props.className}>
+        <div className='cp-swatch' ref={(element) => this.pickerMount = element}
           onClick={(e) => { this.setState({ displayColorPicker: !this.state.displayColorPicker } as ColorPickerState) }}>
-          <div class='cp-color' style={{ background: this.state.color }} ref={(e) => { this.buttonShow = e as HTMLElement; }} />
+          <div className='cp-color' style={{ background: this.state.color }} ref={(e) => { this.buttonShow = e as HTMLElement; }} />
         </div>
 
         {this.state.displayColorPicker ? picker : null}

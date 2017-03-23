@@ -1,6 +1,6 @@
 import { YouDanMu } from '../../';
 import { Settings } from './Settings';
-import { ColorPicker } from './ColorPicker';
+//import { ColorPicker } from './ColorPicker';
 import { h, render } from 'preact';
 
 export class SettingsView {
