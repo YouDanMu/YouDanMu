@@ -57,6 +57,9 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
 }
 
+
+//ported from https://github.com/tovic/color-picker
+//all credits goes to original author
 export class CP {
   private static instance = {};
   private first = 'firstChild';
