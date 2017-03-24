@@ -2,6 +2,8 @@ import { YouDanMu } from '../../';
 import * as React from 'react';
 import * as ReactDOM from "react-dom";
 
+import { ColorPicker } from './ColorPicker';
+
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export interface SettingsProps {
@@ -56,6 +58,8 @@ export class Settings extends React.Component<SettingsProps, any> {
                                 <input id="ydm-settings-post-size-large" name="ydm-settings-post-size" type="radio" checked />
                                 <label htmlFor="ydm-settings-post-size-large" title="__MSG_DanmakuSizeLargeFull__">__MSG_DanmakuSizeLargeAbbrv__</label>
                             </div>
+                            <ColorPicker className="ydm-color-picker" defaultColor={{ r: 0, g: 0, b: 0, a: 1 }} onColorChange={(color) => console.log(color)} />
+
                         </div>
                         <div className="ydm-overlay"></div>
                     </div>

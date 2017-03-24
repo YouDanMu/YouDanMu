@@ -34,7 +34,7 @@
         "jsxFactory": "React.createElement",
         "module": "commonjs",
         "declaration": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "stripInternal": true,
         "noImplicitReturns": true,
         "moduleResolution": "node",
