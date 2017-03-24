@@ -72,6 +72,7 @@ export class ChromeExtensionService implements ExtensionService {
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
+        this.rx.subscribe(this.onRx);
     }
 
     sendCommand(type: string, data?: any): Promise<any> {

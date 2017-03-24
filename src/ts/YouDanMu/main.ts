@@ -16,6 +16,7 @@ const ydm = new YouDanMu();
 
 ydm.extensionService = new ChromeExtensionService(ydm);
 ydm.settingsView = new SettingsView(ydm);
+ydm.settingsService = new SettingsService(ydm);
 
 ydm.settingsService.devMode.subscribe(devMode => {
     if (devMode) {
@@ -29,7 +30,6 @@ ydm.settingsService.devMode.subscribe(devMode => {
 
 ydm.videoService = new YouTubeVideoService(ydm);
 ydm.renderService = new SVGRenderService(ydm);
-ydm.settingsService = new SettingsService(ydm);
 
 ydm.videoService.event.subscribe(event => {
     switch (event) {

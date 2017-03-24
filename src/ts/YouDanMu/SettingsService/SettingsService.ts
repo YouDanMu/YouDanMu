@@ -20,7 +20,7 @@ export class SettingsService {
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         ydm.extensionService.settingsChanged.subscribe(this.onSettingsChanged);
-        ydm.extensionService.getSettings().then(s => {
+        ydm.extensionService.storageGet(null).then(s => {
             this.onSettingsChanged(objToMap(s));
         });
     }
@@ -38,15 +38,15 @@ export class SettingsService {
     }
 
     private setSetting = (k: string, v: any): void => {
-        if (this[k].value === v) return;
-        this[k].next(v);
-        this.ydm.extensionService.setSetting(k, v);
+        if ((<any>this)[k].value === v) return;
+        (<any>this)[k].next(v);
+        this.ydm.extensionService.storageSet({ [k]: v });
     }
 
-    private onSettingsChanged = (changes: Map<string,any>): void => {
+    private onSettingsChanged = (changes: Map<string, any>): void => {
         changes.forEach((v, k) => {
-            if (this[k].value === v) return;
-            this[k].next(v);
+            if ((<any>this)[k].value === v) return;
+            (<any>this)[k].next(v);
         })
     }
 }

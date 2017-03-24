@@ -136,9 +136,9 @@ export class ChromeExtensionService implements ExtensionService {
     }
 
     private dispatchCommandFromInjected(type: string, data: any = null, timestamp: string): void {
-        if (typeof this[type] === 'function') {
+        if (typeof (<any>this)[type] === 'function') {
             // The command can be resolved inside this content-script
-            this[type](data)
+            (<any>this)[type](data)
                 .then((data: any) => {
                     this.sendEventToInjected({ type, data, timestamp });
                 })
@@ -159,9 +159,9 @@ export class ChromeExtensionService implements ExtensionService {
     }
 
     private dispatchCommandFromBackground(type: string, data: any = null, callback: Callback): void {
-        if (typeof this[type] === 'function') {
+        if (typeof (<any>this)[type] === 'function') {
             // The command can be resolved inside this content-script
-            this[type](data)
+            (<any>this)[type](data)
                 .then((data: any) => {
                     callback({ type, data });
                 })
