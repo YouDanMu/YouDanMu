@@ -237,6 +237,7 @@ class Gulpfile {
     clean() {
         return del(['build']);
     }
+
 }
 
 gulp.task('default', gulp.series(
