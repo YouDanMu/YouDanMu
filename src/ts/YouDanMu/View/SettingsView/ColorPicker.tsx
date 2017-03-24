@@ -1,10 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from "react-dom";
 import { SketchPicker, ColorResult, RGBColor } from 'react-color'
+const Color = require('color');
 
 export interface ColorPickerProps {
     defaultColor: RGBColor;
-    onColorChange: (color: ColorResult) => void;
+    onColorChange: (color: Color.Color) => void;
     className: string;
 }
 
@@ -35,7 +36,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
     handleChange = (color: ColorResult) => {
         this.setState({ color: color.rgb });
         this.pickerCover.style.background = `rgba(${ this.state.color.r }, ${ this.state.color.g }, ${ this.state.color.b }, ${ this.state.color.a })`;
-        this.props.onColorChange(color);
+        this.props.onColorChange(Color(color.rgb));
 
     };
 
