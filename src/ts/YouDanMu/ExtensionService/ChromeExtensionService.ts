@@ -63,39 +63,72 @@ class ContentScriptTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
-    settingsChanged = new Subject<Map<string,any>>();
+    settingsChanged = new Subject<Map<string, any>>();
 
     private ydm: YouDanMu;
-    private rx = new Subject<Message>();
-    private tx = new Subject<Message>();
+    private rx = new ContentScriptReceiver().rx;
+    private tx = new ContentScriptTransmitter().tx;
     private delayedMap = new Map<string, Delayed<any>>();
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
-        (new ContentScriptReceiver()).rx
-            .subscribe(this.onRx);
-        this.tx.map((m: Message) => {
-            if (m.timestamp == null && m.delayed != null) {
-                // Init command message
-                m.timestamp = performance.now().toString();
-                if (this.delayedMap.has(m.timestamp))
-                    throw new Error('Timestamp exists');
-                this.delayedMap.set(m.timestamp, m.delayed);
-                delete m.delayed;
+    }
+
+    sendCommand(type: string, data?: any): Promise<any> {
+        return new Promise<any>((resolve, reject): void => {
+            const timestamp = performance.now().toString();
+            const m: Message = { type, data, timestamp };
+            if (this.delayedMap.has(timestamp)) {
+                return void reject('Timestamp exists');
             }
-            return m;
-        }).subscribe((new ContentScriptTransmitter()).tx);
+            this.delayedMap.set(timestamp, { resolve, reject });
+            console.log(3, 'Sending command to injected-script:', type, data);
+            this.tx.next(m);
+        });
+    }
+
+    fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
+        return this.sendCommand('fetch', { input, init });
+    }
+
+    storageGet(
+        keys: string | string[] | Object | null,
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<{ [key: string]: any }> {
+        return this.sendCommand('storageGet', { keys, namespace });
+    }
+
+    storageSet(
+        items: { [key: string]: any },
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageSet', { items, namespace });
+    }
+
+    storageRemove(
+        keys: string | string[],
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageRemove', { keys, namespace });
+    }
+
+    storageClear(
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageClear', { namespace });
     }
 
     private onRx = (m: Message) => {
         if (this.delayedMap.has(m.timestamp)) {
             // Event received.
+            console.log(3, 'Received event from injected-script:', m.type, m);
             m.delayed = this.delayedMap.get(m.timestamp);
             this.delayedMap.delete(m.timestamp);
             if (m.error != null) m.delayed.reject(m.error);
             else m.delayed.resolve(m.data);
         } else {
             // Command received.
+            console.log(3, 'Received command from injected-script:', m.type, m.data);
             (new Promise((resolve, reject) => {
                 try {
                     resolve((<any>this)[m.type](m.data));
@@ -121,29 +154,12 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
-        return this.sendCommand('fetch', { input, init });
+    private sendEvent(m: Message): void {
+        console.log(3, 'Sending event to injected-script:', m.type, m);
+        this.tx.next(m);
     }
 
-    getSettings(): Promise<Settings> {
-        return this.sendCommand('getSettings');
-    }
-
-    setSetting(k: string, v: any): void {
-        this.sendCommand('setSetting', { k, v });
-    }
-
-    private sendCommand<ReturnType>(cmd: string, data?: any): Promise<ReturnType> {
-        return new Promise((resolve, reject) => {
-            this.tx.next({
-                type: cmd,
-                data: data,
-                delayed: { resolve, reject }
-            });
-        });
-    }
-
-    private onSettingsChanged = (changes: {[key: string]: any}): void => {
+    private onSettingsChanged = ({ changes }: { changes: { [key: string]: any } }): void => {
         this.settingsChanged.next(objToMap(changes));
     }
 
