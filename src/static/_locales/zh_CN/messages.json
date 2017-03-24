@@ -52,11 +52,11 @@
         "description": "Danmaku small font size description."
     },
     "DanmakuSizeSmallAbbrv": {
-        "message": "大字号",
+        "message": "小",
         "description": "Danmaku small font size abbreviation show on button."
     },
     "DanmakuSizeLargeFull": {
-        "message": "小",
+        "message": "大字号",
         "description": "Danmaku large font size description."
     },
     "DanmakuSizeLargeAbbrv": {
