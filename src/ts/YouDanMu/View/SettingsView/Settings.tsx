@@ -1,5 +1,5 @@
 import { YouDanMu } from '../../';
-import * as React from 'react'
+import * as React from 'react';
 import * as ReactDOM from "react-dom";
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
