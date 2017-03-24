@@ -31,7 +31,7 @@
         "jsx": "react",
         "pretty": true,
         "target": "es5",
-        "jsxFactory": "h",
+        "jsxFactory": "React.createElement",
         "module": "commonjs",
         "declaration": true,
         "noImplicitAny": false,
