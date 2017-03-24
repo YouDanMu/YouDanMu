@@ -34,17 +34,40 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
 
   static hex2Rgb(hex: string) {
     let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
+    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+      return r + r + g + g + b + b;
     });
 
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
     } : null;
-}
+  }
+
+  static hsv2Rgb(h: number, s: number, v: number) {
+    // H [0, 1] S and V [0.0, 1.0].
+    let i = Math.floor(h * 360.0 / 60.0) % 6;
+    let f = h * 360.0 / 60.0 - Math.floor(h * 360.0 / 60.0);
+    let p = v * (1 - s);
+    let q = v * (1 - s * f);
+    let t = v * (1 - (1 - f) * s);
+    let rgb: number[];
+    switch (i) {
+      case 0: rgb = [v*255, t*255, p*255];
+        break;
+      case 1: rgb = [q*255, v*255, p*255];
+        break;
+      case 2: rgb = [p*255, v*255, t*255];
+        break;
+      case 3: rgb = [p*255, q*255, v*255];
+        break;
+      case 4: rgb = [t*255, p*255, v*255];
+        break;
+      case 5: rgb = [v*255, p*255, q*255];
+    }
+  }
 
   static percent_to_color = (x: number) => {
     let r: number[];
@@ -75,6 +98,8 @@ export class ColorPicker extends Component<ColorPickerProps, ColorPickerState> {
     console.log("[color-picker]: color changed to: " + this.state.color);
     this.props.onChange(this.state.color);
   }
+
+
 
 
   render(props: ColorPickerProps) {
