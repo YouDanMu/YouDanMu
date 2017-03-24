@@ -1,7 +1,7 @@
 import { YouDanMu } from '../../';
 import { Settings } from './Settings';
-//import { ColorPicker } from './ColorPicker';
-import { h, render } from 'preact';
+import * as React from 'react';
+import * as ReactDOM from "react-dom";
 
 export class SettingsView {
     private ydm: YouDanMu;
@@ -13,8 +13,7 @@ export class SettingsView {
         this.parent = document.createElement('div');
         this.parent.classList.add('ydm-settings');
         this.parent.classList.add('ydm-toggleable-hidden');
-        //render(<ColorPicker defaultColor="rgb(255,0,0)" onChange={(c) => console.log(c)} />, this.parent);
-        render(<Settings ydm={ydm} />, this.parent);
+        ReactDOM.render(<Settings ydm={ydm} />, this.parent);
     }
     toggle = (): void => {
         if (this.shown) {
