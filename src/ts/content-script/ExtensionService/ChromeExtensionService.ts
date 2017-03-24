@@ -181,7 +181,7 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    private storageGet({ keys, namespace = 'sync' }:
+    storageGet({ keys, namespace = 'sync' }:
         {
             keys: string | string[] | Object | null,
             namespace?: 'sync' | 'local' | 'managed'
@@ -198,7 +198,7 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageSet({ items, namespace = 'sync' }:
+    storageSet({ items, namespace = 'sync' }:
         {
             items: { [key: string]: any },
             namespace?: 'sync' | 'local' | 'managed'
@@ -215,7 +215,7 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageRemove({ keys, namespace = 'sync' }:
+    storageRemove({ keys, namespace = 'sync' }:
         {
             keys: string | string[],
             namespace?: 'sync' | 'local' | 'managed'
@@ -239,7 +239,7 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageClear({ namespace = 'sync' }:
+    storageClear({ namespace = 'sync' }:
         {
             namespace?: 'sync' | 'local' | 'managed'
         }
