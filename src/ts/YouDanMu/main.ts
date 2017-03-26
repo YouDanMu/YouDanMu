@@ -45,7 +45,7 @@ ydm.videoService.event.subscribe(event => {
             break;
         }
         case PlayerEvent.DanmakuButton: {
-            ydm.settingsView.toggle();
+            ydm.settingsView.show();
             break;
         }
     }
