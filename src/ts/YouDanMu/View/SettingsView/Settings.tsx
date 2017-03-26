@@ -250,7 +250,6 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
                     </div>
                     <div className={'ydm-settings-part' + (this.state.cued ? '' : ' ydm-disabled')}>
                         <div className="ydm-settings-section-title">__MSG_DanmakuSource__</div>
-                        {this.state.danmakuURLError ? <div className="ydm-tooltip ydm-tooltip-error">{this.state.danmakuURLError}</div> : null}
                         <input type="url" name="ydm-settings-danmaku-url" placeholder="__MSG_DanmakuURLPlaceholder__" onChange={this.onDanmakuURLChanged} />
                         <div className="ydm-settings-controls">
                             <button className="ydm-button" onClick={this.onLoadDanmaku}>__MSG_Load__</button>
