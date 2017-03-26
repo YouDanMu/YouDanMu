@@ -53,7 +53,7 @@ export class YouTubeVideoService implements VideoService {
         (<Observable<Screen>>(this._resizeObserver))
             .sampleTime(1000).subscribe(s => {
                 this.screen.next(s);
-                this.event.next(PlayerEvent.ScreenResize);
+                if (s) this.event.next(PlayerEvent.ScreenResize);
             });
         Observable.fromEvent(document, 'DOMContentLoaded')
             .subscribe(() => this.hijectYouTubePlayerReady());
@@ -310,11 +310,14 @@ export class YouTubeVideoService implements VideoService {
 
     private resizeCaptureFn() {
         const screen = this.screen.value;
+        const { e } = screen;
         const width = screen.e.offsetWidth;
         const height = screen.e.offsetHeight;
-        if (width !== screen.width || height !== screen.height) {
+        if (!e.parentElement || e.parentElement.parentElement.parentElement.classList.contains('off-screen')) {
+            this.gotoIdle();
+        } else if (width !== screen.width || height !== screen.height) {
             this._resizeObserver.next({
-                e: screen.e,
+                e,
                 width: width,
                 height: height,
                 fullscreen: screen.fullscreen
@@ -350,26 +353,36 @@ export class YouTubeVideoService implements VideoService {
     private ytUNSTARTED() {
         // YouTubeState.UNSTARTED emitted
         // This can happend at two kinds of situations
-        const videoData = this.player.getVideoData();
-        if (!videoData.title && !videoData.author) {
-            // Video is uncued
+        try {
+            const videoData = this.player.getVideoData();
+            if (!videoData.title && !videoData.author) {
+                // Video is uncued
+                this.gotoIdle();
+            } else {
+                // Video is just cued, and immediately ready to play
+                this.gotoReady();
+            }
+        } catch (e) {
+            // The API is destroied, go idle
             this.gotoIdle();
-        } else {
-            // Video is just cued, and immediately ready to play
-            this.gotoReady();
         }
     }
 
     private ytCUED() {
         // YouTubeState.CUED emitted
         // This can happend at two kinds of situations
-        const videoData = this.player.getVideoData();
-        if (!videoData.title && !videoData.author) {
-            // Video is uncued
+        try {
+            const videoData = this.player.getVideoData();
+            if (!videoData.title && !videoData.author) {
+                // Video is uncued
+                this.gotoIdle();
+            } else {
+                // Video is just cued, and immediately ready to play
+                this.gotoReady();
+            }
+        } catch (e) {
+            // The API is destroied, go idle
             this.gotoIdle();
-        } else {
-            // Video is just cued, and immediately ready to play
-            this.gotoReady();
         }
     }
 
