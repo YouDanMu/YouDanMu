@@ -21,7 +21,6 @@ export class YDMSession {
 
     loadDanmaku = (url: string) => {
         const { ydm, danmakuService } = this;
-        ydm.renderService.clearDanmaku();
         danmakuService.fetchByUrl(url)
             .subscribe(ydm.renderService.addDanmaku, err => { throw err });
     }
