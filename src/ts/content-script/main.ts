@@ -11,8 +11,6 @@ class App {
                 this.setLoggerLevel(changes['devMode'].newValue);
             }
         });
-        // Currently we don't support video in iframe
-        if (this.inIframe()) return;
         let req = new XMLHttpRequest();
         req.open('get', chrome.extension.getURL('js/YouDanMu.js'), true);
         req.onload = () => this.inject(req.responseText);
