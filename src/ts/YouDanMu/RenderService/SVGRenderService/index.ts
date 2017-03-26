@@ -185,15 +185,10 @@ export class SVGRenderService implements RenderService {
                 this.timeline.insert(svgd.startTime, svgd.endTime, svgd);
             });
         }
-        // BUG: baseFrame not drawn if not playing
-        /*
         if (this.isPlaying) {
             this.time = this.ydm.videoService.getTime();
             this.baseFrame();
         }
-        */
-        this.time = this.ydm.videoService.getTime();
-        this.baseFrame();
     }
 
     /**
