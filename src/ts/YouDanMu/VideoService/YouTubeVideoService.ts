@@ -429,8 +429,8 @@ export class YouTubeVideoService implements VideoService {
             .subscribe(this.adPlay.bind(this));
         Observable.fromEvent(player, 'onAdEnd')
             .subscribe(this.adPause.bind(this));
-        Observable.fromEvent(player, 'onPlaybackRateChange')
-            .subscribe(this.setSpeed.bind(this));
+        // Observable.fromEvent(player, 'onPlaybackRateChange')
+        //     .subscribe(this.setSpeed.bind(this));
         Observable.fromEvent(player, 'onFullscreenChange')
             .subscribe(this.setFullscreen.bind(this));
     }
