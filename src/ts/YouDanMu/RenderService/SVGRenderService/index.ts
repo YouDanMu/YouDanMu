@@ -129,10 +129,10 @@ export class SVGRenderService implements RenderService {
                 this.pause();
                 break;
             case PlayerEvent.AdPlay:
-                this.canvas.hide();
+                this.play();
                 break;
             case PlayerEvent.AdPause:
-                this.canvas.show();
+                this.pause();
                 break;
             case PlayerEvent.ScreenInit:
                 this.screenInit();
