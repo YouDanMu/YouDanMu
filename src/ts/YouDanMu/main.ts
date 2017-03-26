@@ -1,10 +1,10 @@
-import { YouDanMu } from '.';
+import { YouDanMu, YDMSession } from '.';
 import { SettingsView } from './View';
 import { SettingsService } from './SettingsService';
 import { SVGRenderService } from './RenderService';
 import { BilibiliDanmakuService } from './DanmakuService';
 import { ChromeExtensionService } from './ExtensionService';
-import { YouTubeVideoService, PlayerEvent } from './VideoService';
+import { YouTubeVideoService, PlayerEvent, PlayerState } from './VideoService';
 import { Logger } from './util';
 
 const console = new Logger('Main');
@@ -31,21 +31,32 @@ ydm.settingsService.settings.subscribe(({ devMode }) => {
     setLoggerLevel(devMode);
 });
 
-ydm.settingsView = new SettingsView(ydm);
 ydm.videoService = new YouTubeVideoService(ydm);
+ydm.settingsView = new SettingsView(ydm);
 ydm.renderService = new SVGRenderService(ydm);
 
 ydm.videoService.event.subscribe(event => {
     switch (event) {
+        case PlayerEvent.ScreenInit:
         case PlayerEvent.Cue: {
-            const testURL = 'https://www.bilibili.com/video/av6856086/';
-            const danmakuService = new BilibiliDanmakuService(ydm);
-            const stream = danmakuService.fetchByUrl(testURL);
-            stream.subscribe(ydm.renderService.addDanmaku);
+            if (ydm.session == null) {
+                ydm.session = new YDMSession(ydm);
+            }
             break;
         }
         case PlayerEvent.DanmakuButton: {
             ydm.settingsView.toggle();
+            break;
+        }
+    }
+});
+
+ydm.videoService.state.subscribe(state => {
+    switch (state) {
+        case PlayerState.Idle: {
+            if (ydm.session) {
+                ydm.session = void ydm.session.destroy();
+            }
             break;
         }
     }

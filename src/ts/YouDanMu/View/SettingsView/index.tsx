@@ -7,14 +7,25 @@ export class SettingsView {
     private ydm: YouDanMu;
     private parent: HTMLElement;
     private shown = false;
+    private view: Settings;
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         this.parent = document.createElement('div');
         this.parent.classList.add('ydm-settings');
         this.parent.classList.add('ydm-toggleable-hidden');
-        ReactDOM.render(<Settings ydm={ydm} onClose={this.hide} />, this.parent);
+        ReactDOM.render(
+            <Settings
+                ydm={ydm}
+                onClose={this.hide}
+                onLoadDanmaku={(url) => ydm.session.loadDanmaku(url)}
+                onUnloadDanmaku={() => ydm.session.unloadDanmaku()}
+                onPostDanmaku={(d) => ydm.session.postDanmaku(d)}
+            />
+            , this.parent
+        );
     }
+
     toggle = (): void => {
         if (this.shown) {
             this.hide();
