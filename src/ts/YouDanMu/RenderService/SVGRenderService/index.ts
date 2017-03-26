@@ -78,14 +78,6 @@ export class SVGRenderService implements RenderService {
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
         ydm.settingsService.settings.subscribe(s => {
             this.canvas.setOpacity(s.opacity);
-            if (this.enabled && !s.enable) {
-                if (this.isPlaying) this.pause();
-                this.canvas.clear();
-                this.enabled = false;
-            } else if (!this.enabled && s.enable) {
-                this.enabled = true;
-                if (this.isPlaying) this.play();
-            }
         });
     }
 
