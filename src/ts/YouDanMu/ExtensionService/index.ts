@@ -2,7 +2,7 @@ import { Settings } from '../SettingsService';
 import { Observable } from 'rxjs/Observable';
 
 export interface ExtensionService {
-    settingsChanged: Observable<Map<string, any>>;
+    storageChanged: Observable<{ [key: string]: chrome.storage.StorageChange }>;
 
     sendCommand(type: string, data?: any): Promise<any>;
 

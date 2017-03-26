@@ -26,6 +26,7 @@
     "@types/react-color": "^2.11.0",
     "@types/react-dom": "^0.14.23",
     "@types/reactcss": "^1.0.2",
+    "@types/underscore": "^1.8.0",
     "browserify": "^14.0.0",
     "chai": "^3.5.0",
     "color": "^1.0.3",
@@ -52,6 +53,7 @@
     "rxjs": "^5.2.0",
     "ts-node": "^2.1.0",
     "typescript": "^2.2.1",
+    "underscore": "^1.8.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

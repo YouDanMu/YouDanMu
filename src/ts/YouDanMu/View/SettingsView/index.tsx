@@ -1,5 +1,5 @@
 import { YouDanMu } from '../../';
-import { Settings } from './Settings';
+import { SettingsView as Settings } from './Settings';
 import * as React from 'react';
 import * as ReactDOM from "react-dom";
 
@@ -7,13 +7,13 @@ export class SettingsView {
     private ydm: YouDanMu;
     private parent: HTMLElement;
     private shown = false;
-    
+
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
         this.parent = document.createElement('div');
         this.parent.classList.add('ydm-settings');
         this.parent.classList.add('ydm-toggleable-hidden');
-        ReactDOM.render(<Settings ydm={ydm} />, this.parent);
+        ReactDOM.render(<Settings ydm={ydm} onClose={this.hide} />, this.parent);
     }
     toggle = (): void => {
         if (this.shown) {

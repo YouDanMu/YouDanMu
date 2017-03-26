@@ -1,18 +1,66 @@
 import { YouDanMu } from '../../';
+import { Settings } from '../../SettingsService';
 import * as React from 'react';
 import * as ReactDOM from "react-dom";
 
 import { ColorPicker } from './ColorPicker';
 
+import * as _ from 'underscore';
+import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+const Color = require('color');
 
 export interface SettingsProps {
     ydm: YouDanMu;
+    onClose: () => void;
 }
 
-export class Settings extends React.Component<SettingsProps, any> {
-    enable: BehaviorSubject<boolean>;
-    devMode: BehaviorSubject<boolean>;
+export interface SettingsState {
+    enable: boolean;
+    devMode: boolean;
+    opacity: number;
+}
+
+export class SettingsView extends React.Component<SettingsProps, SettingsState> {
+
+    private ydm: YouDanMu;
+
+    private sampledOpacity = new Subject<number>();
+
+    constructor(props: SettingsProps) {
+        super(props);
+        const { ydm } = props;
+        this.ydm = ydm;
+        this.state = _.clone(ydm.settingsService.settings.value);
+        this.sampledOpacity.sampleTime(200).subscribe(this.ydm.settingsService.setOpacity);
+    }
+
+    componentDidMount() {
+        this.ydm.settingsService.settings.subscribe(this.onSettingsChanged);
+    }
+
+    private onSettingsChanged = ({ enable, devMode, opacity }: Settings): void => {
+        const state = { enable, devMode, opacity };
+        this.setState(state);
+    }
+
+    private onEnableChanged = () => {
+        this.ydm.settingsService.setEnable(!this.state.enable);
+        this.setState({ enable: !this.state.enable });
+    }
+
+    private onDevModeChanged = () => {
+        this.ydm.settingsService.setDevMode(!this.state.devMode);
+        this.setState({ devMode: !this.state.devMode });
+    }
+
+    private onOpacityChanged = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
+        const opacity = parseFloat(value);
+        if (opacity < 0 || opacity > 1) return;
+        this.sampledOpacity.next(opacity);
+        this.setState({ opacity });
+    }
 
     render() {
         return (
@@ -21,15 +69,15 @@ export class Settings extends React.Component<SettingsProps, any> {
                     <div className="ydm-settings-title-bar-title">
                         <span>__MSG_SettingsViewTitle__</span>
                         <div className="ydm-cbx-btn">
-                            <input type="checkbox" id="ydm-settings-enable" checked />
-                            <label htmlFor="ydm-settings-enable" title="__MSG_EnableDanmaku__"></label>
+                            <input type="checkbox" id="ydm-settings-enable" checked={this.state.enable} onChange={this.onEnableChanged} />
+                            <label htmlFor="ydm-settings-enable" title={this.state.enable ? '__MSG_DisableDanmaku__' : '__MSG_EnableDanmaku__'}></label>
                         </div>
                     </div>
-                    <div className="ydm-settings-close" onClick={() => this.props.ydm.settingsView.hide()} dangerouslySetInnerHTML={{
+                    <div className="ydm-settings-close" onClick={this.props.onClose} dangerouslySetInnerHTML={{
                         __html: `<svg viewBox="0 0 20 20"><path d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z"></path></svg>`
                     }}></div>
                 </div>
-                <div className="ydm-settings-sections">
+                <div className={"ydm-settings-sections" + (this.state.enable ? '' : ' ydm-disabled')}>
                     <div className="ydm-settings-part">
                         <div className="ydm-settings-section-title">__MSG_PostDanmaku__</div>
                         <textarea name="ydm-danmaku-post-content" rows={3} className="ydm-danmaku-post-content" placeholder="__MSG_DanmakuContentPlaceholder__"></textarea>
@@ -75,8 +123,16 @@ export class Settings extends React.Component<SettingsProps, any> {
                     <div className="ydm-settings-part">
                         <div className="ydm-settings-section-title">__MSG_Opacity__</div>
                         <div className="ydm-settings-controls">
-                            <input type="number" min={0} max={1} step={0.01} value="1" name="ydm-settings-opacity-value" className="ydm-input-value" />
-                            <input type="range" min={0} max={1} step={0.01} value="1" name="ydm-settings-opacity-range" className="ydm-input-range" />
+                            <input
+                                type="number"
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                value={this.state.opacity}
+                                onChange={this.onOpacityChanged}
+                                name="ydm-settings-opacity-value"
+                                className="ydm-input-value" />
+                            <input type="range" min={0} max={1} step={0.01} value={this.state.opacity} onChange={this.onOpacityChanged} name="ydm-settings-opacity-range" className="ydm-input-range" />
                         </div>
                         <div className="ydm-overlay"></div>
                     </div>
@@ -84,8 +140,8 @@ export class Settings extends React.Component<SettingsProps, any> {
                         <div className="ydm-settings-section-title">
                             <span>__MSG_DeveloperMode__</span>
                             <div className="ydm-cbx-btn">
-                                <input type="checkbox" id="ydm-settings-dev-enable" checked />
-                                <label htmlFor="ydm-settings-dev-enable" title="__MSG_EnableDeveloperMode__"></label>
+                                <input type="checkbox" id="ydm-settings-dev-enable" checked={this.state.devMode} onChange={this.onDevModeChanged} />
+                                <label htmlFor="ydm-settings-dev-enable" title={this.state.devMode ? '__MSG_DisableDeveloperMode__' : '__MSG_EnableDeveloperMode__'}></label>
                             </div>
                         </div>
                         <div className="ydm-overlay"></div>

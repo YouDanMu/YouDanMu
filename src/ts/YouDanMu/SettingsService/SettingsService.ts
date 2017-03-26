@@ -2,51 +2,66 @@ import { YouDanMu } from '../';
 import { Settings } from '.';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { objToMap } from '../util';
+import * as _ from 'underscore';
 
 const defaults: Settings = {
-    enable: false,
-    devMode: false,
+    enable: true,
+    devMode: true,
     opacity: 1
 }
 
 export class SettingsService {
-    enable = new BehaviorSubject<boolean>(defaults.enable);
-    devMode = new BehaviorSubject<boolean>(defaults.devMode);
-    opacity = new BehaviorSubject<number>(defaults.opacity);
+    settings = new BehaviorSubject<Settings>(defaults);
 
     private ydm: YouDanMu;
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
-        ydm.extensionService.settingsChanged.subscribe(this.onSettingsChanged);
-        ydm.extensionService.storageGet(null).then(s => {
-            this.onSettingsChanged(objToMap(s));
-        });
+        ydm.extensionService.storageChanged.subscribe(this.onStorageChanged);
+        ydm.extensionService.storageGet(null).then(this.change);
     }
 
-    setEnable(e: boolean) {
+    setEnable = (e: boolean) => {
         this.setSetting('enable', e);
     }
 
-    setDevMode(d: boolean) {
+    setDevMode = (d: boolean) => {
         this.setSetting('devMode', d);
     }
 
-    setOpacity(o: number) {
+    setOpacity = (o: number) => {
         this.setSetting('opacity', o);
     }
 
-    private setSetting = (k: string, v: any): void => {
-        if ((<any>this)[k].value === v) return;
-        (<any>this)[k].next(v);
+    private setSetting = (k: keyof Settings, v: any): void => {
+        const settings = _.clone(this.settings.value);
+        if (settings[k] === v) return;
+        settings[k] = v;
+        this.settings.next(settings);
         this.ydm.extensionService.storageSet({ [k]: v });
     }
 
-    private onSettingsChanged = (changes: Map<string, any>): void => {
-        changes.forEach((v, k) => {
-            if ((<any>this)[k].value === v) return;
-            (<any>this)[k].next(v);
-        })
+    private change = (changes: { [key: string]: any }) => {
+        const newValues = _.clone(this.settings.value);
+        let changed = false;
+        for (let k of ['enable', 'devMode', 'opacity']) {
+            if (Object.prototype.hasOwnProperty.call(changes, k)) {
+                if (changes[k] !== (<any>newValues)[k]) {
+                    changed = true;
+                }
+                (<any>newValues)[k] = changes[k];
+            }
+        }
+        if (changed) {
+            this.settings.next(newValues);
+        }
+    }
+
+    private onStorageChanged = (changes: { [key: string]: chrome.storage.StorageChange }): void => {
+        const newValues: { [key: string]: string } = {};
+        for (let k in changes) {
+            newValues[k] = changes[k].newValue;
+        }
+        this.change(newValues);
     }
 }

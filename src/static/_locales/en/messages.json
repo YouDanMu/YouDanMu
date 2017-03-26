@@ -63,6 +63,10 @@
         "message": "L",
         "description": "Danmaku large font size abbreviation show on button."
     },
+    "Color": {
+        "message": "Color",
+        "description": "Color button title text."
+    },
     "Post": {
         "message": "Post",
         "description": "Button text to post Danmaku."

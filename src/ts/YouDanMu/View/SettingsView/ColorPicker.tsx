@@ -36,7 +36,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
     handleChange = (color: ColorResult) => {
         this.setState({ color: color.rgb });
         this.pickerCover.style.background = `rgba(${ this.state.color.r }, ${ this.state.color.g }, ${ this.state.color.b }, ${ this.state.color.a })`;
-        this.props.onColorChange(Color(color.rgb));
+        this.props.onColorChange(Color(color.hex));
 
     };
 
@@ -50,7 +50,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
 
         const p = (
             <div className={this.props.className}>
-                <div className="cp-swatch" onClick={this.handleClick}>
+                <div className="cp-swatch" onClick={this.handleClick} title="__MSG_Color__">
                     <div className="cp-color" style={{ background: this.state.color }} ref={(e) => {this.pickerCover = e;}} />
                 </div>
                 {this.state.displayColorPicker ? picker : null}

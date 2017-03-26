@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/map';
 
-import { Logger, objToMap } from '../util';
+import { Logger } from '../util';
 import { ExtensionService } from './';
 
 const console = new Logger('ChromeExtensionService');
@@ -39,7 +39,6 @@ class ContentScriptReceiver {
     private onReceive = (e: CustomEvent): void => {
         if (!e.detail) return void console.error(0, 'Received mal-formatted event:', e);
         const m = <Message>e.detail;
-        console.log(3, 'Received message from content-script:', m.type, m);
         this.rx.next(m);
     }
 }
@@ -54,7 +53,6 @@ class ContentScriptTransmitter {
     }
 
     private onTransmit = (m: Message): void => {
-        console.log(3, 'Sending message to content-script:', m.type, m);
         document.dispatchEvent(
             new CustomEvent(
                 this.channel,
@@ -63,7 +61,7 @@ class ContentScriptTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
-    settingsChanged = new Subject<Map<string, any>>();
+    storageChanged = new Subject<{ [key: string]: chrome.storage.StorageChange }>();
 
     private ydm: YouDanMu;
     private rx = new ContentScriptReceiver().rx;
@@ -75,7 +73,7 @@ export class ChromeExtensionService implements ExtensionService {
         this.rx.subscribe(this.onRx);
     }
 
-    sendCommand(type: string, data?: any): Promise<any> {
+    sendCommand(type: string, data: any[] = []): Promise<any> {
         return new Promise<any>((resolve, reject): void => {
             const timestamp = performance.now().toString();
             const m: Message = { type, data, timestamp };
@@ -89,34 +87,34 @@ export class ChromeExtensionService implements ExtensionService {
     }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
-        return this.sendCommand('fetch', { input, init });
+        return this.sendCommand('fetch', [input, init]);
     }
 
     storageGet(
         keys: string | string[] | Object | null,
         namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<{ [key: string]: any }> {
-        return this.sendCommand('storageGet', { keys, namespace });
+        return this.sendCommand('storageGet', [keys, namespace]);
     }
 
     storageSet(
         items: { [key: string]: any },
         namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
-        return this.sendCommand('storageSet', { items, namespace });
+        return this.sendCommand('storageSet', [items, namespace]);
     }
 
     storageRemove(
         keys: string | string[],
         namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
-        return this.sendCommand('storageRemove', { keys, namespace });
+        return this.sendCommand('storageRemove', [keys, namespace]);
     }
 
     storageClear(
         namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
-        return this.sendCommand('storageClear', { namespace });
+        return this.sendCommand('storageClear', [namespace]);
     }
 
     private onRx = (m: Message) => {
@@ -130,11 +128,15 @@ export class ChromeExtensionService implements ExtensionService {
         } else {
             // Command received.
             console.log(3, 'Received command from injected-script:', m.type, m.data);
-            (new Promise((resolve, reject) => {
-                try {
-                    resolve((<any>this)[m.type](m.data));
-                } catch (error) {
-                    reject(error);
+            (new Promise((resolve, reject): void => {
+                if (typeof (<any>this)[m.type] === 'function') {
+                    try {
+                        resolve((<any>this)[m.type](...m.data));
+                    } catch (error) {
+                        reject(error);
+                    }
+                } else {
+                    reject(`Unknown command ${m.type}`);
                 }
             }))
                 .then((data) => {
@@ -160,8 +162,8 @@ export class ChromeExtensionService implements ExtensionService {
         this.tx.next(m);
     }
 
-    private onSettingsChanged = ({ changes }: { changes: { [key: string]: any } }): void => {
-        this.settingsChanged.next(objToMap(changes));
+    private onStorageChanged = (changes: { [key: string]: chrome.storage.StorageChange }): void => {
+        this.storageChanged.next(changes);
     }
 
     private onExtensionIconClicked = () => {

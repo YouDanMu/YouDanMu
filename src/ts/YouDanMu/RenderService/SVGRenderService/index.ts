@@ -83,6 +83,9 @@ export class SVGRenderService implements RenderService {
         this.speed = ydm.videoService.speed;
         this.playerState = ydm.videoService.state;
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
+        ydm.settingsService.settings.subscribe(s => {
+            this.canvas.setOpacity(s.opacity);
+        });
     }
 
     addDanmaku = (d: Danmaku): void => {

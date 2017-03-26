@@ -12,13 +12,7 @@ const console = new Logger('Main');
 /* If the injection succeeded, this line should print to the console. */
 console.log(0, '__MSG_YDM_welcome_log__');
 
-const ydm = new YouDanMu();
-
-ydm.extensionService = new ChromeExtensionService(ydm);
-ydm.settingsView = new SettingsView(ydm);
-ydm.settingsService = new SettingsService(ydm);
-
-ydm.settingsService.devMode.subscribe(devMode => {
+const setLoggerLevel = (devMode: boolean) => {
     if (devMode) {
         // Enable development level logging
         Logger.debugLevel = 3;
@@ -26,15 +20,25 @@ ydm.settingsService.devMode.subscribe(devMode => {
         // Disable development level logging
         Logger.debugLevel = 0;
     }
+};
+
+const ydm = new YouDanMu();
+
+ydm.extensionService = new ChromeExtensionService(ydm);
+ydm.settingsService = new SettingsService(ydm);
+
+ydm.settingsService.settings.subscribe(({ devMode }) => {
+    setLoggerLevel(devMode);
 });
 
+ydm.settingsView = new SettingsView(ydm);
 ydm.videoService = new YouTubeVideoService(ydm);
 ydm.renderService = new SVGRenderService(ydm);
 
 ydm.videoService.event.subscribe(event => {
     switch (event) {
         case PlayerEvent.Cue: {
-            const testURL = 'https://www.bilibili.com/video/av8898537';
+            const testURL = 'https://www.bilibili.com/video/av6856086/';
             const danmakuService = new BilibiliDanmakuService(ydm);
             const stream = danmakuService.fetchByUrl(testURL);
             stream.subscribe(ydm.renderService.addDanmaku);

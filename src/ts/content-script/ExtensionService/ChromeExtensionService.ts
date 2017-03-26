@@ -30,7 +30,6 @@ class InjectedReceiver {
     private onReceive = (e: CustomEvent): void => {
         if (!e.detail) return void console.error(0, 'Received mal-formatted event:', e);
         const m = <Message>e.detail;
-        console.log(3, 'Received message from injected:', m.type, m);
         this.rx.next(m);
     }
 }
@@ -52,7 +51,6 @@ class InjectedTransmitter {
     }
 
     private onTransmit = (m: Message): void => {
-        console.log(3, 'Sending message to injected:', m.type, m);
         document.dispatchEvent(
             new CustomEvent(
                 this.channel,
@@ -61,6 +59,8 @@ class InjectedTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
+    storageChanged = new Subject<{ [key: string]: chrome.storage.StorageChange }>();
+
     private rx = (new InjectedReceiver()).rx;
     private tx = (new InjectedTransmitter()).tx;
     private delayedMap = new Map<string, Delayed<any>>();
@@ -87,11 +87,12 @@ export class ChromeExtensionService implements ExtensionService {
         });
 
         chrome.storage.onChanged.addListener((changes, namespace) => {
-            this.sendCommandToInjected('onStorageChanged', changes);
+            this.storageChanged.next(changes);
+            this.sendCommandToInjected('onStorageChanged', [changes]);
         });
     }
 
-    sendCommandToInjected(type: string, data: any = null): Promise<any> {
+    sendCommandToInjected(type: string, data: any[] = []): Promise<any> {
         return new Promise<any>((resolve, reject): void => {
             const timestamp = performance.now().toString();
             const m: Message = { type, data, timestamp };
@@ -104,7 +105,7 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    sendCommandToBackground(type: string, data: any = null): Promise<any> {
+    sendCommandToBackground(type: string, data: any[] = []): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             const m: Message = { type, data };
             console.log(3, 'Sending command to background-script:', type, data);
@@ -135,10 +136,10 @@ export class ChromeExtensionService implements ExtensionService {
         else delayed.resolve(m.data);
     }
 
-    private dispatchCommandFromInjected(type: string, data: any = null, timestamp: string): void {
+    private dispatchCommandFromInjected(type: string, data: any[] = [], timestamp: string): void {
         if (typeof (<any>this)[type] === 'function') {
             // The command can be resolved inside this content-script
-            (<any>this)[type](data)
+            (<any>this)[type](...data)
                 .then((data: any) => {
                     this.sendEventToInjected({ type, data, timestamp });
                 })
@@ -158,10 +159,10 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    private dispatchCommandFromBackground(type: string, data: any = null, callback: Callback): void {
+    private dispatchCommandFromBackground(type: string, data: any[] = [], callback: Callback): void {
         if (typeof (<any>this)[type] === 'function') {
             // The command can be resolved inside this content-script
-            (<any>this)[type](data)
+            (<any>this)[type](...data)
                 .then((data: any) => {
                     callback({ type, data });
                 })
@@ -181,11 +182,9 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    private storageGet({ keys, namespace = 'sync' }:
-        {
-            keys: string | string[] | Object | null,
-            namespace?: 'sync' | 'local' | 'managed'
-        }
+    storageGet(
+        keys: string | string[] | Object | null,
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<{ [key: string]: any }> {
         return new Promise<any>((resolve, reject) => {
             chrome.storage[namespace].get(keys, (items) => {
@@ -198,11 +197,9 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageSet({ items, namespace = 'sync' }:
-        {
-            items: { [key: string]: any },
-            namespace?: 'sync' | 'local' | 'managed'
-        }
+    storageSet(
+        items: { [key: string]: any },
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             chrome.storage[namespace].set(items, () => {
@@ -215,11 +212,9 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageRemove({ keys, namespace = 'sync' }:
-        {
-            keys: string | string[],
-            namespace?: 'sync' | 'local' | 'managed'
-        }
+    storageRemove(
+        keys: string | string[],
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const callback = () => {
@@ -239,10 +234,8 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private storageClear({ namespace = 'sync' }:
-        {
-            namespace?: 'sync' | 'local' | 'managed'
-        }
+    storageClear(
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             chrome.storage[namespace].clear(() => {

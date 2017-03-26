@@ -77,4 +77,8 @@ export class SVGCanvas implements Canvas {
         this._tmpCssDisplay = this.parent.style.display;
         this.parent.style.display = 'none';
     }
+
+    setOpacity(opacity: number) {
+        this.parent.style.opacity = opacity.toString();
+    }
 }

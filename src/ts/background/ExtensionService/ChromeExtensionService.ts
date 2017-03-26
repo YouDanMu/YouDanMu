@@ -39,12 +39,9 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    sendCommand(tabId: number, cmd: string, data: any = null): Promise<any> {
+    sendCommand(tabId: number, type: string, data: any[] = []): Promise<any> {
         return new Promise((resolve, reject) => {
-            chrome.tabs.sendMessage(tabId, {
-                type: cmd,
-                data: data
-            }, (response: Message) => {
+            chrome.tabs.sendMessage(tabId, { type, data }, (response: Message) => {
                 if (response.error != null) {
                     reject(response.error);
                 } else {
@@ -61,7 +58,7 @@ export class ChromeExtensionService implements ExtensionService {
             callback(m);
         };
         if (typeof (<any>this)[m.type] === 'function') {
-            (<any>this)[m.type](m.data)
+            (<any>this)[m.type](...m.data)
                 .then((data: any) => {
                     respond({
                         type: m.type,
@@ -86,7 +83,7 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    private fetch({ input, init }: { input: RequestInfo, init?: RequestInit }, callback: Callback): Promise<string> {
+    private fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
         return fetch(input, init).then((response) => response.text());
     }
 
