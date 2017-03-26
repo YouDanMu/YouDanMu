@@ -185,7 +185,7 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
                     }}></div>
                 </div>
                 <div className={'ydm-settings-sections' + (this.state.enable ? '' : ' ydm-disabled')}>
-                    <div className={'ydm-settings-part' + (this.state.cued ? '' : ' ydm-disabled')}>
+                    <div className={'ydm-settings-part'}>
                         <div className="ydm-settings-section-title">__MSG_PostDanmaku__</div>
                         <textarea onChange={this.onPostTextChanged} name="ydm-danmaku-post-content" rows={3} className="ydm-danmaku-post-content" placeholder="__MSG_DanmakuContentPlaceholder__"></textarea>
                         <div className="ydm-settings-controls">
@@ -247,7 +247,7 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
                         </div>
                         <div className="ydm-overlay"></div>
                     </div>
-                    <div className={'ydm-settings-part' + (this.state.cued ? '' : ' ydm-disabled')}>
+                    <div className={'ydm-settings-part'}>
                         <div className="ydm-settings-section-title">__MSG_DanmakuSource__</div>
                         <input type="url" name="ydm-settings-danmaku-url" placeholder="__MSG_DanmakuURLPlaceholder__" onChange={this.onDanmakuURLChanged} />
                         <div className="ydm-settings-controls">
