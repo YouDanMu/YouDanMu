@@ -155,7 +155,7 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
 
     private onPostDanmaku = () => {
         const { ydm, state } = this;
-        const text = state.postText.replace(/[\n\r]/gm, '');
+        const text = state.postText;
         if (text) {
             this.props.onPostDanmaku({
                 text: text,
