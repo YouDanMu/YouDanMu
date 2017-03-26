@@ -1,0 +1,71 @@
+.ydm-cbx-btn {
+    display: inline-block;
+    &>input[type="checkbox"] {
+        display: none;
+        &,
+        &:after,
+        &:before,
+        & *,
+        & *:after,
+        & *:before,
+        &+label {
+            box-sizing: border-box;
+            &::selection {
+                background: none;
+            }
+        }
+        &+label {
+            outline: 0;
+            display: block;
+            width: 2em;
+            height: 1em;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            background: #fbfbfb;
+            border-radius: 2em;
+            padding: 2px;
+            transition: all .4s ease;
+            border: 1px solid $main-color;
+            &:after,
+            &:before {
+                position: relative;
+                display: block;
+                content: "";
+                width: 50%;
+                height: 100%;
+            }
+            &:after {
+                left: 0;
+                border-radius: 2em;
+                background: #fbfbfb;
+                transition: left .3s cubic-bezier( 0.175, 0.885, 0.320, 1.275), padding .3s ease, margin .3s ease;
+                box-shadow: 0 0 0 1px rgba(0, 0, 0, .1), 0 4px 0 rgba(0, 0, 0, .08);
+            }
+            &:hover:after {
+                will-change: padding;
+            }
+            &:before {
+                display: none;
+            }
+            &:active {
+                box-shadow: inset 0 0 0 2em #e8eae9;
+                &:after {
+                    padding-right: .8em;
+                }
+            }
+        }
+        &:checked+label {
+            background: $main-color;
+            &:active {
+                box-shadow: none;
+                &:after {
+                    margin-left: -.8em;
+                }
+            }
+        }
+        &:checked+label:after {
+            left: 50%;
+        }
+    }
+}

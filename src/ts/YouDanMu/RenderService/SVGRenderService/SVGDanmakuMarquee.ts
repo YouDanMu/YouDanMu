@@ -103,13 +103,11 @@ export class SVGDanmakuMarquee extends SVGDanmaku {
     collide(d: SVGDanmakuMarquee): boolean {
         return (
             (d.startTime >= this.startTime &&
-                d.startTime < this.fullyEntryTime) ||
+                (d.startTime < this.fullyEntryTime ||
+                    (d.beginLeaveTime < this.endTime))) ||
             (this.startTime >= d.startTime &&
-                this.startTime < d.fullyEntryTime) ||
-            (d.beginLeaveTime >= this.beginLeaveTime &&
-                d.beginLeaveTime < this.endTime) ||
-            (this.beginLeaveTime >= d.beginLeaveTime &&
-                this.beginLeaveTime < d.endTime)
+                (this.startTime < d.fullyEntryTime ||
+                    (this.beginLeaveTime < d.endTime)))
         );
     }
 }

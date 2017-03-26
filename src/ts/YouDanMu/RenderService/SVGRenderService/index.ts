@@ -61,7 +61,7 @@ function createSVGDanmaku(d: Danmaku, canvas: SVGCanvas): SVGDanmaku {
 }
 
 export class SVGRenderService implements RenderService {
-    danmakuInput = new Subject<Danmaku>();
+    private enabled = true;
 
     private canvas = new SVGCanvas(Mode._modeCount);
     private timeline = new IntervalTree<SVGDanmaku>();
@@ -84,16 +84,40 @@ export class SVGRenderService implements RenderService {
         this.ydm = ydm;
         this.speed = ydm.videoService.speed;
         this.playerState = ydm.videoService.state;
-        this.danmakuInput.subscribe(d => this.onDanmaku(d));
         ydm.videoService.event.subscribe(e => this.onPlayerEvent(e));
+        ydm.settingsService.settings.subscribe(s => {
+            this.canvas.setOpacity(s.opacity);
+            if (this.enabled && !s.enable) {
+                if (this.isPlaying) this.pause();
+                this.canvas.clear();
+                this.enabled = false;
+            } else if (!this.enabled && s.enable) {
+                this.enabled = true;
+                if (this.isPlaying) this.play();
+            }
+        });
     }
 
-    private onDanmaku(d: Danmaku): void {
+    addDanmaku = (d: Danmaku): void => {
+        if (!d.text) return; // 0 height protection
         const svgd = createSVGDanmaku(d, this.canvas);
         this.timeline.insert(svgd.startTime, svgd.endTime, svgd)
         if (this.isPlaying) {
+            if (!svgd.expire(this.time)) {
+                this.canvas.add(svgd);
+            }
             this.timelineIterator = this.timeline.iterateFrom(this.time);
         }
+    }
+
+    clearDanmaku = (): void => {
+        if (this.isPlaying) {
+            this.pause();
+        }
+        this.canvas.clear();
+        this.uncue();
+        this.time = this.ydm.videoService.getTime();
+        this.baseFrame();
     }
 
     private onPlayerEvent(event: PlayerEvent): void {
@@ -161,10 +185,15 @@ export class SVGRenderService implements RenderService {
                 this.timeline.insert(svgd.startTime, svgd.endTime, svgd);
             });
         }
+        // BUG: baseFrame not drawn if not playing
+        /*
         if (this.isPlaying) {
             this.time = this.ydm.videoService.getTime();
             this.baseFrame();
         }
+        */
+        this.time = this.ydm.videoService.getTime();
+        this.baseFrame();
     }
 
     /**
@@ -202,15 +231,15 @@ export class SVGRenderService implements RenderService {
      * @memberOf SVGRenderService
      */
     private nextFrame(timestamp: number): void {
-        const timeslice = (timestamp - this.timestamp) * this.speed.value / 1000;
-        this.time += timeslice;
-        this.timestamp = timestamp;
-        this.canvas.nextFrame(this.time, timeslice);
-        const it = this.timelineIterator;
-        while (it.hasNext() && it.peek().start <= this.time) {
-            it.next().values.forEach(d => this.canvas.add(d));
-        }
         if (this.isPlaying) {
+            const timeslice = (timestamp - this.timestamp) * this.speed.value / 1000;
+            this.time += timeslice;
+            this.timestamp = timestamp;
+            this.canvas.nextFrame(this.time, timeslice);
+            const it = this.timelineIterator;
+            while (it.hasNext() && it.peek().start <= this.time) {
+                it.next().values.forEach(d => this.canvas.add(d));
+            }
             this.animationFrame = requestAnimationFrame(
                 this.nextFrame.bind(this)
             );
@@ -226,6 +255,7 @@ export class SVGRenderService implements RenderService {
      */
     private play(): void {
         const { time, timeline } = this;
+        if (!this.enabled) return;
         this.time = this.ydm.videoService.getTime();
         if (time && Math.abs(time - this.time) > 0.1) {
             // Seeked to a distant frame
@@ -248,7 +278,7 @@ export class SVGRenderService implements RenderService {
      * @memberOf SVGRenderService
      */
     private pause(): void {
-        if (this.animationFrame) {
+        if (this.enabled && this.animationFrame) {
             this.animationFrame = void cancelAnimationFrame(
                 this.animationFrame
             );

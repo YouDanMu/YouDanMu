@@ -1,4 +1,5 @@
 import { YouDanMu } from '..';
+import { Settings } from '../SettingsService';
 
 import { Subject } from 'rxjs/Subject';
 import { Observer } from 'rxjs/Observer';
@@ -32,13 +33,12 @@ class ContentScriptReceiver {
 
     constructor() {
         Observable.fromEvent(document, this.channel)
-            .subscribe(this.onReceive.bind(this));
+            .subscribe(this.onReceive);
     }
 
-    private onReceive(e: CustomEvent): void {
+    private onReceive = (e: CustomEvent): void => {
         if (!e.detail) return void console.error(0, 'Received mal-formatted event:', e);
         const m = <Message>e.detail;
-        console.log(3, 'Received message from content-script:', m.type, m);
         this.rx.next(m);
     }
 }
@@ -49,11 +49,10 @@ class ContentScriptTransmitter {
     private channel = 'YDM: injected -> content-script';
 
     constructor() {
-        this.tx.subscribe(this.onTransmit.bind(this));
+        this.tx.subscribe(this.onTransmit);
     }
 
-    private onTransmit(m: Message): void {
-        console.log(3, 'Sending message to content-script:', m.type, m);
+    private onTransmit = (m: Message): void => {
         document.dispatchEvent(
             new CustomEvent(
                 this.channel,
@@ -62,41 +61,82 @@ class ContentScriptTransmitter {
 }
 
 export class ChromeExtensionService implements ExtensionService {
+    storageChanged = new Subject<{ [key: string]: chrome.storage.StorageChange }>();
+
     private ydm: YouDanMu;
-    private rx = new Subject<Message>();
-    private tx = new Subject<Message>();
+    private rx = new ContentScriptReceiver().rx;
+    private tx = new ContentScriptTransmitter().tx;
     private delayedMap = new Map<string, Delayed<any>>();
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
-        (new ContentScriptReceiver()).rx
-            .subscribe(this.onRx.bind(this));
-        this.tx.map((m: Message) => {
-            if (m.timestamp == null && m.delayed != null) {
-                // Init command message
-                m.timestamp = performance.now().toString();
-                if (this.delayedMap.has(m.timestamp))
-                    throw new Error('Timestamp exists');
-                this.delayedMap.set(m.timestamp, m.delayed);
-                delete m.delayed;
-            }
-            return m;
-        }).subscribe((new ContentScriptTransmitter()).tx);
+        this.rx.subscribe(this.onRx);
     }
 
-    private onRx(m: Message) {
+    sendCommand(type: string, data: any[] = []): Promise<any> {
+        return new Promise<any>((resolve, reject): void => {
+            const timestamp = performance.now().toString();
+            const m: Message = { type, data, timestamp };
+            if (this.delayedMap.has(timestamp)) {
+                return void reject('Timestamp exists');
+            }
+            this.delayedMap.set(timestamp, { resolve, reject });
+            console.log(3, 'Sending command to injected-script:', type, data);
+            this.tx.next(m);
+        });
+    }
+
+    fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
+        return this.sendCommand('fetch', [input, init]);
+    }
+
+    storageGet(
+        keys: string | string[] | Object | null,
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<{ [key: string]: any }> {
+        return this.sendCommand('storageGet', [keys, namespace]);
+    }
+
+    storageSet(
+        items: { [key: string]: any },
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageSet', [items, namespace]);
+    }
+
+    storageRemove(
+        keys: string | string[],
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageRemove', [keys, namespace]);
+    }
+
+    storageClear(
+        namespace: 'sync' | 'local' | 'managed' = 'sync'
+    ): Promise<void> {
+        return this.sendCommand('storageClear', [namespace]);
+    }
+
+    private onRx = (m: Message) => {
         if (this.delayedMap.has(m.timestamp)) {
             // Event received.
+            console.log(3, 'Received event from injected-script:', m.type, m);
             m.delayed = this.delayedMap.get(m.timestamp);
+            this.delayedMap.delete(m.timestamp);
             if (m.error != null) m.delayed.reject(m.error);
             else m.delayed.resolve(m.data);
         } else {
             // Command received.
-            (new Promise((resolve, reject) => {
-                try {
-                    resolve((<any>this)[m.type](m.data));
-                } catch (error) {
-                    reject(error);
+            console.log(3, 'Received command from injected-script:', m.type, m.data);
+            (new Promise((resolve, reject): void => {
+                if (typeof (<any>this)[m.type] === 'function') {
+                    try {
+                        resolve((<any>this)[m.type](...m.data));
+                    } catch (error) {
+                        reject(error);
+                    }
+                } else {
+                    reject(`Unknown command ${m.type}`);
                 }
             }))
                 .then((data) => {
@@ -117,13 +157,20 @@ export class ChromeExtensionService implements ExtensionService {
         }
     }
 
-    fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
-        return new Promise((resolve, reject) => {
-            this.tx.next({
-                type: 'fetch',
-                data: { input, init },
-                delayed: { resolve, reject }
-            });
-        });
+    private sendEvent(m: Message): void {
+        console.log(3, 'Sending event to injected-script:', m.type, m);
+        this.tx.next(m);
+    }
+
+    private onStorageChanged = (changes: { [key: string]: chrome.storage.StorageChange }): void => {
+        this.storageChanged.next(changes);
+    }
+
+    private onExtensionIconClicked = () => {
+        this.ydm.settingsView.toggle();
+    }
+
+    private onContextMenuClicked = () => {
+        this.ydm.settingsView.show();
     }
 }

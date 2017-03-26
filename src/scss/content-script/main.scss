@@ -1,24 +1,16 @@
-.ydm-svg-canvas {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 11;
-}
-
-.ydm-svg-canvas-layer {
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-
-.ydm-svg-canvas-prepare {
-  top: 0;
-  left: 100%;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
+@import url(//fonts.googleapis.com/css?family=Roboto:400,300);
+@import "_colors";
+@import "_shadow";
+@import "_button";
+@import "_toggleable";
+@import "_input-text";
+@import "_input-number";
+@import "keyframes";
+@import "disabled";
+@import "icon";
+@import "cbx-btn";
+@import "tooltip";
+@import "input-range";
+@import "svg-canvas";
+@import "color-picker";
+@import "settings";

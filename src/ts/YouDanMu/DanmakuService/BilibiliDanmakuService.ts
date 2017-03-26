@@ -34,7 +34,7 @@ export class BilibiliDanmakuService implements DanmakuService {
 
     fetchByUrl(url: string): Observable<Danmaku> {
         const matches = url.match(/https?:\/\/www\.bilibili\.com\/video\/av(\d+)(\/index_(\d+)\.html)?/);
-        if (!matches) throw new Error('Invalid URL!');
+        if (!matches) throw new Error('Unsupported Danmaku source URL!');
         const aid = matches[1];
         const page = matches[3];
         const uri = `https://www.bilibili.com/widget/getPageList?aid=${aid}`;

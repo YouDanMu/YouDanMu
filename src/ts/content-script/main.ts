@@ -1,18 +1,30 @@
 import { Logger } from './util';
 import { ChromeExtensionService } from './ExtensionService';
 
-Logger.debugLevel = 3;
-
 class App {
     ext = new ChromeExtensionService();
-    
+
     constructor() {
+        this.ext.storageGet(null).then(s => this.setLoggerLevel(s.devMode))
+        this.ext.storageChanged.subscribe(changes => {
+            if (Object.prototype.hasOwnProperty.call(changes, 'devMode')) {
+                this.setLoggerLevel(changes['devMode'].newValue);
+            }
+        });
         // Currently we don't support video in iframe
         if (this.inIframe()) return;
         let req = new XMLHttpRequest();
         req.open('get', chrome.extension.getURL('js/YouDanMu.js'), true);
         req.onload = () => this.inject(req.responseText);
         req.send();
+    }
+
+    private setLoggerLevel = (devMode: boolean): void => {
+        if (devMode) {
+            Logger.debugLevel = 3;
+        } else {
+            Logger.debugLevel = 0;
+        }
     }
 
     inIframe(): boolean {

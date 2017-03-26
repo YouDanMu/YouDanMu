@@ -1,0 +1,30 @@
+.ydm-tooltip {
+    position: absolute;
+    display: block;
+    color: #fff;
+    padding: 5px;
+    font-size: 13px;
+    background: #000;
+    border-radius: 5px;
+    white-space: nowrap;
+    text-decoration: none;
+    transform: translateY(-10px);
+
+    &:after {
+        display: block;
+        position: absolute;
+        width: 0;
+        height: 0;
+        content: '';
+        border: 6px solid transparent;
+        border-top-color: #000;
+        transform: translateX(5px) translateY(5px);
+    }
+    
+    &-error {
+        background: #ca1313;
+        &:after {
+            border-top-color: #ca1313;
+        }
+    }
+}

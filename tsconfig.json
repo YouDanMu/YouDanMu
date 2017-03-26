@@ -28,8 +28,10 @@
             ".",
             "src/ts"
         ],
+        "jsx": "react",
         "pretty": true,
         "target": "es5",
+        "jsxFactory": "React.createElement",
         "module": "commonjs",
         "declaration": true,
         "noImplicitAny": true,

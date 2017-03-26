@@ -15,8 +15,7 @@
             "19": "images/icon19.png",
             "38": "images/icon38.png"
         },
-        "default_title": "__MSG_ext_name__",
-        "default_popup": "popup.html"
+        "default_title": "__MSG_ext_name__"
     },
     "web_accessible_resources": [
         "js/YouDanMu.js"
@@ -48,6 +47,7 @@
     "permissions": [
         "cookies",
         "storage",
+        "contextMenus",
         "unlimitedStorage",
         "*://*.bilibili.com/*"
     ]

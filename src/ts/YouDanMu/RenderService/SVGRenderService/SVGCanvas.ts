@@ -31,14 +31,16 @@ export class SVGCanvas implements Canvas {
         this.parent.appendChild(this.prepare);
     }
 
-    add(d: SVGDanmaku) {
+    add(d: SVGDanmaku): void {
+        const list = this.list[d.layer];
+        if (list.has(d)) return;
         const s = new Segments(0, this.height);
-        this.list[d.layer].forEach((x) => {
+        list.forEach((x) => {
             if (d.collide(x)) s.ref(x.y - x.height, x.y);
         });
         d.allocateY(s);
         d.baseFrame(this.time);
-        this.list[d.layer].add(d);
+        list.add(d);
         this.layers[d.layer].appendChild(d.getDOM());
     }
 
@@ -76,5 +78,9 @@ export class SVGCanvas implements Canvas {
     hide() {
         this._tmpCssDisplay = this.parent.style.display;
         this.parent.style.display = 'none';
+    }
+
+    setOpacity(opacity: number) {
+        this.parent.style.opacity = opacity.toString();
     }
 }

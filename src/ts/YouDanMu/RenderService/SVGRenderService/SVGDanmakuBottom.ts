@@ -39,16 +39,24 @@ export class SVGDanmakuBottom extends SVGDanmaku {
         this.endTime = d.time + 5;
     }
 
+    get y(): number {
+        return parseFloat(this.e.getAttribute('y')) + 8;
+    }
+
+    set y(y: number) {
+        this.e.setAttribute('y', (y - 8).toString());
+    }
+
     baseFrame(time: number): void {
         this.x = (this.canvasW - this.width) / 2;
     }
 
     nextFrame(time: number, timeslice: number): void {
-        return void(0);
+        return void (0);
     }
 
     allocateY(s: Segments): void {
-        this.y = s.take(this.height, true).end - 8;
+        this.y = s.take(this.height, true).end;
     }
 
     expire(time: number): boolean {

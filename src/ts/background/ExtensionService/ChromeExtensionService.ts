@@ -10,7 +10,7 @@ import { ExtensionService } from './';
 
 const console = new Logger('ChromeExtensionService');
 
-interface Message {
+export interface Message {
     type: string;
     data: any;
     error?: any;
@@ -20,12 +20,18 @@ type Callback = (m: Message) => void;
 
 export class ChromeExtensionService implements ExtensionService {
     constructor() {
+        chrome.contextMenus.create({
+            title: chrome.i18n.getMessage('SettingsViewTitle'),
+            onclick: this.onContextMenuClicked
+        });
+
+        chrome.browserAction.onClicked.addListener(this.onExtensionIconClicked);
+
         chrome.runtime.onMessage.addListener((m: Message, sender, callback: Callback) => {
             if (sender.tab == null)
                 // Message sent from other extensions
                 return void console.error(0, 'Received message from unknown sender:', sender, m);
             // Message sent from the content-script
-            console.log(3, 'Received message from content-script:', m.type, m);
             this.dispatchCommand(m, callback);
             // Return true to enable asynchronously callback
             // Refer: https://developer.chrome.com/extensions/messaging
@@ -33,30 +39,61 @@ export class ChromeExtensionService implements ExtensionService {
         });
     }
 
-    private dispatchCommand(m: Message, callback: Callback): void {
-        if (typeof (<any>this)[m.type] === 'function')
-            (<any>this)[m.type](m.data, (response: Message) => {
-                console.log(3, 'Sending message to content-script:', response.type, response);
-                callback(response);
-            });
-        else console.error(0, 'Undefined command type:', m.type, m);
-    }
-
-    private fetch(args: { input: RequestInfo, init?: RequestInit }, callback: Callback): void {
-        fetch(args.input, args.init).then((response) => {
-            response.text().then((data) => {
-                callback({
-                    type: 'fetch',
-                    data: data,
-                    error: null
-                });
-            });
-        }).catch((error) => {
-            callback({
-                type: 'fetch',
-                data: null,
-                error: error
+    sendCommand(tabId: number, type: string, data: any[] = []): Promise<any> {
+        return new Promise((resolve, reject) => {
+            chrome.tabs.sendMessage(tabId, { type, data }, (response: Message) => {
+                if (response.error != null) {
+                    reject(response.error);
+                } else {
+                    resolve(response.data);
+                }
             });
         });
+    }
+
+    private dispatchCommand(m: Message, callback: Callback): void {
+        console.log(3, 'Received command from content-script:', m.type, m);
+        const respond = (m: Message) => {
+            console.log(3, 'Sending event to content-script:', m.type, m);
+            callback(m);
+        };
+        if (typeof (<any>this)[m.type] === 'function') {
+            (<any>this)[m.type](...m.data)
+                .then((data: any) => {
+                    respond({
+                        type: m.type,
+                        data: data,
+                        error: null
+                    });
+                }).catch((error: any) => {
+                    respond({
+                        type: m.type,
+                        data: null,
+                        error: error
+                    });
+                });
+        } else {
+            const error = `Undefined command type "${m.type}"`;
+            console.error(0, error, m);
+            respond({
+                type: m.type,
+                data: null,
+                error: `Undefined command type "${m.type}"`
+            });
+        }
+    }
+
+    private fetch(input: RequestInfo, init?: RequestInit): Promise<string> {
+        return fetch(input, init).then((response) => response.text());
+    }
+
+    private onExtensionIconClicked = (tab: chrome.tabs.Tab) => {
+        console.log(3, 'YouDanMu extension icon clicked');
+        this.sendCommand(tab.id, 'onExtensionIconClicked')
+    }
+
+    private onContextMenuClicked = (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => {
+        console.log(3, 'YouDanMu context menu clicked');
+        this.sendCommand(tab.id, 'onContextMenuClicked')
     }
 }

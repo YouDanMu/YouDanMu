@@ -164,18 +164,16 @@ export class IntervalTree<V> {
 
     iterateFrom(start: number): SuccessorIterator<V> {
         let node = this.root;
+        let r: Node<V> = null;
         while (node) {
             if (start <= node.start) {
-                if (node.left && start <= node.left.start) {
-                    node = node.left;
-                } else {
-                    break;
-                }
+                if (!r || node.start < r.start) r = node;
+                node = node.left;
             } else {
-                node = node.right;
+                node = node.right
             }
         }
-        return new SuccessorIterator(node);
+        return new SuccessorIterator(r);
     }
 
     iterate(): InOrderIterator<V> {
