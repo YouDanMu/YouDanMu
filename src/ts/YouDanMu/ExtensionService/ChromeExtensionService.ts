@@ -167,7 +167,7 @@ export class ChromeExtensionService implements ExtensionService {
     }
 
     private onExtensionIconClicked = () => {
-        this.ydm.settingsView.toggle();
+        this.ydm.settingsView.show();
     }
 
     private onContextMenuClicked = () => {
