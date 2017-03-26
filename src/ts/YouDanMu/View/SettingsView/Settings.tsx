@@ -187,7 +187,6 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
                 <div className={'ydm-settings-sections' + (this.state.enable ? '' : ' ydm-disabled')}>
                     <div className={'ydm-settings-part' + (this.state.cued ? '' : ' ydm-disabled')}>
                         <div className="ydm-settings-section-title">__MSG_PostDanmaku__</div>
-                        {this.state.postTextError ? <div className="ydm-tooltip ydm-tooltip-error">{this.state.postTextError}</div> : null}
                         <textarea onChange={this.onPostTextChanged} name="ydm-danmaku-post-content" rows={3} className="ydm-danmaku-post-content" placeholder="__MSG_DanmakuContentPlaceholder__"></textarea>
                         <div className="ydm-settings-controls">
                             <div className="ydm-button" onClick={this.onPostDanmaku}>__MSG_POST__</div>
