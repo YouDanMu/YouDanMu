@@ -4,7 +4,7 @@ import { SketchPicker, ColorResult, RGBColor } from 'react-color'
 const Color = require('color');
 
 export interface ColorPickerProps {
-    defaultColor: RGBColor;
+    defaultColor: Color.Color;
     onColorChange: (color: Color.Color) => void;
     className: string;
 }
@@ -16,11 +16,12 @@ export interface ColorPickerState {
 
 export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
 
-    private pickerCover : HTMLElement;
+    private pickerCover: HTMLElement;
 
     constructor(props: ColorPickerProps) {
         super(props);
-        this.state = {color: props.defaultColor, displayColorPicker: false};
+        const c = props.defaultColor.object();
+        this.state = { color: { r: c.r, g: c.g, b: c.b, a: 1 }, displayColorPicker: false };
         //this.setState({color: props.defaultColor, displayColorPicker: false});
     }
 
@@ -35,7 +36,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
 
     handleChange = (color: ColorResult) => {
         this.setState({ color: color.rgb });
-        this.pickerCover.style.background = `rgba(${ this.state.color.r }, ${ this.state.color.g }, ${ this.state.color.b }, ${ this.state.color.a })`;
+        this.pickerCover.style.background = `rgba(${this.state.color.r}, ${this.state.color.g}, ${this.state.color.b}, ${this.state.color.a})`;
         this.props.onColorChange(Color(color.hex));
 
     };
@@ -51,7 +52,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
         const p = (
             <div className={this.props.className}>
                 <div className="cp-swatch" onClick={this.handleClick} title="__MSG_Color__">
-                    <div className="cp-color" style={{ background: this.state.color }} ref={(e) => {this.pickerCover = e;}} />
+                    <div className="cp-color" style={{ background: this.state.color }} ref={(e) => { this.pickerCover = e; }} />
                 </div>
                 {this.state.displayColorPicker ? picker : null}
             </div>
