@@ -31,20 +31,11 @@ function createSVGDanmaku(d: Danmaku, canvas: SVGCanvas): SVGDanmaku {
     e.textContent = d.text;
     e.style.fontSize = d.size;
     e.style.fill = d.color.string();
-    // TODO: apply defaults
-    if (d.color.dark()) {
-        e.style.textShadow =
-            'rgb(255, 255, 255) 1px 0px 1px'
-            + ', rgb(255, 255, 255) 0px 1px 1px'
-            + ', rgb(255, 255, 255) 0px -1px 1px'
-            + ', rgb(255, 255, 255) -1px 0px 1px';
-    } else {
-        e.style.textShadow =
-            'rgb(0, 0, 0) 1px 0px 1px'
-            + ', rgb(0, 0, 0) 0px 1px 1px'
-            + ', rgb(0, 0, 0) 0px -1px 1px'
-            + ', rgb(0, 0, 0) -1px 0px 1px';
-    }
+    e.style.textShadow =
+        'rgb(0, 0, 0) 1px 0px 1px'
+        + ', rgb(0, 0, 0) 0px 1px 1px'
+        + ', rgb(0, 0, 0) 0px -1px 1px'
+        + ', rgb(0, 0, 0) -1px 0px 1px';
     e.style.fontFamily = 'SimHei, "Microsoft JhengHei", Arial, Helvetica, sans-serif';
     e.style.fontWeight = 'bold';
     e.style.lineHeight = '1.125';
