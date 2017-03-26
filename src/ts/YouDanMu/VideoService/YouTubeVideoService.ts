@@ -53,7 +53,7 @@ export class YouTubeVideoService implements VideoService {
         (<Observable<Screen>>(this._resizeObserver))
             .sampleTime(1000).subscribe(s => {
                 this.screen.next(s);
-                if (s) this.event.next(PlayerEvent.ScreenResize);
+                this.event.next(PlayerEvent.ScreenResize);
             });
         Observable.fromEvent(document, 'DOMContentLoaded')
             .subscribe(() => this.hijectYouTubePlayerReady());
@@ -62,33 +62,39 @@ export class YouTubeVideoService implements VideoService {
         this.event.subscribe(event => console.log(3, 'Event:', PlayerEvent[event]));
     }
 
-    cue(): void {
-        const _cue = (nextState: PlayerState) => {
-            const { player } = this;
-            const videoData = player.getVideoData();
-            this.video.next({
-                id: videoData.video_id,
-                url: player.getVideoUrl(),
-                title: videoData.title,
-                service: 'YouTube',
-                duration: player.getDuration()
-            });
-            this.event.next(PlayerEvent.Cue);
-            this.state.next(nextState);
-        };
+    cue() {
+        const { player } = this;
+        const videoData = player.getVideoData();
+        if (this.video.value && this.video.value.id === videoData.video_id)
+            return; // Actually video unchanged
+        this.video.next({
+            id: videoData.video_id,
+            url: player.getVideoUrl(),
+            title: videoData.title,
+            service: 'YouTube',
+            duration: player.getDuration()
+        });
         switch (this.state.value) {
             case PlayerState.Idle:
-                _cue(PlayerState.Cued);
+                this.event.next(PlayerEvent.Cue);
+                this.state.next(PlayerState.Cued);
                 break;
             case PlayerState.ScreenInit:
-                _cue(PlayerState.Ready);
+                this.event.next(PlayerEvent.Cue);
+                this.state.next(PlayerState.Ready);
                 break;
+            case PlayerState.Ready:
+            case PlayerState.Cued:
+                break; // State unchanged.
             default:
                 this.unknownEventTransition(PlayerEvent.Cue);
         }
     }
 
     play() {
+        if (this.state.value === PlayerState.Idle) this.screenInit();
+        if (this.state.value === PlayerState.ScreenInit) this.cue();
+        if (this.state.value === PlayerState.Cued) this.screenInit();
         if (this.state.value === PlayerState.Ready) {
             this.event.next(PlayerEvent.Play);
             this.state.next(PlayerState.Playing);
@@ -98,36 +104,36 @@ export class YouTubeVideoService implements VideoService {
     }
 
     pause() {
-        if (this.state.value === PlayerState.Playing) {
-            this.event.next(PlayerEvent.Pause);
-            this.state.next(PlayerState.Ready);
-        } else {
-            this.unknownEventTransition(PlayerEvent.Pause);
+        switch (this.state.value) {
+            case PlayerState.Playing:
+                this.event.next(PlayerEvent.Pause);
+                this.state.next(PlayerState.Ready);
+                break;
+            default:
+                this.unknownEventTransition(PlayerEvent.Pause);
         }
     }
 
     screenInit() {
-        const _screenInit = (nextState: PlayerState) => {
-            const { player } = this;
-            const videoConfig = player.getCurrentVideoConfig();
-            const e = document.getElementById(videoConfig.attrs.id);
-            this.screen.next({
-                e: e,
-                width: e.clientWidth,
-                height: e.clientHeight,
-                fullscreen: false
-            });
-            this.installDanmakuButton();
-            this.startCaptureResize();
-            this.event.next(PlayerEvent.ScreenInit);
-            this.state.next(nextState);
-        }
+        const { player } = this;
+        const videoConfig = player.getCurrentVideoConfig();
+        const e = document.getElementById(videoConfig.attrs.id);
+        this.screen.next({
+            e: e,
+            width: e.clientWidth,
+            height: e.clientHeight,
+            fullscreen: false
+        });
+        this.installDanmakuButton();
+        this.startCaptureResize();
         switch (this.state.value) {
             case PlayerState.Idle:
-                _screenInit(PlayerState.ScreenInit);
+                this.event.next(PlayerEvent.ScreenInit);
+                this.state.next(PlayerState.ScreenInit);
                 break;
             case PlayerState.Cued:
-                _screenInit(PlayerState.Ready);
+                this.event.next(PlayerEvent.ScreenInit);
+                this.state.next(PlayerState.Ready);
                 break;
             default:
                 this.unknownEventTransition(PlayerEvent.ScreenInit);
@@ -135,26 +141,27 @@ export class YouTubeVideoService implements VideoService {
     }
 
     screenDestroy() {
-        const _screenDestroy = (nextState: PlayerState) => {
-            this.stopCaptureResize();
-            this.screen.next(null);
-            this.uninstallDanmakuButton();
-            this.event.next(PlayerEvent.ScreenDestroy);
-            this.state.next(nextState);
-        };
+        this.stopCaptureResize();
+        this.screen.next(null);
+        this.uninstallDanmakuButton();
         switch (this.state.value) {
             case PlayerState.Ready:
-                _screenDestroy(PlayerState.Cued);
+                this.event.next(PlayerEvent.ScreenDestroy);
+                this.state.next(PlayerState.Cued);
                 break;
             case PlayerState.ScreenInit:
-                _screenDestroy(PlayerState.Idle);
+                this.event.next(PlayerEvent.ScreenDestroy);
+                this.state.next(PlayerState.Idle);
                 break;
             default:
                 this.unknownEventTransition(PlayerEvent.ScreenDestroy);
         }
     }
 
-    adPlay() {
+    adStart() {
+        if (this.state.value === PlayerState.Playing) this.pause();
+        if (this.state.value === PlayerState.Cued) this.screenInit();
+        if (this.state.value === PlayerState.ScreenInit) this.cue();
         if (this.state.value === PlayerState.Ready) {
             this.event.next(PlayerEvent.AdPlay);
             this.state.next(PlayerState.AdPlaying);
@@ -163,7 +170,7 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
-    adPause() {
+    adEnd() {
         switch (this.state.value) {
             case PlayerState.AdPlaying:
                 this.event.next(PlayerEvent.AdPause);
@@ -177,18 +184,25 @@ export class YouTubeVideoService implements VideoService {
     uncue() {
         switch (this.state.value) {
             case PlayerState.Ready:
-                this.video.next(null);
                 this.event.next(PlayerEvent.Uncue);
                 this.state.next(PlayerState.ScreenInit);
                 break;
             case PlayerState.Cued:
-                this.video.next(null);
                 this.event.next(PlayerEvent.Uncue);
                 this.state.next(PlayerState.Idle);
                 break;
             default:
                 this.unknownEventTransition(PlayerEvent.AdPause);
         }
+    }
+
+    unplay() {
+        if (this.state.value === PlayerState.Playing) this.pause();
+        if (this.state.value === PlayerState.AdPlaying) this.adEnd();
+        if (this.state.value === PlayerState.Ready ||
+            this.state.value === PlayerState.ScreenInit)
+            this.screenDestroy();
+        this.uncue();
     }
 
     setSpeed(speed: number) {
@@ -222,38 +236,6 @@ export class YouTubeVideoService implements VideoService {
 
     getTime(): number {
         return this.player.getCurrentTime();
-    }
-
-    private gotoReady() {
-        if (this.state.value === PlayerState.Idle) this.screenInit();
-        if (this.state.value === PlayerState.ScreenInit) this.cue();
-        if (this.state.value === PlayerState.Cued) this.screenInit();
-        if (this.state.value === PlayerState.AdPlaying) this.adPause();
-        if (this.state.value === PlayerState.Playing) this.pause();
-    }
-
-    private gotoIdle() {
-        if (this.state.value === PlayerState.Playing) this.pause();
-        if (this.state.value === PlayerState.AdPlaying) this.adPause();
-        if (this.state.value === PlayerState.Ready) this.screenDestroy();
-        if (this.state.value === PlayerState.Cued) this.uncue();
-        if (this.state.value === PlayerState.ScreenInit) this.screenDestroy();
-    }
-
-    private gotoPlaying() {
-        if (this.state.value === PlayerState.Idle) this.screenInit();
-        if (this.state.value === PlayerState.ScreenInit) this.cue();
-        if (this.state.value === PlayerState.Cued) this.screenInit();
-        if (this.state.value === PlayerState.AdPlaying) this.adPause();
-        if (this.state.value === PlayerState.Ready) this.play();
-    }
-
-    private gotoAdPlaying() {
-        if (this.state.value === PlayerState.Idle) this.screenInit();
-        if (this.state.value === PlayerState.ScreenInit) this.cue();
-        if (this.state.value === PlayerState.Cued) this.screenInit();
-        if (this.state.value === PlayerState.Playing) this.pause();
-        if (this.state.value === PlayerState.Ready) this.adPlay();
     }
 
     private installDanmakuButton() {
@@ -310,14 +292,11 @@ export class YouTubeVideoService implements VideoService {
 
     private resizeCaptureFn() {
         const screen = this.screen.value;
-        const { e } = screen;
         const width = screen.e.offsetWidth;
         const height = screen.e.offsetHeight;
-        if (!e.parentElement || e.parentElement.parentElement.parentElement.classList.contains('off-screen')) {
-            this.gotoIdle();
-        } else if (width !== screen.width || height !== screen.height) {
+        if (width !== screen.width || height !== screen.height) {
             this._resizeObserver.next({
-                e,
+                e: screen.e,
                 width: width,
                 height: height,
                 fullscreen: screen.fullscreen
@@ -326,86 +305,22 @@ export class YouTubeVideoService implements VideoService {
     }
 
     private onStateChanged(state: YouTubeState) {
-        console.log(3, 'YouTube State:', YouTubeState[state], state);
         const { player } = this;
         switch (state) {
-            case YouTubeState.UNSTARTED:
-                this.ytUNSTARTED();
-                break;
-            case YouTubeState.ENDED:
-                this.ytENDED();
-                break;
             case YouTubeState.PLAYING:
-                this.ytPLAYING();
+                this.play();
                 break;
-            case YouTubeState.PAUSED:
-                this.ytPAUSED();
+            case YouTubeState.UNSTARTED:
+                this.unplay();
                 break;
             case YouTubeState.BUFFERING:
-                this.ytBUFFERING();
+                this.cue();
                 break;
             case YouTubeState.CUED:
-                this.ytCUED();
+            case YouTubeState.PAUSED:
+                this.pause();
                 break;
         }
-    }
-
-    private ytUNSTARTED() {
-        // YouTubeState.UNSTARTED emitted
-        // This can happend at two kinds of situations
-        try {
-            const videoData = this.player.getVideoData();
-            if (!videoData.title && !videoData.author) {
-                // Video is uncued
-                this.gotoIdle();
-            } else {
-                // Video is just cued, and immediately ready to play
-                this.gotoReady();
-            }
-        } catch (e) {
-            // The API is destroied, go idle
-            this.gotoIdle();
-        }
-    }
-
-    private ytCUED() {
-        // YouTubeState.CUED emitted
-        // This can happend at two kinds of situations
-        try {
-            const videoData = this.player.getVideoData();
-            if (!videoData.title && !videoData.author) {
-                // Video is uncued
-                this.gotoIdle();
-            } else {
-                // Video is just cued, and immediately ready to play
-                this.gotoReady();
-            }
-        } catch (e) {
-            // The API is destroied, go idle
-            this.gotoIdle();
-        }
-    }
-
-    private ytPLAYING() {
-        // YouTubeState.PLAYING emitted
-        this.gotoReady();
-        this.play();
-    }
-
-    private ytBUFFERING() {
-        // YouTubeState.BUFFERING emitted
-        // Currently this event is too ambiguous to be useful
-    }
-
-    private ytENDED() {
-        // YouTubeState.ENDED emitted
-        // Currently this only happens when the time reaches the end
-        this.gotoReady();
-    }
-
-    private ytPAUSED() {
-        // YouTubeState.PAUSED emitted
-        this.gotoReady();
     }
 
     private hijectYouTubePlayerReady() {
@@ -426,11 +341,11 @@ export class YouTubeVideoService implements VideoService {
         Observable.fromEvent(player, 'onStateChange')
             .subscribe(this.onStateChanged.bind(this));
         Observable.fromEvent(player, 'onAdStart')
-            .subscribe(this.adPlay.bind(this));
+            .subscribe(this.adStart.bind(this));
         Observable.fromEvent(player, 'onAdEnd')
-            .subscribe(this.adPause.bind(this));
-        // Observable.fromEvent(player, 'onPlaybackRateChange')
-        //     .subscribe(this.setSpeed.bind(this));
+            .subscribe(this.adEnd.bind(this));
+        Observable.fromEvent(player, 'onPlaybackRateChange')
+            .subscribe(this.setSpeed.bind(this));
         Observable.fromEvent(player, 'onFullscreenChange')
             .subscribe(this.setFullscreen.bind(this));
     }
