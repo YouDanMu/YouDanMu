@@ -45,7 +45,7 @@ export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerSt
         const picker = (
             <div className="cp-popover">
                 <div className="cp-cover" onClick={this.handleClose} />
-                <SketchPicker disableAlpha={true} color={this.state.color} onChange={this.handleChange} />
+                <SketchPicker color={this.state.color} onChange={this.handleChange} />
             </div>
         );
 
