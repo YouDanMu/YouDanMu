@@ -17,7 +17,6 @@ export class SettingsService {
 
     constructor(ydm: YouDanMu) {
         this.ydm = ydm;
-        ydm.extensionService.storageChanged.subscribe(this.onStorageChanged);
         ydm.extensionService.storageGet(null).then(this.change);
     }
 
