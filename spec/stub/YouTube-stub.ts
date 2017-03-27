@@ -97,19 +97,108 @@ export namespace YouTube {
         height: number;
     }
 
+    export interface PlayerSize {
+        width: number;
+        height: number;
+    }
+
     export class Player {
-
-        events: { [key: string]: Subject<any> } = {
-            onStateChange: new Subject()
-        };
-
-        subscriptions = new Map<Function, { [key: string]: Subscription }>();
 
         e: HTMLDivElement;
 
+        private _state: PlayerState;
+
+        get state(): PlayerState {
+            return this._state;
+        }
+
+        set state(state: PlayerState) {
+            this._state = state;
+            this.events.get('onStateChange').next(state);
+        }
+
+        private _videoData: VideoData;
+
+        get videoData(): VideoData {
+            return this._videoData;
+        }
+
+        set videoData(videoDate: VideoData) {
+            this._videoData = videoDate;
+            this.state = PlayerState.CUED;
+        }
+
+        private _time: number;
+
+        get time(): number {
+            if (this.timestamp != null) {
+                return this._time + (performance.now() - this.timestamp) / 1000;
+            }
+            return this._time;
+        }
+
+        set time(time: number) {
+            if (this.timestamp != null) {
+                this.timestamp = performance.now();
+            }
+            this._time = time;
+        }
+        
+        private timestamp: number;
+
+        private _playbackRate: number;
+
+        get playbackRate(): number {
+            return this._playbackRate;
+        }
+
+        set playbackRate(r: number) {
+            this._playbackRate = r;
+            this.events.get('onPlaybackRateChange').next(r);
+        }
+
+        private _playerSize: PlayerSize;
+
+        get playerSize(): PlayerSize {
+            return this._playerSize;
+        }
+
+        set playerSize(size: PlayerSize) {
+            this.e.style.width = `${size.width}px`;
+            this.e.style.height = `${size.height}px`;
+            this._playerSize = size;
+        }
+
+        events = new Map<string, Subject<any>>();
+
+        listeners = new Map<string, Map<Function, Subscription>>();
+
         constructor() {
             this.e = document.createElement('div');
-            this.e.id = 'movie-player';
+            this.e.id = 'movie_player';
+            this.events.set('onStateChange', new Subject());
+            this.events.set('onAdStart', new Subject());
+            this.events.set('onAdEnd', new Subject());
+            this.events.set('onPlaybackRateChange', new Subject());
+            this.events.set('onFullscreenChange', new Subject());
+            this.state = PlayerState.UNSTARTED;
+            this.videoData = {
+                author: '',
+                title: '',
+                video_id: undefined,
+                video_quality: undefined
+            };
+            this.time = 0;
+            this.playbackRate = 1;
+            this.playerSize = { width: 854, height: 480 };
+        }
+
+        mount() {
+            document.getElementById('movie-outter').appendChild(this.e);
+        }
+
+        unmount() {
+            this.e.remove();
         }
 
         cueVideoById(options: CueVideoByIdOptions): void;
@@ -149,19 +238,30 @@ export namespace YouTube {
         }
 
         playVideo(): void {
-
+            this.timestamp = performance.now();
+            this.state = PlayerState.PLAYING;
         }
 
         pauseVideo(): void {
-
+            this._time = this.time;
+            this.timestamp = null;
+            this.state = PlayerState.PAUSED;
         }
 
         stopVideo(): void {
-
+            this.timestamp = null;
+            this.time = 0;
+            this.state = PlayerState.ENDED;
         }
 
         seekTo(seconds: number, allowSeekAhead: boolean): void {
-
+            if (this.timestamp) {
+                this.pauseVideo();
+                this.time = seconds;
+                this.playVideo();
+            } else {
+                this.time = seconds;
+            }
         }
 
         nextVideo(): void {
@@ -174,6 +274,14 @@ export namespace YouTube {
 
         playVideoAt(index: number): void {
 
+        }
+
+        adStart(): void {
+            this.events.get('onAdStart').next();
+        }
+
+        adEnd(): void {
+            this.events.get('onAdEnd').next();
         }
 
         mute(): void {
@@ -197,11 +305,11 @@ export namespace YouTube {
         }
 
         getPlaybackRate(): number {
-            return 1;
+            return this.playbackRate;
         }
 
         setPlaybackRate(suggestedRate: number): void {
-
+            this.playbackRate = suggestedRate;
         }
 
         getAvailablePlaybackRates(): number[] {
@@ -221,19 +329,19 @@ export namespace YouTube {
         }
 
         getPlayerState(): number {
-            return PlayerState.PAUSED;
+            return this.state;
         }
 
         getCurrentTime(): number {
-            return 5.066483;
+            return this.time;
         }
 
         getPlaybackQuality(): string {
-            return 'hd720';
+            return this.videoData.video_quality;
         }
 
         setPlaybackQuality(suggestedQuality: string): void {
-
+            this.videoData.video_quality = suggestedQuality;
         }
 
         getAvailableQualityLevels(): string[] {
@@ -245,11 +353,11 @@ export namespace YouTube {
         }
 
         getVideoUrl(): string {
-            return 'https://www.youtube.com/watch?t=5&v=SLHVAHEaBQg';
+            return `https://www.youtube.com/watch?t=5&v=${this.videoData.video_id}`;
         }
 
         getVideoEmbedCode(): string {
-            return '<iframe width="1280" height="720" src="https://www.youtube.com/embed/SLHVAHEaBQg" frameborder="0" allowfullscreen></iframe>';
+            return `<iframe width="1280" height="720" src="https://www.youtube.com/embed/${this.videoData.video_id}" frameborder="0" allowfullscreen></iframe>`;
         }
 
         getPlaylist(): string[] {
@@ -261,12 +369,7 @@ export namespace YouTube {
         }
 
         getVideoData(): VideoData {
-            return {
-                author: 'Metacoder',
-                title: 'YouDanMu Test Video',
-                video_id: '3jIcj8Heu3f',
-                video_quality: 'hd720'
-            };
+            return this.videoData;
         }
 
         getCurrentVideoConfig(): VideoConfig {
@@ -290,8 +393,16 @@ export namespace YouTube {
 
         }
 
-        hideVideoInfo():void {
+        hideVideoInfo(): void {
 
+        }
+
+        setFullscreen(fullscreen: boolean) {
+            this.events.get('onFullscreenChange').next({
+                fullscreen,
+                time: this.time,
+                videoId: this.videoData.video_id
+            })
         }
 
         addEventListener(event: 'onStateChange', listener: ((state: number) => void)): void;
@@ -309,17 +420,17 @@ export namespace YouTube {
         addEventListener(event: 'onAdEnd', listener: string | ((val: any) => void)): void;
         addEventListener(event: string, listener?: EventListenerOrEventListenerObject, useCapture?: boolean): void;
         addEventListener(event: string, listener: (val: any) => void): void {
-            let observable = this.events[event];
+            const observable = this.events.get(event);
             if (!observable) return;
-            let subscriptions: { [key: string]: Subscription };
-            if (this.subscriptions.has(listener)) {
-                subscriptions = this.subscriptions.get(listener);
-                if (subscriptions[event]) return;
+            let listeners = this.listeners.get(event);
+            if (listeners) {
+                const subscription = listeners.get(listener);
+                if (subscription) return;
             } else {
-                subscriptions = {};
-                this.subscriptions.set(listener, subscriptions);
+                listeners = new Map<Function, Subscription>();
+                this.listeners.set(event, listeners);
             }
-            subscriptions[event] = observable.subscribe(listener);
+            listeners.set(listener, observable.subscribe(listener));
         }
 
         dispatchEvent(evt: Event): boolean {
@@ -341,11 +452,11 @@ export namespace YouTube {
         removeEventListener(event: 'onAdEnd', listener: string | ((val: any) => void)): void;
         removeEventListener(event: string, listener?: EventListenerOrEventListenerObject, useCapture?: boolean): void;
         removeEventListener(event: string, listener: (val: any) => void): void {
-            let subscriptions: { [key: string]: Subscription };
-            if (!this.subscriptions.has(listener)) return;
-            subscriptions = this.subscriptions.get(listener);
-            if (!subscriptions[event]) return;
-            subscriptions[event].unsubscribe();
+            const listeners = this.listeners.get(event);
+            if (!listeners) return;
+            const subscription = listeners.get(listener);
+            if (!subscription) return;
+            subscription.unsubscribe();
         }
     }
 

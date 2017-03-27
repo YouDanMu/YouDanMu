@@ -55,8 +55,7 @@ export class YouTubeVideoService implements VideoService {
                 this.screen.next(s);
                 if (s) this.event.next(PlayerEvent.ScreenResize);
             });
-        Observable.fromEvent(document, 'DOMContentLoaded')
-            .subscribe(() => this.hijectYouTubePlayerReady());
+        document.addEventListener('DOMContentLoaded', this.hijectYouTubePlayerReady);
         // Development level logging
         this.state.subscribe(state => console.log(3, 'State:', PlayerState[state]));
         this.event.subscribe(event => console.log(3, 'Event:', PlayerEvent[event]));
@@ -154,7 +153,7 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
-    adPlay() {
+    adPlay = () => {
         if (this.state.value === PlayerState.Ready) {
             this.event.next(PlayerEvent.AdPlay);
             this.state.next(PlayerState.AdPlaying);
@@ -163,7 +162,7 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
-    adPause() {
+    adPause = () => {
         switch (this.state.value) {
             case PlayerState.AdPlaying:
                 this.event.next(PlayerEvent.AdPause);
@@ -191,12 +190,12 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
-    setSpeed(speed: number) {
+    setSpeed = (speed: number) => {
         this.speed.next(speed);
         this.event.next(PlayerEvent.SpeedChange);
     }
 
-    setFullscreen(state: YouTube.FullscreenState) {
+    setFullscreen = (state: YouTube.FullscreenState) => {
         const screen = this.screen.value;
         this._resizeObserver.next({
             e: screen.e,
@@ -325,7 +324,7 @@ export class YouTubeVideoService implements VideoService {
         }
     }
 
-    private onStateChanged(state: YouTubeState) {
+    private onStateChanged = (state: YouTubeState) => {
         console.log(3, 'YouTube State:', YouTubeState[state], state);
         const { player } = this;
         switch (state) {
@@ -408,7 +407,7 @@ export class YouTubeVideoService implements VideoService {
         this.gotoReady();
     }
 
-    private hijectYouTubePlayerReady() {
+    private hijectYouTubePlayerReady = () => {
         let oldReady = window.onYouTubePlayerReady;
         window.onYouTubePlayerReady = (player) => {
             this.onYouTubePlayerReady(player);
@@ -417,22 +416,17 @@ export class YouTubeVideoService implements VideoService {
         };
     }
 
-    private onYouTubePlayerReady(player: YouTube.Player) {
+    private onYouTubePlayerReady = (player: YouTube.Player) => {
         this.player = player;
         // The injection may happen after the video
         // starts playing. Here we check the video
         // state and emmit events immediately
         this.onStateChanged(player.getPlayerState());
-        Observable.fromEvent(player, 'onStateChange')
-            .subscribe(this.onStateChanged.bind(this));
-        Observable.fromEvent(player, 'onAdStart')
-            .subscribe(this.adPlay.bind(this));
-        Observable.fromEvent(player, 'onAdEnd')
-            .subscribe(this.adPause.bind(this));
-        Observable.fromEvent(player, 'onPlaybackRateChange')
-            .subscribe(this.setSpeed.bind(this));
-        Observable.fromEvent(player, 'onFullscreenChange')
-            .subscribe(this.setFullscreen.bind(this));
+        player.addEventListener('onStateChange', this.onStateChanged);
+        player.addEventListener('onAdStart', this.adPlay);
+        player.addEventListener('onAdEnd', this.adPause);
+        player.addEventListener('onPlaybackRateChange', this.setSpeed);
+        player.addEventListener('onFullscreenChange', this.setFullscreen);
     }
 
     private unknownEventTransition(event: PlayerEvent) {
