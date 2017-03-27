@@ -125,7 +125,6 @@ export namespace YouTube {
 
         set videoData(videoDate: VideoData) {
             this._videoData = videoDate;
-            this.state = PlayerState.CUED;
         }
 
         private _time: number;
@@ -182,15 +181,15 @@ export namespace YouTube {
             this.events.set('onPlaybackRateChange', new Subject());
             this.events.set('onFullscreenChange', new Subject());
             this.state = PlayerState.UNSTARTED;
-            this.videoData = {
+            this.time = 0;
+            this.playbackRate = 1;
+            this.playerSize = { width: 854, height: 480 };
+            this.cue({
                 author: '',
                 title: '',
                 video_id: undefined,
                 video_quality: undefined
-            };
-            this.time = 0;
-            this.playbackRate = 1;
-            this.playerSize = { width: 854, height: 480 };
+            });
         }
 
         mount() {
@@ -199,6 +198,11 @@ export namespace YouTube {
 
         unmount() {
             this.e.remove();
+        }
+
+        cue(videoData: VideoData): void {
+            this.videoData = videoData;
+            this.state = PlayerState.CUED;
         }
 
         cueVideoById(options: CueVideoByIdOptions): void;

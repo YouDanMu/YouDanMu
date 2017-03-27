@@ -15,7 +15,17 @@ const ydm = new YouDanMu();
 const videoService = new YouTubeVideoService(ydm);
 ydm.videoService = videoService;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const yt = new YouTube.API();
-    YouTubeVideoServiceTest(videoService, yt);
-});
+let yt: YouTube.API;
+
+function initializeYouTubeAPI(): Promise<YouTube.API> {
+    return new Promise<YouTube.API>((resolve, reject) => {
+        document.addEventListener('DOMContentLoaded', () => {
+            yt = new YouTube.API();
+            resolve();
+        });
+    });
+}
+
+initializeYouTubeAPI()
+    .then(() => YouTubeVideoServiceTest(videoService, yt.player))
+    .then(() => yt.player.unmount());

@@ -19,7 +19,7 @@
             position: relative;
         }
         
-        #ydm-test {
+        .ydm-test {
             background-color: #f4f6ff;
         }
         
@@ -50,17 +50,19 @@
 </head>
 
 <body>
-    <div id="ydm-test">
+    <div class="ydm-test">
         <div class="content">
             <h1 class="title">YouDanMu Automated Testing Framework</h1>
-        </div>
-        <div id="movie-outter">
-            <!--<div id="movie-player"></div>-->
         </div>
     </div>
     <div class="content">
         <h1 class="title">Macha Test Reports</h1>
         <div id="mocha"></div>
+    </div>
+    <div class="ydm-test">
+        <div id="movie-outter">
+            <!--<div id="movie-player"></div>-->
+        </div>
     </div>
     <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
     <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
