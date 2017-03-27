@@ -61,7 +61,7 @@ export class SettingsView extends React.Component<SettingsProps, SettingsState> 
         });
         this.state = state;
 
-        this.sampledOpacity.sampleTime(200).subscribe(this.ydm.settingsService.setOpacity);
+        this.sampledOpacity.subscribe(this.ydm.settingsService.setOpacity);
         ydm.videoService.event.subscribe(this.onVideoEvent);
     }
 
