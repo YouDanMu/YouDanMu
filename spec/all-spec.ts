@@ -1,31 +1,45 @@
 import { YouDanMu } from '../YouDanMu';
 import { Logger } from '../YouDanMu/util/Logger';
 import { YouTubeVideoService } from '../YouDanMu/VideoService';
+import { ChromeExtensionService } from '../YouDanMu/ExtensionService';
 
-import { YouTube } from './stub/YouTube-stub';
+import { YouTube, ContentScript } from './stub';
 
-import { SegmentsTest } from './Segments-spec';
+import { SegmentTest, SegmentsTest } from './Segments-spec';
 import { YouTubeVideoServiceTest } from './YouTubeVideoService-spec';
+import { ChromeExtensionServiceTest } from './ChromeExtensionService-spec';
 
 Logger.debugLevel = 3;
-
-SegmentsTest();
-
-const ydm = new YouDanMu();
-const videoService = new YouTubeVideoService(ydm);
-ydm.videoService = videoService;
-
-let yt: YouTube.API;
 
 function initializeYouTubeAPI(): Promise<YouTube.API> {
     return new Promise<YouTube.API>((resolve, reject) => {
         document.addEventListener('DOMContentLoaded', () => {
-            yt = new YouTube.API();
+            const api = new YouTube.API();
+            yt.player = api.player;
             resolve();
         });
     });
 }
 
-initializeYouTubeAPI()
-    .then(() => YouTubeVideoServiceTest(videoService, yt.player))
-    .then(() => yt.player.unmount());
+const ydm = new YouDanMu();
+const cs = new ContentScript();
+const videoService = new YouTubeVideoService(ydm);
+
+let ext: ChromeExtensionService;
+let yt: {player: YouTube.Player} = {
+    player: null
+};
+
+let prev: Promise<any>;
+
+prev = initializeYouTubeAPI();
+prev = YouTubeVideoServiceTest(prev, videoService, yt);
+prev = SegmentTest(prev);
+prev = SegmentsTest(prev);
+prev = prev.then(() => {
+    ydm.extensionService = ext = new ChromeExtensionService(ydm);
+});
+prev = ChromeExtensionServiceTest(prev, ext, cs);
+prev = prev.then(() => {
+    yt.player.unmount();
+});

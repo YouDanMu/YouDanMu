@@ -1,6 +1,6 @@
 import { YouTubeVideoService, PlayerState, Screen } from '../YouDanMu/VideoService';
 
-import { YouTube } from './stub/YouTube-stub';
+import { YouTube } from './stub';
 import { videoData } from './data';
 
 const { expect } = chai;
@@ -13,14 +13,16 @@ function assertScreen(screen: Screen, player: YouTube.Player) {
     expect(screen.e).to.equal(player.e);
 }
 
-export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, player: YouTube.Player) {
-    return new Promise((resolve, reject) => {
+export function YouTubeVideoServiceTest(prev: Promise<any>, videoService: YouTubeVideoService, yt: YouTube.API): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
         describe('VideoService/YouTubeVideoService', () => {
+
+            if (prev) before(done => void prev.then(done));
 
             after(() => resolve());
 
             it('should capture YouTube Player API object in initialization', () => {
-                expect(videoService.player).to.equal(player);
+                expect(videoService.player).to.equal(yt.player);
             });
 
             it('should initialize to Idle state', () => {
@@ -28,23 +30,23 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
             });
 
             it('should inject onStateChange event listener to YouTube API', () => {
-                expect(player.listeners.get('onStateChange').has((<any>videoService).onStateChanged)).to.be.true;
+                expect(yt.player.listeners.get('onStateChange').has((<any>videoService).onStateChanged)).to.be.true;
             });
 
             it('should inject onAdStart event listener to YouTube API', () => {
-                expect(player.listeners.get('onAdStart').has((<any>videoService).adPlay)).to.be.true;
+                expect(yt.player.listeners.get('onAdStart').has((<any>videoService).adPlay)).to.be.true;
             });
 
             it('should inject onAdEnd event listener to YouTube API', () => {
-                expect(player.listeners.get('onAdEnd').has((<any>videoService).adPause)).to.be.true;
+                expect(yt.player.listeners.get('onAdEnd').has((<any>videoService).adPause)).to.be.true;
             });
 
             it('should inject onPlaybackRateChange event listener to YouTube API', () => {
-                expect(player.listeners.get('onPlaybackRateChange').has((<any>videoService).setSpeed)).to.be.true;
+                expect(yt.player.listeners.get('onPlaybackRateChange').has((<any>videoService).setSpeed)).to.be.true;
             });
 
             it('should inject onFullscreenChange event listener to YouTube API', () => {
-                expect(player.listeners.get('onFullscreenChange').has((<any>videoService).setFullscreen)).to.be.true;
+                expect(yt.player.listeners.get('onFullscreenChange').has((<any>videoService).setFullscreen)).to.be.true;
             });
 
             it('should capture YouTube CUED event and transits to Ready state', () => {
@@ -52,8 +54,8 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.mount();
-                player.cue(videoData.v1);
+                yt.player.mount();
+                yt.player.cue(videoData.v1);
                 expect(states).to.eql([
                     PlayerState.Idle,
                     PlayerState.ScreenInit,
@@ -67,7 +69,7 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.playVideo();
+                yt.player.playVideo();
                 expect(states).to.eql([
                     PlayerState.Ready,
                     PlayerState.Playing
@@ -76,9 +78,9 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
             });
 
             it('should capture YouTube time', () => {
-                expect(videoService.getTime() - player.time).to.below(0.01);
-                player.time = 25.23;
-                expect(videoService.getTime() - player.time).to.below(0.01);
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
+                yt.player.time = 25.23;
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
             });
 
             it('should capture YouTube PAUSED event and transits to Ready state', () => {
@@ -86,7 +88,7 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.pauseVideo();
+                yt.player.pauseVideo();
                 expect(states).to.eql([
                     PlayerState.Playing,
                     PlayerState.Ready
@@ -99,11 +101,11 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.seekTo(50, true);
-                expect(videoService.getTime() - player.time).to.below(0.01);
-                player.playVideo();
-                player.seekTo(60, true);
-                expect(videoService.getTime() - player.time).to.below(0.01);
+                yt.player.seekTo(50, true);
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
+                yt.player.playVideo();
+                yt.player.seekTo(60, true);
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
                 expect(states).to.eql([
                     PlayerState.Ready,
                     PlayerState.Playing,
@@ -118,9 +120,9 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.time = 0;
-                player.state = YouTube.PlayerState.PLAYING;
-                expect(videoService.getTime() - player.time).to.below(0.01);
+                yt.player.time = 0;
+                yt.player.state = YouTube.PlayerState.PLAYING;
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
                 expect(states).to.eql([
                     PlayerState.Playing,
                     PlayerState.Ready,
@@ -134,8 +136,8 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.stopVideo();
-                expect(videoService.getTime()).to.equal(player.time);
+                yt.player.stopVideo();
+                expect(videoService.getTime()).to.equal(yt.player.time);
                 expect(states).to.eql([
                     PlayerState.Playing,
                     PlayerState.Ready
@@ -148,13 +150,13 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                 const sub = videoService.state.subscribe((state) => {
                     states.push(state);
                 });
-                player.videoData = videoData.empty;
-                player.state = YouTube.PlayerState.UNSTARTED;
-                player.cue(videoData.v2);
-                player.state = YouTube.PlayerState.UNSTARTED;
-                player.state = YouTube.PlayerState.BUFFERING;
-                player.playVideo();
-                expect(videoService.getTime() - player.time).to.below(0.01);
+                yt.player.videoData = videoData.empty;
+                yt.player.state = YouTube.PlayerState.UNSTARTED;
+                yt.player.cue(videoData.v2);
+                yt.player.state = YouTube.PlayerState.UNSTARTED;
+                yt.player.state = YouTube.PlayerState.BUFFERING;
+                yt.player.playVideo();
+                expect(videoService.getTime() - yt.player.time).to.below(0.01);
                 expect(states).to.eql([
                     PlayerState.Ready,
                     PlayerState.Cued,
@@ -169,7 +171,7 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
             it('should capture YouTube video size change event', function (done) {
                 this.slow(1300);
                 this.timeout(1500);
-                assertScreen(videoService.screen.value, player);
+                assertScreen(videoService.screen.value, yt.player);
                 const newSize = {
                     width: 1280,
                     height: 720
@@ -180,15 +182,15 @@ export function YouTubeVideoServiceTest(videoService: YouTubeVideoService, playe
                     if (count-- === 0) {
                         sub.unsubscribe();
                         try {
-                            assertScreen(videoService.screen.value, player);
+                            assertScreen(videoService.screen.value, yt.player);
                             done();
                         } catch (e) {
                             done(e);
                         }
                     }
                 });
-                player.playerSize = newSize;
-                expect(player.playerSize).to.eql(newSize);
+                yt.player.playerSize = newSize;
+                expect(yt.player.playerSize).to.eql(newSize);
             });
         });
     });
