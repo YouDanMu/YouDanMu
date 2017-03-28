@@ -23,9 +23,9 @@ function initializeYouTubeAPI(): Promise<YouTube.API> {
 
 const ydm = new YouDanMu();
 const cs = new ContentScript();
+const ext = new ChromeExtensionService(ydm);
 const videoService = new YouTubeVideoService(ydm);
 
-let ext: ChromeExtensionService;
 let yt: {player: YouTube.Player} = {
     player: null
 };
@@ -36,9 +36,6 @@ prev = initializeYouTubeAPI();
 prev = YouTubeVideoServiceTest(prev, videoService, yt);
 prev = SegmentTest(prev);
 prev = SegmentsTest(prev);
-prev = prev.then(() => {
-    ydm.extensionService = ext = new ChromeExtensionService(ydm);
-});
 prev = ChromeExtensionServiceTest(prev, ext, cs);
 prev = prev.then(() => {
     yt.player.unmount();
