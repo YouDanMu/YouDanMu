@@ -41,12 +41,13 @@ export function ChromeExtensionServiceTest(prev: Promise<any>, ext: ChromeExtens
                     p: 'abc',
                     q: [4, 5, 6]
                 }];
-                const sub = cs.onCommand.subscribe(({ type, timestamp }) => {
-                    if (type === type) {
-                        sub.unsubscribe();
-                        cs.sendEvent({ type, data, timestamp });
+                const sub = cs.onCommand.subscribe(m => {
+                    sub.unsubscribe();
+                    const { timestamp } = m;
+                    if (m.type === type) {
+                        cs.sendEvent({ type: m.type, data, timestamp });
                     } else {
-                        cs.sendEvent({ type, data: null, error: `Unkown command ${type}`, timestamp });
+                        cs.sendEvent({ type: m.type, data: null, error: `Unkown command ${type}`, timestamp });
                     }
                 });
                 ext.sendCommand(type, data).then(value => {

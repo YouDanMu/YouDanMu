@@ -8,6 +8,7 @@ import { YouTube, ContentScript } from './stub';
 import { SegmentTest, SegmentsTest } from './Segments-spec';
 import { YouTubeVideoServiceTest } from './YouTubeVideoService-spec';
 import { ChromeExtensionServiceTest } from './ChromeExtensionService-spec';
+import { SettingsServiceTest } from './SettingsService-spec';
 
 Logger.debugLevel = 3;
 
@@ -23,10 +24,10 @@ function initializeYouTubeAPI(): Promise<YouTube.API> {
 
 const ydm = new YouDanMu();
 const cs = new ContentScript();
-const ext = new ChromeExtensionService(ydm);
-const videoService = new YouTubeVideoService(ydm);
+const ext = ydm.extensionService = new ChromeExtensionService(ydm);
+const videoService = ydm.videoService = new YouTubeVideoService(ydm);
 
-let yt: {player: YouTube.Player} = {
+let yt: { player: YouTube.Player } = {
     player: null
 };
 
@@ -37,6 +38,7 @@ prev = YouTubeVideoServiceTest(prev, videoService, yt);
 prev = SegmentTest(prev);
 prev = SegmentsTest(prev);
 prev = ChromeExtensionServiceTest(prev, ext, cs);
+prev = SettingsServiceTest(prev, ydm, cs);
 prev = prev.then(() => {
     yt.player.unmount();
 });
