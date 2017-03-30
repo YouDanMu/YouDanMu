@@ -80,13 +80,134 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
     });
 }
 
+export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        describe('RenderService/SVGCanvas', () => {
+
+
+            if(prev) before(done => void prev.then(done));
+
+            after(() => resolve());
+
+            let d1: Danmaku = {
+                text: Math.random().toString(36),
+                time: Number(12),
+                mode: Mode.MARQUEE,
+                size: 12 + 'px',
+                color: Color('#000000')
+            };
+            let d2: Danmaku = {
+                text: Math.random().toString(36),
+                time: Number(10),
+                mode: Mode.MARQUEE,
+                size: 18 + 'px',
+                color: Color('#FFFFFF')
+            };
+            let e1 = createSVGTextElement(d1);
+            let e2 = createSVGTextElement(d2);
+
+            let canvas = new SVGCanvas(3);
+            canvas.width = 1280;
+            canvas.height = 720;
+
+            let A = new SVGDanmakuMarquee(d1, e1, canvas);
+            A.startTime = 0; A.fullyEntryTime = 10; A.beginLeaveTime = 12; 
+            A.endTime = 22; (<any>A).speed = 1; A.height = 1;
+            let B = new SVGDanmakuTop(d2, e2, canvas);
+            B.startTime = 0; B.endTime = 24; (<any>B).speed = 1; B.height = 1;
+
+
+
+            it('should be able to add danmaku onto the canvas', () => {
+                canvas.baseFrame(10);
+                canvas.add(A);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
+                canvas.baseFrame(10);
+            });
+
+            it('should be able to remove danmaku onto the canvas', () => {
+                canvas.baseFrame(10);
+                canvas.add(A);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
+                canvas.remove(A);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
+                expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
+            });
+
+            it('should be able to clear danmaku on the canvas', () => {
+                canvas.baseFrame(10);
+                canvas.add(A);
+                canvas.add(B);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
+                canvas.clear();
+                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.false;
+                expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.not.equal(B.getDOM().parentElement);
+            });
+
+            it('should clear danmaku on the canvas and set time when seek for baseFrame', () => {
+                canvas.baseFrame(10);
+                expect((<any> canvas).time).to.be.equal(10);
+                canvas.add(A);
+                canvas.add(B);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
+                canvas.baseFrame(100);
+                expect((<any> canvas).time).to.be.equal(100);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.false;
+                expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.not.equal(B.getDOM().parentElement);
+            });
+
+
+            it('should remove expired danmaku when go to nextFrame', () => {
+                canvas.baseFrame(22);
+                canvas.add(A);
+                canvas.add(B);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
+                canvas.nextFrame(23,1);
+                expect((<any> canvas).time).to.be.equal(23);
+                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
+                expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
+            });
+
+            it('should be able to set opacity', () => {
+                canvas.baseFrame(22);
+                canvas.add(A);
+                canvas.add(B);
+                canvas.setOpacity(1.0);
+                expect(canvas.parent.style.opacity).to.equal('1');
+                canvas.setOpacity(0.5);
+                expect(canvas.parent.style.opacity).to.equal('0.5');
+            });
+
+
+        });
+    });
+}
+
+
 
 export function SVGDanmakuTest(prev: Promise<any>): Promise<void> {
-    let danmakuTests : { (prev: Promise<any>) : Promise<void>;} [] = [
-        SVGDanmakuMarqueeTest, 
+    let danmakuTests: { (prev: Promise<any>): Promise<void>; }[] = [
+        SVGDanmakuMarqueeTest,
         SVGDanmakuTopTest,
         SVGDanmakuBottomTest
-        ];
+    ];
     for(var test of danmakuTests) {
         prev = test(prev);
     }
@@ -268,7 +389,7 @@ export function SVGDanmakuBottomTest(prev: Promise<any>): Promise<void> {
                 expect(parseFloat(A.e.getAttribute('y'))).to.equal(2);
                 A.y = 8.4;
                 expect(A.y).to.equal(8.4);
-                expect(parseFloat(A.e.getAttribute('y'))).to.equal(0.4);
+                expect(parseFloat(A.e.getAttribute('y')) - 0.4).is.lessThan(0.001);
             });
 
 

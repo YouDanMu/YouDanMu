@@ -10,7 +10,7 @@ import { SegmentTest, SegmentsTest } from './Segments-spec';
 import { YouTubeVideoServiceTest } from './YouTubeVideoService-spec';
 import { ChromeExtensionServiceTest } from './ChromeExtensionService-spec';
 import { SettingsServiceTest } from './SettingsService-spec';
-import { SVGRenderServiceTest, SVGDanmakuTest } from './RenderService-spec';
+import { SVGRenderServiceTest, SVGDanmakuTest, SVGCanvasTest } from './RenderService-spec';
 
 Logger.debugLevel = 3;
 
@@ -46,6 +46,7 @@ prev = ChromeExtensionServiceTest(prev, ext, cs);
 prev = SettingsServiceTest(prev, ydm, cs);
 //prev = SVGRenderServiceTest(prev, ydm, yt);
 prev = SVGDanmakuTest(prev);
+prev = SVGCanvasTest(prev);
 prev = prev.then(() => {
     yt.player.unmount();
 });
