@@ -47,6 +47,7 @@ prev = SettingsServiceTest(prev, ydm, cs);
 //prev = SVGRenderServiceTest(prev, ydm, yt);
 prev = SVGDanmakuTest(prev);
 prev = SVGCanvasTest(prev);
+prev = SVGRenderServiceTest(prev,ydm,yt);
 prev = prev.then(() => {
     yt.player.unmount();
 });

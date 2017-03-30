@@ -52,29 +52,94 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
             after(() => resolve());
 
 
-            it('should install canvas on PlayerEvent.screenInit', () => {
+            it('should install canvas on PlayerEvent.ScreenInit', () => {
                 yt.player.mount();
-                let e = ydm.videoService.screen.value.e;
+                const e = ydm.videoService.screen.value.e;
                 expect(e.getElementsByClassName('ydm-svg-canvas')[0]).not.null;
-
-
-
             });
 
-            it('should insert Danmaku into timeline', () => {
-                let d: Danmaku = {
+
+            it('should resize canvas on PlayerEvent.ScreenResize', function (done) {
+                this.timeout(1500);
+                let newSize = {
+                    width: 1000,
+                    height: 7
+                };
+                yt.player.playerSize = newSize;
+                setTimeout(() => {
+                    try {
+                        expect((<any>renderer).canvas.width).to.equal(1000);
+                        expect((<any>renderer).canvas.height).to.equal(7);
+                        done();
+                    } catch(error) {
+                        done(error);
+                    }
+                }, 1000);
+            });
+
+
+            it('should be able to insert Danmaku into timeline', () => {
+                const d: Danmaku = {
                     text: "testInsert",
                     time: Number(12),
                     mode: Mode.MARQUEE,
                     size: 12 + 'px',
                     color: Color('#000000')
                 };
+                const e = createSVGTextElement(d);
+                const danmu: SVGDanmakuMarquee = new SVGDanmakuMarquee(d, e, (<any>renderer).canvas);
                 renderer.addDanmaku(d);
-                (<any>renderer).timeline
+                expect((<any>renderer).timeline.findInterval(danmu.startTime, danmu.endTime)
+                    .values[0].d).to.equal(d);
+                renderer.clearDanmaku();
+            });
 
+            it('should be able to clear Danmaku in timeline', () => {
+                const d: Danmaku = {
+                    text: "testInsert",
+                    time: Number(12),
+                    mode: Mode.MARQUEE,
+                    size: 12 + 'px',
+                    color: Color('#000000')
+                };
+                const e = createSVGTextElement(d);
+                const danmu: SVGDanmakuMarquee = new SVGDanmakuMarquee(d, e, (<any>renderer).canvas);
+                renderer.addDanmaku(d);
+                expect((<any>renderer).timeline.findInterval(danmu.startTime, danmu.endTime)
+                    .values[0].d).to.equal(d);
+                renderer.clearDanmaku();
+                expect((<any>renderer).timeline.findInterval(danmu.startTime, danmu.endTime)).to.be.null;
+            });
 
+            it('should be able to advance time on PlayerEvent.Play', function (done) {
+                this.timeout(1500);
+                yt.player.playVideo();
+                const timeNow = (<any>renderer).time;
+                const speed = (<any>renderer).speed.value / 1000;
+                setTimeout(() => {
+                    try {
+                        expect((<any>renderer).time).to.be.greaterThan(timeNow);
+                        expect(Math.abs((<any>renderer).time - (timeNow + speed * 1000))).to.be.lessThan(0.5);
+                        done();
+                    } catch(error) {
+                        done(error);
+                    }
+                }, 1000);
+            });
+
+            it('should not advance time on PlayerEvent.Pause', function (done) {
+                this.timeout(1500);
+                yt.player.pauseVideo();
+                const timeNow = (<any>renderer).time;
+                setTimeout(() => {
+                    try {
+                        expect(Math.abs((<any>renderer).time - (timeNow))).to.be.lessThan(0.01);
+                        done();
+                    } catch(error) {
+                        done(error);
+                    }
+                }, 1000);
             })
-
 
         });
     });
@@ -89,31 +154,31 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
 
             after(() => resolve());
 
-            let d1: Danmaku = {
+            const d1: Danmaku = {
                 text: Math.random().toString(36),
                 time: Number(12),
                 mode: Mode.MARQUEE,
                 size: 12 + 'px',
                 color: Color('#000000')
             };
-            let d2: Danmaku = {
+            const d2: Danmaku = {
                 text: Math.random().toString(36),
                 time: Number(10),
                 mode: Mode.MARQUEE,
                 size: 18 + 'px',
                 color: Color('#FFFFFF')
             };
-            let e1 = createSVGTextElement(d1);
-            let e2 = createSVGTextElement(d2);
+            const e1 = createSVGTextElement(d1);
+            const e2 = createSVGTextElement(d2);
 
-            let canvas = new SVGCanvas(3);
+            const canvas = new SVGCanvas(3);
             canvas.width = 1280;
             canvas.height = 720;
 
-            let A = new SVGDanmakuMarquee(d1, e1, canvas);
-            A.startTime = 0; A.fullyEntryTime = 10; A.beginLeaveTime = 12; 
+            const A = new SVGDanmakuMarquee(d1, e1, canvas);
+            A.startTime = 0; A.fullyEntryTime = 10; A.beginLeaveTime = 12;
             A.endTime = 22; (<any>A).speed = 1; A.height = 1;
-            let B = new SVGDanmakuTop(d2, e2, canvas);
+            const B = new SVGDanmakuTop(d2, e2, canvas);
             B.startTime = 0; B.endTime = 24; (<any>B).speed = 1; B.height = 1;
 
 
@@ -121,7 +186,7 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
             it('should be able to add danmaku onto the canvas', () => {
                 canvas.baseFrame(10);
                 canvas.add(A);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.true;
                 expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
                 canvas.baseFrame(10);
             });
@@ -129,10 +194,10 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
             it('should be able to remove danmaku onto the canvas', () => {
                 canvas.baseFrame(10);
                 canvas.add(A);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.true;
                 expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
                 canvas.remove(A);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.false;
                 expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
             });
 
@@ -140,30 +205,30 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
                 canvas.baseFrame(10);
                 canvas.add(A);
                 canvas.add(B);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.true;
                 expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
                 canvas.clear();
-                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.false;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.false;
                 expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.not.equal(B.getDOM().parentElement);
             });
 
             it('should clear danmaku on the canvas and set time when seek for baseFrame', () => {
                 canvas.baseFrame(10);
-                expect((<any> canvas).time).to.be.equal(10);
+                expect((<any>canvas).time).to.be.equal(10);
                 canvas.add(A);
                 canvas.add(B);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.true;
                 expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
                 canvas.baseFrame(100);
-                expect((<any> canvas).time).to.be.equal(100);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.false;
+                expect((<any>canvas).time).to.be.equal(100);
+                expect((<any>canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.false;
                 expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.not.equal(B.getDOM().parentElement);
             });
@@ -173,14 +238,14 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
                 canvas.baseFrame(22);
                 canvas.add(A);
                 canvas.add(B);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.true;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                expect((<any>canvas).list[A.layer].has(A)).to.be.true;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.true;
                 expect(canvas.layers[A.layer]).to.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
-                canvas.nextFrame(23,1);
-                expect((<any> canvas).time).to.be.equal(23);
-                expect((<any> canvas).list[A.layer].has(A)).to.be.false;
-                expect((<any> canvas).list[B.layer].has(B)).to.be.true;
+                canvas.nextFrame(23, 1);
+                expect((<any>canvas).time).to.be.equal(23);
+                expect((<any>canvas).list[A.layer].has(A)).to.be.false;
+                expect((<any>canvas).list[B.layer].has(B)).to.be.true;
                 expect(canvas.layers[A.layer]).to.not.equal(A.getDOM().parentElement);
                 expect(canvas.layers[B.layer]).to.equal(B.getDOM().parentElement);
             });
@@ -200,10 +265,8 @@ export function SVGCanvasTest(prev: Promise<any>): Promise<void> {
     });
 }
 
-
-
 export function SVGDanmakuTest(prev: Promise<any>): Promise<void> {
-    let danmakuTests: { (prev: Promise<any>): Promise<void>; }[] = [
+    const danmakuTests: { (prev: Promise<any>): Promise<void>; }[] = [
         SVGDanmakuMarqueeTest,
         SVGDanmakuTopTest,
         SVGDanmakuBottomTest
@@ -224,7 +287,7 @@ export function SVGDanmakuMarqueeTest(prev: Promise<any>): Promise<void> {
 
             after(() => resolve());
 
-            let d1: Danmaku = {
+            const d1: Danmaku = {
                 text: Math.random().toString(36),
                 time: Number(12),
                 mode: Mode.MARQUEE,
@@ -232,15 +295,15 @@ export function SVGDanmakuMarqueeTest(prev: Promise<any>): Promise<void> {
                 color: Color('#000000')
             };
 
-            let e1 = createSVGTextElement(d1);
+            const e1 = createSVGTextElement(d1);
 
-            let canvas = new SVGCanvas(3);
+            const canvas = new SVGCanvas(3);
             canvas.width = 1280;
             canvas.height = 720;
 
-            let A = new SVGDanmakuMarquee(d1, e1, canvas);
+            const A = new SVGDanmakuMarquee(d1, e1, canvas);
             A.startTime = 0; A.fullyEntryTime = 10; A.beginLeaveTime = 12; A.endTime = 22; (<any>A).speed = 1;
-            let B = { startTime: 11, fullyEntryTime: 12, beginLeaveTime: 23, endTime: 24 } as SVGDanmakuMarquee;
+            const B = { startTime: 11, fullyEntryTime: 12, beginLeaveTime: 23, endTime: 24 } as SVGDanmakuMarquee;
 
 
 
@@ -311,7 +374,7 @@ export function SVGDanmakuBottomTest(prev: Promise<any>): Promise<void> {
 
             after(() => resolve());
 
-            let d1: Danmaku = {
+            const d1: Danmaku = {
                 text: Math.random().toString(36),
                 time: Number(12),
                 mode: Mode.MARQUEE,
@@ -319,15 +382,15 @@ export function SVGDanmakuBottomTest(prev: Promise<any>): Promise<void> {
                 color: Color('#000000')
             };
 
-            let e1 = createSVGTextElement(d1);
+            const e1 = createSVGTextElement(d1);
 
-            let canvas = new SVGCanvas(3);
+            const canvas = new SVGCanvas(3);
             canvas.width = 1280;
             canvas.height = 720;
 
-            let A = new SVGDanmakuBottom(d1, e1, canvas);
-            A.startTime = 0;; A.endTime = 22; (<any>A).speed = 1;
-            let B = { startTime: 22, endTime: 24 } as SVGDanmakuBottom;
+            const A = new SVGDanmakuBottom(d1, e1, canvas);
+            A.startTime = 0; A.endTime = 22; (<any>A).speed = 1;
+            const B = { startTime: 22, endTime: 24 } as SVGDanmakuBottom;
 
 
 
@@ -421,7 +484,7 @@ export function SVGDanmakuTopTest(prev: Promise<any>): Promise<void> {
             canvas.height = 720;
 
             let A = new SVGDanmakuTop(d1, e1, canvas);
-            A.startTime = 0;; A.endTime = 22; (<any>A).speed = 1;
+            A.startTime = 0; A.endTime = 22; (<any>A).speed = 1;
             let B = { startTime: 22, endTime: 24 } as SVGDanmakuTop;
 
 
