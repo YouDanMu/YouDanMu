@@ -2,13 +2,15 @@ import { YouDanMu } from '../YouDanMu';
 import { Logger } from '../YouDanMu/util/Logger';
 import { YouTubeVideoService } from '../YouDanMu/VideoService';
 import { ChromeExtensionService } from '../YouDanMu/ExtensionService';
-
+import { SVGRenderService } from '../YouDanMu/RenderService';
 import { YouTube, ContentScript } from './stub';
+import { SettingsService } from '../YouDanMu/SettingsService'
 
 import { SegmentTest, SegmentsTest } from './Segments-spec';
 import { YouTubeVideoServiceTest } from './YouTubeVideoService-spec';
 import { ChromeExtensionServiceTest } from './ChromeExtensionService-spec';
 import { SettingsServiceTest } from './SettingsService-spec';
+import { SVGRenderServiceTest, SVGDanmakuTest } from './RenderService-spec';
 
 Logger.debugLevel = 3;
 
@@ -26,6 +28,9 @@ const ydm = new YouDanMu();
 const cs = new ContentScript();
 const ext = ydm.extensionService = new ChromeExtensionService(ydm);
 const videoService = ydm.videoService = new YouTubeVideoService(ydm);
+const settingService = ydm.settingsService = new SettingsService(ydm);
+const renderService = ydm.renderService = new SVGRenderService(ydm);
+
 
 let yt: { player: YouTube.Player } = {
     player: null
@@ -39,6 +44,8 @@ prev = SegmentTest(prev);
 prev = SegmentsTest(prev);
 prev = ChromeExtensionServiceTest(prev, ext, cs);
 prev = SettingsServiceTest(prev, ydm, cs);
+//prev = SVGRenderServiceTest(prev, ydm, yt);
+prev = SVGDanmakuTest(prev);
 prev = prev.then(() => {
     yt.player.unmount();
 });
