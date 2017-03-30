@@ -4,7 +4,7 @@ import { SVGDanmakuTop } from '../YouDanMu/RenderService/SVGRenderService/SVGDan
 import { SVGDanmakuBottom } from '../YouDanMu/RenderService/SVGRenderService/SVGDanmakuBottom'
 import { SVGCanvas } from '../YouDanMu/RenderService/SVGRenderService/SVGCanvas'
 import { YouDanMu } from '../YouDanMu';
-import { Danmaku, Mode } from '../YouDanMu/Danmaku';
+import { Danmaku, Mode} from '../YouDanMu/Danmaku';
 import { Screen, Seconds, PlayerState, PlayerEvent } from '../YouDanMu/VideoService';
 import { YouTube } from './stub';
 
@@ -60,7 +60,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
 
 
             it('should resize canvas on PlayerEvent.ScreenResize', function (done) {
-                this.timeout(1500);
+                this.timeout(2500);
                 let newSize = {
                     width: 1000,
                     height: 7
@@ -112,7 +112,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
             });
 
             it('should be able to advance time on PlayerEvent.Play', function (done) {
-                this.timeout(1500);
+                this.timeout(2500);
                 yt.player.playVideo();
                 const timeNow = (<any>renderer).time;
                 const speed = (<any>renderer).speed.value / 1000;
@@ -128,7 +128,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
             });
 
             it('should not advance time on PlayerEvent.Pause', function (done) {
-                this.timeout(1500);
+                this.timeout(2500);
                 yt.player.pauseVideo();
                 const timeNow = (<any>renderer).time;
                 setTimeout(() => {

@@ -11,6 +11,7 @@ import { YouTubeVideoServiceTest } from './YouTubeVideoService-spec';
 import { ChromeExtensionServiceTest } from './ChromeExtensionService-spec';
 import { SettingsServiceTest } from './SettingsService-spec';
 import { SVGRenderServiceTest, SVGDanmakuTest, SVGCanvasTest } from './RenderService-spec';
+import { IntervalTreeTest } from './IntervalTree-spec'
 
 Logger.debugLevel = 3;
 
@@ -44,7 +45,7 @@ prev = SegmentTest(prev);
 prev = SegmentsTest(prev);
 prev = ChromeExtensionServiceTest(prev, ext, cs);
 prev = SettingsServiceTest(prev, ydm, cs);
-//prev = SVGRenderServiceTest(prev, ydm, yt);
+prev = IntervalTreeTest(prev);
 prev = SVGDanmakuTest(prev);
 prev = SVGCanvasTest(prev);
 prev = SVGRenderServiceTest(prev,ydm,yt);
