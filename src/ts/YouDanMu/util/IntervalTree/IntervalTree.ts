@@ -77,9 +77,10 @@ export class IntervalTree<V> {
         return null;
     }
 
-    insert(start: number, end: number, value: V): void {
+    insert(start: number, end: number, value: V): Node<V> {
         const node = new Node(start, end, value);
         this.insertNode(node);
+        return node;
     }
 
     insertNode(node: Node<V>, parent: Node<V> = this.root): void {

@@ -59,7 +59,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
             });
 
 
-            it('should resize canvas on PlayerEvent.ScreenResize', function (done) {
+            it('[Expected in 1000ms] should resize canvas on PlayerEvent.ScreenResize', function (done) {
                 this.timeout(2500);
                 let newSize = {
                     width: 1000,
@@ -111,7 +111,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
                 expect((<any>renderer).timeline.findInterval(danmu.startTime, danmu.endTime)).to.be.null;
             });
 
-            it('should be able to advance time on PlayerEvent.Play', function (done) {
+            it('[Expected in 1000ms] should be able to advance time on PlayerEvent.Play', function (done) {
                 this.timeout(2500);
                 yt.player.playVideo();
                 const timeNow = (<any>renderer).time;
@@ -127,7 +127,7 @@ export function SVGRenderServiceTest(prev: Promise<any>, ydm: YouDanMu, yt: YouT
                 }, 1000);
             });
 
-            it('should not advance time on PlayerEvent.Pause', function (done) {
+            it('[Expected in 1000ms] should not advance time on PlayerEvent.Pause', function (done) {
                 this.timeout(2500);
                 yt.player.pauseVideo();
                 const timeNow = (<any>renderer).time;

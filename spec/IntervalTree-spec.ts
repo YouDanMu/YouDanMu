@@ -60,6 +60,22 @@ export function IntervalTreeTest(prev: Promise<any>): Promise<void> {
                 expect(tree.searchPoint(100)).not.contains(tree.findInterval(T1.start,T1.end))
             });
 
+            it('should be able to iterate Node base on time point', () => {
+                const tree = new IntervalTree<string>();
+                const nodes = [];
+                const NodeT1 = tree.insert(T1.start,T1.end,T1.value);
+                const NodeT2 = tree.insert(T2.start,T2.end,T2.value);
+
+                const it = tree.iterateFrom(11);
+                while(it.hasNext()) {
+                    nodes.push(it.next());
+                }
+                expect(nodes).contains(NodeT2);
+                expect(nodes).contains(NodeT1);             
+            });
+
+            
+
         });
     });
 }
