@@ -210,7 +210,7 @@ export class SVGRenderService implements RenderService {
      */
     private nextFrame(timestamp: number): void {
         if (this.isPlaying) {
-            const timeslice = (timestamp - this.timestamp) * this.speed.value / 1000;
+            const timeslice = (timestamp - this.timestamp) / 1000;
             this.time += timeslice;
             this.timestamp = timestamp;
             this.canvas.nextFrame(this.time, timeslice);
