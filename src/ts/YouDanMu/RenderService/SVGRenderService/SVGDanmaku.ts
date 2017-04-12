@@ -168,8 +168,9 @@ export abstract class SVGDanmaku {
     private measureWidthHeight() {
         const e = <SVGTextElement>this.e.cloneNode(true);
         this.canvas.prepare.appendChild(e);
-        this.width = e.clientWidth;
-        this.height = e.clientHeight;
+        const box = e.getBBox();
+        this.width = box.width;
+        this.height = box.height;
         e.remove();
     }
 }
