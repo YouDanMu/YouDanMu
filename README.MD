@@ -31,5 +31,6 @@ Floating comment (_Danmu_ in Chinese, or _Danmaku_ in Japanese) is a comment sys
 * [Sprint 2 Instructions Manual](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Sprint%202%20Instructions%20Manual.pdf)
 * [Sprint 2 Seeded-Defects Log](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Sprint%202%20Seeded-Defects%20Log.pdf)
 * [YouDanMu-bugseed.crx](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/YouDanMu-bugseed.crx)
+* [Part 2 Test Plan.pdf](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Part%202%20Test%20Plan.pdf)
 * [Part 2 Black-Box Testing Defects Log.pdf](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Part%202%20Black-Box%20Testing%20Defects%20Log.pdf)
 * [Part 2 Higher-Order Defects Log.pdf](https://cdn.rawgit.com/YouDanMu/YouDanMu/documents/Part%202%20Higher-Order%20Defects%20Log.pdf)
